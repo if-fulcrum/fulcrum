@@ -5,7 +5,7 @@ mariadb:
    - c:/Users/$USERNAME/fulcrum/etc/mysql:/etc/mysql
    - c:/Users/$USERNAME/fulcrum/log/mariadb:/var/log
    - c:/Users/$USERNAME/fulcrum/data/mysql:/var/lib/mysql
-   - c:/Users/$USERNAME/fulcrum/data:/data
+   - mariadbdata:/data
   environment:
    - MYSQL_ALLOW_EMPTY_PASSWORD=yes
    - FULCRUM_HOST_UID=$FULCRUM_HOST_UID
@@ -92,3 +92,5 @@ haproxy:
 #     - c:/Users/$USERNAME/fulcrum/log/solr:/opt/solr/server/logs
 #     - c:/Users/$USERNAME/fulcrum/etc/solr:/opt/solr/server/etc
 #     - c:/Users/$USERNAME/fulcrum/data/solr:/opt/solr/server/solr
+volumes:
+  mariadbdata
