@@ -93,4 +93,4 @@ haproxy:
 #     - c:/Users/$USERNAME/fulcrum/etc/solr:/opt/solr/server/etc
 #     - c:/Users/$USERNAME/fulcrum/data/solr:/opt/solr/server/solr
 volumes:
-  mariadbdata
+  - mariadbdata
