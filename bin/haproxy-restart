@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -ue
+
+UNAMES=$(uname -s)
+SUDO="sudo"
+
+# for mac, we dont need to sudo
+if [ "$UNAMES" == "Darwin" ]; then
+  SUDO=""
+fi
+
+$SUDO docker exec haproxy haproxy -f /etc/haproxy/haproxy.cfg -c 1>/dev/null 2>/dev/null
+if [ $? -gt 0 ]; then
+  echo "FATAL: syntax error in haproxy config it seems, quitting without restart"
+  exit 1
+fi
+
+$SUDO docker kill -s HUP haproxy 1>/dev/null
+if [ $? -gt 0 ]; then
+  echo "FATAL: Unable to send -HUP to haproxy"
+  exit 1
+fi
+
+
+
+# recommend way to reload
+# https://hub.docker.com/_/haproxy/
+
+# might be a long term goal
+# http://engineeringblog.yelp.com/2015/04/true-zero-downtime-haproxy-reloads.html

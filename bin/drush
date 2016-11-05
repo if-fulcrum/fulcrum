@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# set -x
+
+# for centOS, the path has to be absolute with sudo
+if [[ "$(uname -a)" == *"Darwin"* ]]; then
+. ~/fulcrum/bin/fulcrum-env
+else
+. /usr/local/fulcrum/bin/fulcrum-env
+fi
+
+TAG=centos7-php5.6-remi-drush
+SITE=$1
+MARIABDB_LINK=""
+MARIABDB_ENV=""
+REDIS_LINK=""
+NOW=$($FULCRUM_PATH/bin/now)
+DOCKER_PS_CMD="${FULCRUM_DOCKER_PREFIX}docker ps$FULCRUM_DOCKER_SUFIX"
+DOCKER_PS=$(eval "$DOCKER_PS_CMD")
+
+if [[ "$DOCKER_PS" == *"mariadb"* ]]; then
+  MARIABDB_LINK="--link mariadb:mariadb"
+  MARIABDB_ENV="--env=FULCRUM_DB=mariadb"
+fi
+
+if [[ "$DOCKER_PS" == *"redis"* ]]; then
+  REDIS_LINK="--link redis:redis"
+fi
+
+CONF="$FULCRUM_PATH/conf/$SITE.json"
+
+if [ ! -f $CONF ]; then
+    echo "Cannot find configuration file for domain: $CONF"
+    exit 1
+fi
+
+# remove domain from remaining arguments
+shift
+REST=$@
+
+mkdir -p $FULCRUM_PATH/log/$TAG/php-fpm
+
+PULL="${FULCRUM_DOCKER_PREFIX}docker pull fulcrum/$TAG$FULCRUM_DOCKER_SUFIX"
+# echo $PULL
+eval "$PULL > /dev/null 2>&1"
+
+RUN="$FULCRUM_DOCKER_PREFIX                           \
+docker run                                            \
+    --name=drush-$NOW                                 \
+    --detach=false --interactive=true --tty=true --rm \
+    $MARIABDB_LINK                                    \
+    $REDIS_LINK                                       \
+    --volume=$FULCRUM_PATH/etc/php5/php.d:/etc/php/conf.d \
+    --volume=$FULCRUM_PATH/etc/php5/php-fpm.d:/etc/php-fpm.d \
+    --volume=$FULCRUM_PATH/etc/php5/php.ini:/etc/php.ini \
+    --volume=$FULCRUM_PATH/log/$TAG:/var/log          \
+    --volume=$FULCRUM_PATH/files:/drupal_files        \
+    --volume=$FULCRUM_PATH/webroots:/var/www/html     \
+    --volume=$FULCRUM_PATH/php:/fulcrum:ro            \
+    --volume=$FULCRUM_TMP_DIR:/tmp                    \
+    --volume=$FULCRUM_REPOS_PATH:/var/repos           \
+    --volume=$CONF:/config.json:ro                    \
+    --workdir=/var/www/html/$SITE/                    \
+    --entrypoint=/root/.composer/vendor/bin/drush     \
+    $MARIABDB_ENV                                     \
+    fulcrum/$TAG                                      \
+    --uri=http://$SITE $@$FULCRUM_DOCKER_SUFIX"
+
+eval "$RUN"

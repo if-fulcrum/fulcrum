@@ -1,0 +1,18 @@
+
+dialog() {
+    osascript -e 'on run args
+    try
+    tell app "SystemUIServer" to display dialog (item 1 of args)
+    end
+    activate app (path to frontmost application as text)
+    end' "$1"
+}
+
+vout() {
+  echo "$1"
+}
+
+eout() {
+  vout "$1"
+  exit 1
+}

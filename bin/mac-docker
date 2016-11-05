@@ -1,0 +1,348 @@
+#!/bin/bash
+
+# http://www.davidpashley.com/articles/writing-robust-shell-scripts/
+set -eu
+
+
+function sendalert()
+{
+  if [ ${QUIET} -eq 0 ]; then
+    echo "$1"
+  fi
+}
+
+function vout()
+{
+  if [ ${VERBOSE} -eq 1 ]; then
+    echo "DEBUG: $1"
+  fi
+}
+
+function eout()
+{
+  echo "******************"
+  echo "$1"
+  echo "******************"
+  exit 1
+}
+
+function usage()
+{
+  echo "Example Usage: "
+  echo " -h  Help"
+  echo " -n  No docker pull (default)"
+  echo " -p  Do docker pull (update your images)"
+  echo " -q  quiet"
+  echo " -v  verbose (debug"
+  echo ""
+  echo "up    - restart all containers, also use to start them [restart] [start]"
+  echo "dps   - show containers (running or stopped) [ps]"
+  echo "drush - run drush for drupal 7 sites [dr] [d]"
+  echo "drush8 - run drush for drupal 8 sites [dr8] [d8]"
+  echo "haproxyrestart - restart haproxy, for when modifying the config [haproxy] [haproxy-restart]"
+  echo ""
+  echo "dbash - step inside a running container [bash]"
+  echo "dlogs - show logs being put out from containers, ctrl+C to stop following [dlog]"
+  echo ""
+  echo "This requires docker for mac, please get the stable version from https://docs.docker.com/docker-for-mac/"
+  exit 0
+}
+
+# show container status
+function dps()
+{
+  docker-compose --file "${DCFILE}" ps
+  exit 0
+}
+
+# show container logs
+function dlogs()
+{
+  sendalert "We are following the logs of the containers, Ctrl+C to stop"
+  docker-compose --file "${DCFILE}" logs -f
+  exit 0
+}
+
+
+# start/restart all our containers
+function drestart()
+{
+  # update dnsmasq entries
+  # address=/ifdev/127.0.0.1 - /usr/local/etc/dnsmasq.d/ifdev.config
+  # TODO we need to figure out our ending domain and how we will help people install this part
+  IFDEV_LOCAL=$(grep "127.0.0.1" /usr/local/etc/dnsmasq.d/ifdev.config | wc -l )
+  if [ $IFDEV_LOCAL -ne 1 ]; then
+    vout "could not find 127.0.0.1 for dnsmasq"
+    eout "You do not appear to have *.ifdev pointing to 127.0.0.1, which is needed for docker for mac.  Please update /usr/local/etc/dnsmasq.d/ifdev.config -- address=/ifdev/127.0.0.1"
+  fi
+
+  DNSMASQ_RECENT=$(find /usr/local/etc/dnsmasq.d/ -type f -mmin -3 | wc -l)
+  if [ $DNSMASQ_RECENT -gt 0 ]; then
+    vout "found recent dnsmasq edits"
+    sendalert "You appear to have recently edied dnsmasq files, you MAY be prompted for your login password to restart dnsmasq"
+    sudo launchctl stop homebrew.mxcl.dnsmasq
+    sudo launchctl start homebrew.mxcl.dnsmasq
+  fi
+
+  #ensure that whitelist.vcl gets made else varnish dies on boot
+  bash ~/fulcrum/bin/varnish-whitelist
+
+  # fulcrum-node to ensure our sites config is compiled
+  MYFILE=~/fulcrum/bin/fulcrum-node
+  if [ -f ${MYFILE} ]; then
+    vout "running ${MYFILE}"
+    ${MYFILE}
+  fi
+
+  # Quit Docker if it is running
+  # osascript -e 'quit app "Docker"'
+
+  # run d4m-nfs in order to allow using NFS volume mounts
+  ~/repos/d4m-nfs/d4m-nfs.sh
+
+  # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
+  RUNNING_CONTAINERS=$(docker ps -q | wc -l)
+  if [ $RUNNING_CONTAINERS -gt 0 ]; then
+    sendalert "stopping any running containers"
+    docker stop $(docker ps -q) 1>/dev/null
+  fi
+  STOPPED_CONTAINERS=$(docker ps -a -q | wc -l)
+  if [ $STOPPED_CONTAINERS -gt 0 ]; then
+    sendalert "killing any stopped containers"
+    docker rm -f $(docker ps -a -q) 1>/dev/null
+  fi
+
+
+  if [ $DOPULL -eq 1 ]; then
+    vout "doing docker pull"
+    sendalert "doing docker pull, if you get an error about \"TLS handshake timeout\", then re-run this same command again"
+    docker-compose --file "${DCFILE}" pull
+  else
+    vout "skipping docker pull"
+    sendalert "skipping docker image pull, add -p flag if you wish to pull next time"
+  fi
+
+  vout "starting containers"
+  sendalert "Starting containers"
+  if [ $QUIET -eq 1 ]; then
+    vout "quiet docker-compose up"
+    docker-compose --file "${DCFILE}" up -d 1>/dev/null 2>/dev/null
+  else
+    vout "verbose docker-compose up"
+    docker-compose --file "${DCFILE}" up -d
+  fi
+}
+
+# step into docker container
+dbash()
+{
+  DOCKER_IMAGES=$(docker ps --format '{{.Names}}' | sort | awk '{ print FNR " " $0 }')
+  echo "$DOCKER_IMAGES"
+  read -p "Please enter container number to enter: " MYNUMBER
+  ENTER_IMAGE=$(echo "$DOCKER_IMAGES" | awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER { print $2 }')
+
+  echo "${ENTER_IMAGE}"
+  # https://github.com/docker/docker/issues/9299
+  docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
+}
+
+
+# run external drush command... but lets make it where we are not typing arguments
+drush()
+{
+  SITES=$(ls -1 ~/repos | sort | awk '{ print FNR " " $0 }')
+  echo "$SITES"
+  read -p "Please site number to run drush against: " MYNUMBER
+  SITE=$(echo "$SITES" | awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER { print $2 }')
+
+  CMDS=$(echo "cc rr sqlc uli up en" | tr " " "\n" | sort | awk '{ print FNR " " $0 }')
+  echo "${CMDS}"
+  read -p "Which command would you like to run: " MYNUMBER
+  CMD=$(echo "$CMDS" | awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER { print $2 }')
+  vout "site -$SITE   cmd - $CMD"
+
+  if [ "${CMD}" == "cc" ]; then
+    CMD="cc all"
+  fi
+
+  if [ "${CMD}" == "up" ]; then
+    read -p "Please type in the module you wish to update:" MYMODULE
+    vout "MYMODULE UPDATE = $MYMODULE"
+    CMD="${CMD} $MYMODULE"
+  fi
+
+  if [ "${CMD}" == "en" ]; then
+    read -p "Please type in the module you wish to enable:" MYMODULE
+    vout "MYMODULE ENABLE = $MYMODULE"
+    CMD="${CMD} $MYMODULE"
+  fi
+
+  sendalert "running [drush ${SITE} ${CMD}]"
+  mac-drush ${SITE} ${CMD}
+}
+
+haproxyrestart()
+{
+  # ensure we have no syntax errors
+  docker exec haproxy /usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c 1>/dev/null 2>/dev/null
+  if [ $? -gt 0 ]; then
+    eout "FATAL: syntax error in haproxy config it seems, quitting without restart"
+  fi
+
+  docker kill -s HUP haproxy
+  sendalert "haproxy has been reloaded"
+}
+
+
+# run external drush command... but lets make it where we are not typing arguments
+drush8()
+{
+  SITES=$(ls -1 ~/repos | sort | awk '{ print FNR " " $0 }')
+  echo "$SITES"
+  read -p "Please site number to run drush8 against: " MYNUMBER
+  SITE=$(echo "$SITES" | awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER { print $2 }')
+
+  CMDS=$(echo "cc rr sqlc uli up en" | tr " " "\n" | sort | awk '{ print FNR " " $0 }')
+  echo "${CMDS}"
+  read -p "Which command would you like to run: " MYNUMBER
+  CMD=$(echo "$CMDS" | awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER { print $2 }')
+  vout "site -$SITE   cmd - $CMD"
+
+  if [ "${CMD}" == "cc" ]; then
+    CMD="cc all"
+  fi
+
+  if [ "${CMD}" == "up" ]; then
+    read -p "Please type in the module you wish to update:" MYMODULE
+    vout "MYMODULE UPDATE = $MYMODULE"
+    CMD="${CMD} $MYMODULE"
+  fi
+
+  if [ "${CMD}" == "en" ]; then
+    read -p "Please type in the module you wish to enable:" MYMODULE
+    vout "MYMODULE ENABLE = $MYMODULE"
+    CMD="${CMD} $MYMODULE"
+  fi
+
+  sendalert "running [drush8 ${SITE} ${CMD}]"
+  mac-drush8 ${SITE} ${CMD}
+}
+
+# make sure mac fulcrum hinge enviroment is healthy
+mac-doctor
+
+
+
+
+# defaults
+DOPULL=0
+VERBOSE=0
+QUIET=0
+MYCOMMAND=""
+
+# read in command line args
+while getopts ":hnpqv" opt; do
+  case ${opt} in
+    h)
+      usage
+      ;;
+    n)
+      DOPULL=0
+      ;;
+    p)
+      DOPULL=1
+      ;;
+    q)
+      QUIET=1
+      ;;
+    v)
+      VERBOSE=1
+      ;;
+    \?)
+      echo "Invalid Option: -$OPTARG" >&2
+      echo "Try -h for Help."
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG Requires an Argument." >&2
+      echo "Try -h for Help."
+      exit 1
+      ;;
+  esac
+done
+
+
+# so docker for mac needs to be running
+# docker ps 1> /dev/null 2>/dev/null || eout "docker for mac does not appear to be running, you should launch it from your applications folder. If it is running, you may need to wait a few more seconds for it to finish booting up.  If you do not have docker for mac, please download the stable version from https://docs.docker.com/docker-for-mac/"
+
+# set vars for use in docker compose
+export FULCRUM_HOST_USER=$(whoami)
+
+# it does not appear docker-for-mac needs the fulcrum ID work around
+export FULCRUM_HOST_UID=$(id -u $FULCRUM_HOST_USER)
+export FULCRUM_HOST_GID=$(id -g $FULCRUM_HOST_USER)
+export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2)
+
+# must come after FULCRUM_HOST_USER
+DCFILE="/Users/${FULCRUM_HOST_USER}/fulcrum/compose/hinge.yml"
+
+# debug
+vout "FULCRUM_HOST_USER = $FULCRUM_HOST_USER"
+vout "FULCRUM_HOST_UID = $FULCRUM_HOST_UID"
+vout "FULCRUM_HOST_GID = $FULCRUM_HOST_GID"
+vout "FULCRUM_HOST_IP = $FULCRUM_HOST_IP"
+vout "DCFILE = ${DCFILE}"
+
+
+
+
+
+
+
+MYCOMMAND=${!#}
+vout "MYCOMMAND = ${MYCOMMAND}"
+
+case ${MYCOMMAND} in
+  "dps"|"ps")
+    vout "running dps command"
+    dps
+    ;;
+
+  "dlogs"|"dlog")
+    vout "running dlogs command"
+    dlogs
+    ;;
+
+  "start"|"restart"|"reload"|"up")
+    vout "running restart command"
+    drestart
+    ;;
+
+  "dbash"|"bash")
+    vout "running dbash command"
+    dbash
+    ;;
+
+  "drush"|"dr"|"d")
+    vout "running drush command"
+    drush
+    ;;
+
+  "drush8"|"dr8"|"d8")
+    vout "running drush8 command"
+    drush8
+    ;;
+
+  "haproxyrestart"|"haproxy"|"haproxy-restart")
+    vout "running haproxyrestart command"
+    haproxyrestart
+    ;;
+
+  *)
+    vout "command not found..."
+    sendalert ""
+    sendalert "command not found"
+    sendalert ""
+    sendalert ""
+    usage
+esac

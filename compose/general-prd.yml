@@ -1,0 +1,64 @@
+phpfpm5-6:
+  container_name: phpfpm5-6
+  image: fulcrum/centos7-php5.6-remi
+  restart: always
+  volumes:
+    - /dev/log:/dev/log
+    - /etc/localtime:/etc/localtime:ro
+    - /var/spool/postfix:/var/spool/postfix
+    - /usr/local/fulcrum/etc/php.d:/etc/php.d
+    - /usr/local/fulcrum/etc/php-fpm.d:/etc/php-fpm.d
+    - /usr/local/fulcrum/log/centos7-php5.6-remi:/var/log
+    - /usr/local/fulcrum/php:/fulcrum:ro
+    - /sfs/files:/drupal_files
+    - /sfs/other/tmp:/tmp
+    - /usr/local/fulcrum/webroots:/var/www/html:ro
+    - /usr/local/repos:/var/repos:ro
+
+nginx1-6:
+  container_name: nginx1-6
+  image: fulcrum/centos7-nginx1.6
+  restart: always
+  volumes:
+    - /dev/log:/dev/log
+    - /etc/localtime:/etc/localtime:ro
+    - /usr/local/fulcrum/etc/nginx:/etc/nginx
+    - /usr/local/fulcrum/log/centos7-nginx1.6:/var/log
+    - /sfs/files:/drupal_files
+    - /usr/local/fulcrum/webroots:/var/www/html:ro
+    - /usr/local/repos:/var/repos:ro
+  links:
+    - phpfpm5-6
+  ports:
+    - "8080:80"
+
+varnish4-1:
+  container_name: varnish4-1
+  image: fulcrum/centos7-varnish4.1
+  restart: always
+  volumes:
+    - /dev/log:/dev/log
+    - /etc/localtime:/etc/localtime:ro
+    - /usr/local/fulcrum/etc/varnish4:/etc/varnish
+    - /usr/local/fulcrum/log/centos7-varnish4.1:/var/log
+  links:
+    - nginx1-6
+  ports:
+    - "80:80"
+    - "6082:6082"
+
+haproxy1-5:
+  container_name: haproxy1-5
+  image: fulcrum/centos7-haproxy1.5
+  restart: always
+  volumes:
+    - /dev/log:/dev/log
+    - /etc/localtime:/etc/localtime:ro
+    - /usr/local/fulcrum/etc/haproxy:/etc/haproxy
+    - /usr/local/fulcrum/etc/certs.d:/etc/certs.d
+    - /usr/local/fulcrum/log/centos7-haproxy1-5:/var/log
+  links:
+    - varnish4-1
+  ports:
+    - "443:443"
+    - "1936:1936"

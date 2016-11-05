@@ -1,0 +1,94 @@
+mariadb10-0:
+  container_name: mariadb10-0
+  image: fulcrum/mariadb
+  restart: always
+  volumes:
+   - /Users/$FULCRUM_HOST_USER/fulcrum/etc/mysql:/etc/mysql
+   - /Users/$FULCRUM_HOST_USER/fulcrum/log/mariadb:/var/log
+   - /Users/$FULCRUM_HOST_USER/fulcrum/data/mysql:/var/lib/mysql
+   - /Users/$FULCRUM_HOST_USER/fulcrum/data:/data
+  environment:
+   - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+   - FULCRUM_HOST_UID=$FULCRUM_HOST_UID
+   - FULCRUM_HOST_GID=$FULCRUM_HOST_GID
+  ports:
+    - "3306:3306"
+
+redis3-0:
+  container_name: redis3-0
+  image: fulcrum/redis:latest-alpine
+  restart: always
+  volumes:
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/redis3/redis.conf:/etc/redis/redis.conf
+    - /Users/$FULCRUM_HOST_USER/fulcrum/log/redis:/var/log
+
+phpfpm5-6:
+  container_name: phpfpm5-6
+  image: fulcrum/php:latest-alpine
+  restart: always
+  volumes:
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.ini:/etc/php5/php.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/10-opcache.ini:/etc/php5/conf.d/10-opcache.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/20-gettext.ini:/etc/php5/conf.d/20-gettext.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/20-gd.ini:/etc/php5/conf.d/20-gd.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/20-mcrypt.ini:/etc/php5/conf.d/20-mcrypt.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/20-xml.ini:/etc/php5/conf.d/20-xml.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/30-mysql.ini:/etc/php5/conf.d/30-mysql.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/40-zip.ini:/etc/php5/conf.d/40-zip.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/50-redis.ini:/etc/php5/conf.d/50-redis.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php.d/zz-drupal-php.ini:/etc/php5/conf.d/zz-drupal-php.ini
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/php-fpm.d/www.conf:/etc/php5/php-fpm.conf
+    - /Users/$FULCRUM_HOST_USER/fulcrum/log/php:/var/log
+    - /Users/$FULCRUM_HOST_USER/fulcrum/php:/fulcrum:ro
+    - /Users/$FULCRUM_HOST_USER/fulcrum/files:/drupal_files
+    - /Users/$FULCRUM_HOST_USER/fulcrum/webroots:/var/www/html
+    - /Users/$FULCRUM_HOST_USER/repos:/var/repos
+  links:
+    - redis3-0
+    - mariadb10-0
+  extra_hosts:
+    - "varnish4-1:$FULCRUM_HOST_IP"
+
+nginx1-9:
+  container_name: nginx1-9
+  image: fulcrum/nginx:latest-alpine
+  restart: always
+  volumes:
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/nginx1-9:/etc/nginx
+    - /Users/$FULCRUM_HOST_USER/fulcrum/log/nginx:/var/log
+    - /Users/$FULCRUM_HOST_USER/fulcrum/files:/drupal_files:ro
+    - /Users/$FULCRUM_HOST_USER/fulcrum/webroots:/var/www/html:ro
+    - /Users/$FULCRUM_HOST_USER/repos:/var/repos:ro
+  links:
+    - phpfpm5-6
+  ports:
+    - "8080:80"
+
+varnish4-1:
+  container_name: varnish4-1
+  image: fulcrum/varnish:latest-alpine
+  restart: always
+  volumes:
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/varnish4:/etc/varnish
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/varnish4/default-nginx1-9.vcl:/etc/varnish/default.vcl
+    - /Users/$FULCRUM_HOST_USER/fulcrum/log/varnish:/var/log
+  links:
+    - nginx1-9
+  ports:
+    - "80:80"
+    - "6082:6082"
+
+haproxy1-5:
+  container_name: haproxy1-5
+  image: fulcrum/haproxy:latest-alpine
+  restart: always
+  volumes:
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/haproxy:/etc/haproxy
+    - /Users/$FULCRUM_HOST_USER/fulcrum/etc/certs.d:/etc/certs.d
+    - /Users/$FULCRUM_HOST_USER/fulcrum/log/haproxy:/var/log
+    - /tmp:/var/lib/haproxy
+  links:
+    - varnish4-1
+  ports:
+    - "443:443"
+    - "1936:1936"

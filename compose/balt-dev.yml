@@ -1,0 +1,59 @@
+redis2-8:
+  container_name: redis2-8
+  image: fulcrum/redis
+  restart: always
+  volumes:
+    - /usr/local/fulcrum/etc/redis:/etc/redis
+    - /usr/local/fulcrum/log/redis:/var/log
+
+phpfpm5-6:
+  container_name: phpfpm5-6
+  image: fulcrum/php
+  restart: always
+  volumes:
+    - /dev/log:/dev/log
+    - /usr/local/fulcrum/log/php:/var/log
+    - /etc/localtime:/etc/localtime:ro
+    - /usr/local/fulcrum/etc/php.d:/etc/php.d
+    - /usr/local/fulcrum/etc/php-fpm.d:/etc/php-fpm.d
+    - /usr/local/fulcrum/php:/fulcrum:ro
+    - /usr/local/fulcrum/files:/drupal_files
+    - /sfs/other/private:/private
+    - /sfs/other/tmp:/tmp
+    - /usr/local/fulcrum/webroots:/var/www/html:ro
+    - /usr/local/repos:/var/repos:ro
+    - /var/spool/postfix:/var/spool/postfix
+  links:
+    - redis2-8
+
+nginx1-6:
+  container_name: nginx1-6
+  image: fulcrum/nginx
+  restart: always
+  volumes:
+    - /dev/log:/dev/log
+    - /usr/local/fulcrum/log/nginx:/var/log
+    - /etc/localtime:/etc/localtime:ro
+    - /usr/local/fulcrum/etc/nginx:/etc/nginx
+    - /usr/local/fulcrum/files:/drupal_files
+    - /usr/local/fulcrum/webroots:/var/www/html:ro
+    - /usr/local/repos:/var/repos:ro
+  links:
+    - phpfpm5-6
+  ports:
+    - "8080:80"
+
+haproxy1-5:
+  container_name: haproxy1-5
+  image: fulcrum/haproxy
+  restart: always
+  volumes:
+    - /usr/local/fulcrum/etc/haproxy/haproxy-novarnish.cfg:/etc/haproxy/haproxy.cfg
+    - /usr/local/fulcrum/etc/certs.d:/etc/certs.d
+    - /usr/local/fulcrum/log/haproxy:/var/log
+  links:
+    - nginx1-6
+  ports:
+    - "80:80"
+    - "443:443"
+    - "1936:1936"

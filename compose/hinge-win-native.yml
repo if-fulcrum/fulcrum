@@ -1,0 +1,75 @@
+mariadb10-0:
+  container_name: mariadb10-0
+  image: fulcrum/debian8-mariadb10-0
+  volumes:
+   - c:/Users/$USERNAME/fulcrum/etc/mysql:/etc/mysql
+   - c:/Users/$USERNAME/fulcrum/log/mariadb10-0:/var/log
+   - c:/Users/$USERNAME/fulcrum/data/mysql:/var/lib/mysql
+   - c:/Users/$USERNAME/fulcrum/data:/data
+  environment:
+   - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+  ports:
+    - "3306:3306"
+
+redis2-8:
+  container_name: redis2-8
+  image: fulcrum/centos7-redis2.8
+  volumes:
+    - c:/Users/$USERNAME/fulcrum/etc/redis:/etc/redis
+    - c:/Users/$USERNAME/fulcrum/log/centos7-redis2.8:/var/log
+
+phpfpm5-6:
+  container_name: phpfpm5-6
+  image: fulcrum/centos7-php5.6-remi
+  volumes:
+    - c:/Users/$USERNAME/fulcrum/etc/php.d:/etc/php.d
+    - c:/Users/$USERNAME/fulcrum/etc/php-fpm.d:/etc/php-fpm.d
+    - c:/Users/$USERNAME/fulcrum/log/centos7-php5.6-remi:/var/log
+    - c:/Users/$USERNAME/fulcrum/php:/fulcrum:ro
+    - c:/Users/$USERNAME/fulcrum/files:/drupal_files
+    - c:/Users/$USERNAME/fulcrum/webroots:/var/www/html
+    - c:/Users/$USERNAME/repos:/var/repos
+  links:
+    - redis2-8
+    - mariadb10-0
+  extra_hosts:
+    - "varnish4-1:127.0.0.1"
+
+nginx1-6:
+  container_name: nginx1-6
+  image: fulcrum/centos7-nginx1.6
+  volumes:
+    - c:/Users/$USERNAME/fulcrum/etc/nginx:/etc/nginx
+    - c:/Users/$USERNAME/fulcrum/log/centos7-nginx1.6:/var/log
+    - c:/Users/$USERNAME/fulcrum/files:/drupal_files:ro
+    - c:/Users/$USERNAME/fulcrum/webroots:/var/www/html:ro
+    - c:/Users/$USERNAME/repos:/var/repos:ro
+  links:
+    - phpfpm5-6
+  ports:
+    - "8080:80"
+
+varnish4-1:
+  container_name: varnish4-1
+  image: fulcrum/centos7-varnish4.1
+  volumes:
+    - c:/Users/$USERNAME/fulcrum/etc/varnish4:/etc/varnish
+    - c:/Users/$USERNAME/fulcrum/log/centos7-varnish4.1:/var/log
+  links:
+    - nginx1-6
+  ports:
+    - "80:80"
+    - "6082:6082"
+
+haproxy1-5:
+  container_name: haproxy1-5
+  image: fulcrum/centos7-haproxy1.5
+  volumes:
+    - c:/Users/$USERNAME/fulcrum/etc/haproxy:/etc/haproxy
+    - c:/Users/$USERNAME/fulcrum/etc/certs.d:/etc/certs.d
+    - c:/Users/$USERNAME/fulcrum/log/centos7-haproxy1-5:/var/log
+  links:
+    - varnish4-1
+  ports:
+    - "443:443"
+    - "1936:1936"

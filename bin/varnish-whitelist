@@ -1,0 +1,3 @@
+#!/bin/bash
+echo 'acl whitelist { "0.0.0.0"/0; }' > ~/fulcrum/etc/varnish/whitelist.vcl
+echo 'acl internal { "0.0.0.0"/0; }' > ~/fulcrum/etc/varnish/internal.vcl

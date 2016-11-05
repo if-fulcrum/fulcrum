@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -e
+
+UNAMES=$(uname -s)
+
+# ensure a conf file was passed in to read the prefix from
+if [ $# -ne 1 ]; then
+  echo "must pass in argument of conf file (~/fulcrum/conf/\$CLIENT.json)"
+  exit 1
+fi
+
+MYFILE=$1
+if [ ! -f $MYKEY ]; then
+  echo "file $MYFILE does not exist"
+  exit 1
+fi
+
+# ensure jq exists on system
+which jq 1>/dev/null || ( echo "you need \"jq\" on your system to run this script, check brew/yum/apt" && exit 1 )
+
+MYKEY=$(jq '.pre.set.conf.cache_prefix.default' $MYFILE | tr -d '"')
+MYREDISHOST=$(jq '.pre.set.conf.redis_client_host' $MYFILE | tr -d '"')
+
+# so host detection is tricky as we could either be running in docker, or in aws service
+# if we have periods, then assume aws service and use hostname, else go with localhost bound port
+# why grep fails here is beyond me
+HAS_PERIOD=$(echo "${MYREDISHOST}" | awk -F '.' '{ print $2 }' )
+
+if [ -n "$HAS_PERIOD" ]; then
+  # real host
+  redis-cli -h $MYREDISHOST keys "${MYKEY}*" > /tmp/$$
+  MYSTRING=$(cat /tmp/$$ | tr "\n" " ")
+  redis-cli -h $MYREDISHOST del ${MYSTRING}
+  rm /tmp/$$
+elif [ "$UNAMES" == "Darwin" ]; then
+  # mac
+  echo "just do a stack-cycle on your local mac"
+else
+  # container
+  sudo docker exec $MYREDISHOST redis-cli keys "${MYKEY}*" > /tmp/$$
+  MYSTRING=$(cat /tmp/$$ | tr "\n" " ")
+  sudo docker exec $MYREDISHOST redis-cli del ${MYSTRING}
+  rm /tmp/$$
+fi

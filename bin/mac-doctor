@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# get d4m-nfs if it doesn't already exist
+if [ ! -e ~/repos/d4m-nfs ]; then
+  cd ~/repos/
+  git clone git@github.com:IFSight/d4m-nfs.git
+  cd -
+fi
+
+# mariadb -> /etc/hosts
+if ! $(egrep "^127.0.0.1\s+mariadb$" /etc/hosts > /dev/null 2>&1); then
+  echo "Adding: mariadb to /etc/hosts."
+  echo -e "\n127.0.0.1 mariadb\n" | sudo tee -a /etc/hosts
+else
+  echo "Check: mariadb exists in /etc/hosts."
+fi
+
+# redis -> /etc/hosts
+if ! $(egrep "^127.0.0.1\s+redis$" /etc/hosts > /dev/null 2>&1); then
+  echo "Adding: redis to /etc/hosts."
+  echo -e "\n127.0.0.1 redis\n" | sudo tee -a /etc/hosts
+else
+  echo "Check: redis exists in /etc/hosts."
+fi
+
+# varnish -> /etc/hosts
+if ! $(egrep "^127.0.0.1\s+varnish$" /etc/hosts > /dev/null 2>&1); then
+  echo "Adding: varnish to /etc/hosts."
+  echo -e "\n127.0.0.1 varnish\n" | sudo tee -a /etc/hosts
+else
+  echo "Check: varnish exists in /etc/hosts."
+fi
+
+TAPDIR=$(brew --prefix)/Library/Taps/homebrew
+if [ ! -e $TAPDIR ]; then
+  TAPDIR=$(brew --prefix)/Homebrew/Library/Taps/homebrew
+
+  if [ ! -e $TAPDIR ]; then
+    echo "ERROR: Cannot find Homebrew tap director, make use Homebrew is installed!"
+    exit 1
+  fi
+fi
+
+if ! $(ls -d $TAPDIR/homebrew-dupes > /dev/null 2>&1); then
+  echo "Tapping: homebrew dupes"
+  brew tap homebrew/dupes
+else
+  echo "Check: homebrew dupes"
+fi  
+
+if ! $(ls -d $TAPDIR/homebrew-versions > /dev/null 2>&1); then
+  echo "Tapping: homebrew versions"
+  brew tap homebrew/versions
+else
+  echo "Check: homebrew versions"
+fi  
+
+if ! $(ls -d $TAPDIR/homebrew-php > /dev/null 2>&1); then
+  echo "Tapping: homebrew homebrew-php"
+  brew tap homebrew/homebrew-php
+else
+  echo "Check: homebrew homebrew-php"
+fi  
+
+# kludge for Homebrew 0.9
+if [[ ! "$TAPDIR" == *"Homebrew"* ]]; then
+  SEDDIR=/usr/local/Library/ENV/4.3
+  if [ ! -e $SEDDIR ]; then
+    echo "Creating: $SEDDIR for homebrew sed workaround."
+    sudo mkdir -p $SEDDIR
+  else
+    echo "Check: $SEDDIR homebrew workaround exists."
+  fi
+
+  SEDLINK=$SEDDIR/sed
+  if [ ! -e $SEDLINK ]; then
+    echo "Creating: $SEDLINK for homebrew sed workaround."
+    sudo ln -s /usr/local/Library/Homebrew/shims/super/sed $SEDDIR/sed
+  else
+    echo "Check: $SEDLINK homebrew workaround exists."
+  fi
+fi
+
+BREWLIST=$(brew list)
+
+if [[ ! "$BREWLIST" == *"php56"* ]]; then
+  echo "Installing: homebrew 'php56' package."
+  brew install php56
+else
+  echo "Check: homebrew 'php56' package is installed."
+fi
+
+if [[ ! "$BREWLIST" == *"php56-redis"* ]]; then
+  echo "Installing: homebrew 'php56-redis' package."
+  brew install php56-redis
+else
+  echo "Check: homebrew 'php56-redis' package is installed."
+fi
+
+if [[ ! "$BREWLIST" == *"drush"* ]]; then
+  echo "Installing: homebrew 'drush' package."
+  brew install drush
+else
+  echo "Check: homebrew 'drush' package is installed."
+fi

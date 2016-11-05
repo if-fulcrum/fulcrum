@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -x
+
+ssh -t docker@$(~/fulcrum/bin/dri) docker exec varnish /usr/bin/varnishadm "ban.url ~ /"

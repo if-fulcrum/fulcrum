@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -ue
+
+UNAMES=$(uname -s)
+SUDO="sudo"
+
+# make compatible on OSX
+if [ "$UNAMES" == "Darwin" ]; then
+  SUDO=""
+  . ~/fulcrum/bin/nginx-whitelist
+fi
+
+# ensure we have no syntax errors
+$SUDO docker exec nginx /usr/sbin/nginx -t -c /etc/nginx/nginx.conf 1>/dev/null 2>/dev/null
+if [ $? -gt 0 ]; then
+  echo "FATAL: syntax error in nginx config it seems, quitting without restart"
+  exit 1
+fi
+
+$SUDO docker exec nginx kill -HUP 1
+if [ $? -gt 0 ]; then
+  echo "FATAL: Unable to send -HUP to nginx"
+  exit 1
+fi

@@ -1,0 +1,167 @@
+#!/bin/bash
+
+# exit script if anything returns an error
+set -e
+
+vout()
+{
+  echo "$1"
+}
+eout()
+{
+  vout "$1"
+  exit 1
+}
+
+# TODO: make envsubst linked up stream
+ENVSUBST=/usr/local/Cellar/gettext/0.19.7/bin/envsubst
+
+FULCRUM_SITE=$1
+FULCRUM_DBNAME=$2
+FULCRUM_REPO=$3
+FULCRUM_AWSPROFILE=$4
+FULCRUM_WRD=$5
+
+if [ -z $FULCRUM_SITE ];
+then
+    eout "Error, FULCRUM_SITE not provided!"
+else
+    vout "FULCRUM_SITE: $FULCRUM_SITE"
+fi
+
+if [ -z $FULCRUM_DBNAME ];
+then
+    eout "Error, FULCRUM_DBNAME not provided!"
+else
+    vout "FULCRUM_DBNAME: $FULCRUM_DBNAME"
+fi
+
+if [ -z $FULCRUM_REPO ];
+then
+    eout "Error, FULCRUM_REPO not provided!"
+else
+    vout "FULCRUM_REPO: $FULCRUM_REPO"
+fi
+
+if [ ! -z $FULCRUM_AWSPROFILE ];
+then
+    FULCRUM_AWSPROFILE="--profile $FULCRUM_AWSPROFILE"
+fi
+
+if [ ! -z $FULCRUM_WRD ];
+then
+    FULCRUM_WRD="/$FULCRUM_WRD"
+fi
+
+FULCRUM_DBBAK=/Users/$USER/fulcrum/bak/$FULCRUM_SITE.sql.gz
+FULCRUM_DBPASS=RS1NVShiDo7iID41v4RApgt2gMpfLHZ
+FULCRUM_LOCAL=$(echo $FULCRUM_SITE|sed 's;[^.]*$;ifdev;')
+FULCRUM_CONF=/Users/$USER/fulcrum/conf/$FULCRUM_SITE.json
+
+# pull down the latest DB
+# TODO can we md5sum and see if the latest one is already downloaded
+vout "Grabbing $FULCRUM_SITE latest DB (s3://if-backup/dbs/$FULCRUM_SITE/latest.sql.gz) saving as ~/fulcrum/bak/$FULCRUM_SITE.sql.gz"
+aws $FULCRUM_AWSPROFILE s3 cp s3://if-backup/dbs/$FULCRUM_SITE/latest.sql.gz $FULCRUM_DBBAK
+
+# if DB already exists, ask user if they want to blow it away and restore from latest
+DB_COUNT=`mysql -s -h $(~/fulcrum/bin/dri) -u root --password="" --execute="SHOW DATABASES LIKE '$FULCRUM_DBNAME'" | wc -l`
+if [ "$DB_COUNT" -gt 0 ]; then
+  read -e -p "Drop existing database and restore from fresh backup? (y/n)" DROPDB
+  if [ "$DROPDB" == "y" ]; then
+    vout "DROPPING $FULCRUM_DBNAME"
+    mysql -h $(~/fulcrum/bin/dri) -u root --password="" --execute="DROP DATABASE $FULCRUM_DBNAME"
+  else
+    eout "quiting since you did not want the db recycled..."
+  fi
+fi
+
+# create the database
+vout "Creating $FULCRUM_DBNAME"
+mysql -h $(~/fulcrum/bin/dri) -u root --password="" --execute="CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME"
+
+vout "Restoring $FULCRUM_DBNAME from $FULCRUM_DBBAK"
+gzcat "$FULCRUM_DBBAK" | mysql -h $(~/fulcrum/bin/dri) -u root --password="" $FULCRUM_DBNAME
+
+# get the repo
+if [ -d ~/repos/$FULCRUM_LOCAL ]; then
+  vout "you appear to already have the repo... skipping clone down"
+else
+  vout "Cloning repo $FULCRUM_REPO to ~/repos/$FULCRUM_LOCAL"
+  git clone $FULCRUM_REPO ~/repos/$FULCRUM_LOCAL
+fi
+
+# link to the webroot
+# TODO: for repos that don't use the top level we need to tweak
+if [ ! -L ~/fulcrum/webroots/$FULCRUM_LOCAL ]; then
+  vout "Symlinking ~/fulcrum/webroots/$FULCRUM_LOCAL -> ../../repos/$FULCRUM_LOCAL$FULCRUM_WRD"
+  rm -f ~/fulcrum/webroots/$FULCRUM_LOCAL
+  ln -s ../../repos/$FULCRUM_LOCAL$FULCRUM_WRD ~/fulcrum/webroots/$FULCRUM_LOCAL
+fi
+
+# make local files dir
+if [ ! -d ~/fulcrum/files/$FULCRUM_LOCAL ]; then
+  vout "Making file directory ~/fulcrum/files/$FULCRUM_LOCAL and symlink from /repos/$FULCRUM_LOCAL/sites/default/files"
+  mkdir -p ~/fulcrum/files/$FULCRUM_LOCAL
+  chmod -R 777 ~/fulcrum/files/$FULCRUM_LOCAL # don't like that this is 777, but you have trouble with uploads otherwise
+fi
+
+# link to the files
+if [ ! -L ~/repos/$FULCRUM_LOCAL$FULCRUM_WRD/sites/default/files ]; then
+  vout "Symlinking ~/repos/$FULCRUM_LOCAL/sites/default/files -> /drupal_files/$FULCRUM_LOCAL"
+  rm -f ~/repos/$FULCRUM_LOCAL$FULCRUM_WRD/sites/default/files
+  ln -s /drupal_files/$FULCRUM_LOCAL ~/repos/$FULCRUM_LOCAL$FULCRUM_WRD/sites/default/files
+fi
+
+
+
+# TODO: make symlink for wildcards
+# ask if a wildcard should be created
+#read -p "Respond to any subdomain of *.$MAINSITE (y/n)? " SUBDOMAINS
+
+#if [ "y" == "$SUBDOMAINS" ];
+#then
+#	echo "Creating symlink for all subdomains *.$MAINSITE.json"
+	# cd ~/fulcrum/conf && ln -s $FULCRUM_SITE.json \*.$MAINSITE.json && cd -
+#fi
+
+# test to see if the conf exists yet or not
+# brew install gettext -- now in bootstrap-fulcrum run
+if [ ! -f $FULCRUM_CONF ]; then
+  export FULCRUM_DBPASS
+  export FULCRUM_DBNAME
+  export FULCRUM_ENVIRONMENT=dev
+  export FULCRUM_DBUSER=fulcrum
+  export FULCRUM_WEBROOT=$FULCRUM_LOCAL
+  export FULCRUM_SALT=$(cat /dev/urandom | LC_CTYPE=C tr -dc '_a-zA-Z0-9-' | fold -w 74 | head -n 1)
+  export FULCRUM_CNG_SYNC="sites/default/files/config_$(cat /dev/urandom | LC_CTYPE=C tr -dc '_a-zA-Z0-9-' | fold -w 74 | head -n 1)/sync"
+  # export FULCRUM_COOKIE=.$(echo $FULCRUM_LOCAL|sed 's;^www\.;;g')
+
+  # REDIS=""
+  # VARNISH=""
+
+  if [ -d ~/repos/$FULCRUM_LOCAL/sites/all/modules/contrib/redis ]; then
+    REDIS="-redis"
+  fi
+
+  if [ -d ~/repos/$FULCRUM_LOCAL/sites/all/modules/contrib/varnish ]; then
+    VARNISH="-varnish"
+  fi
+
+  $ENVSUBST<~/fulcrum/conf/json${REDIS}${VARNISH}8.tpl>~/fulcrum/conf/$FULCRUM_LOCAL.json
+
+  ~/fulcrum/bin/fulcrum-node
+
+	ssh docker@$(~/fulcrum/bin/dri) docker exec nginx /usr/bin/kill -HUP 1
+fi
+
+# set public directory
+# ~/fulcrum/bin/drush $FULCRUM_LOCAL vset file_public_path sites/default/files
+
+# set temporary directory
+# ~/fulcrum/bin/drush $FULCRUM_LOCAL vset file_temporary_path /tmp
+
+# clear all caches
+~/fulcrum/bin/drush8 $FULCRUM_LOCAL cr
+
+# open site, logged in as admin
+open $(drush8 $FULCRUM_LOCAL uli | tr -d '\r' | grep $FULCRUM_LOCAL)

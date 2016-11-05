@@ -1,0 +1,22 @@
+#!/bin/bash
+
+. ~/fulcrum/bin/fulcrum-lib
+. ~/fulcrum/bin/fulcrum-env
+
+DBNAME=$1
+BAKFILE=$2
+
+if [[ -z "$1" ]]; then
+	eout "ERROR: No database name given!"
+elif [[  -z "$1" ]]; then
+	eout "ERROR: No backup file given!"
+elif [[ "$FULCRUM_UNAME_A" != *"Darwin"* ]]; then
+	eout "ERROR: This should only be run on local Mac environment!"
+elif [[ ! -r "$BAKFILE" ]]; then
+	eout "ERROR: Could not read '$BAKFILE'!"
+elif [[ "$(file $BAKFILE)" != *"gzip"* ]]; then
+	eout "ERROR: The file '$BAKFILE' is not a gzip backup!"
+fi
+
+vout "Restoring database '$DBNAME' from '$BAKFILE'."
+gzcat $BAKFILE | mysql -h$(dri) -uroot --password="" $DBNAME

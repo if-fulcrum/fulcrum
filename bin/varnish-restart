@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -ue
+
+CFGNAME=varnish-cfg-$(date +"%Y%m%d%H%M%S")
+UNAMES=$(uname -s)
+SUDO="sudo"
+
+# for mac, we dont need to sudo
+if [ "$UNAMES" == "Darwin" ]; then
+  SUDO=""
+fi
+
+# ensure we have no syntax errors
+$SUDO docker exec varnish /usr/sbin/varnishd -C -f /etc/varnish/default.vcl 2>/dev/null
+if [ $? -gt 0 ]; then
+  echo "FATAL: syntax error in varnish config it seems, quitting without restart"
+  exit 1
+fi
+
+$SUDO docker exec varnish /usr/bin/varnishadm vcl.load $CFGNAME /etc/varnish/default.vcl
+if [ $? -gt 0 ]; then
+  echo "FATAL: unable to vcl.load $CFGNAME"
+  exit 1
+fi
+
+$SUDO docker exec varnish /usr/bin/varnishadm vcl.use $CFGNAME
+if [ $? -gt 0 ]; then
+  echo "FATAL: unable to vcl.use $CFGNAME"
+  exit 1
+fi
