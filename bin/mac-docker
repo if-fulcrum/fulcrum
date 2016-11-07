@@ -284,7 +284,7 @@ export FULCRUM_HOST_GID=$(id -g $FULCRUM_HOST_USER)
 export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2)
 
 # must come after FULCRUM_HOST_USER
-DCFILE="/Users/${FULCRUM_HOST_USER}/fulcrum/compose/hinge.yml"
+DCFILE="/Users/${FULCRUM_HOST_USER}/fulcrum/compose/hinge-mac.yml"
 
 # debug
 vout "FULCRUM_HOST_USER = $FULCRUM_HOST_USER"

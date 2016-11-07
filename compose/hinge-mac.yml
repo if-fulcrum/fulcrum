@@ -8,8 +8,6 @@ mariadb:
    - /mnt/fulcrum/data:/data
   environment:
    - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-   - FULCRUM_HOST_UID=$FULCRUM_HOST_UID
-   - FULCRUM_HOST_GID=$FULCRUM_HOST_GID
   ports:
     - "3306:3306"
 
