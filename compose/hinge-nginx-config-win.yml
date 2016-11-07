@@ -1,0 +1,7 @@
+util:
+  container_name: util
+  image: fulcrum/util
+  entrypoint: /fulcrum/bin/nginxConfig
+  volumes:
+    - c:/Users/$USERNAME/fulcrum/conf:/fulcrum/conf:ro
+    - c:/Users/$USERNAME/fulcrum/etc/nginx/fulcrum:/fulcrum/etc/nginx/fulcrum
