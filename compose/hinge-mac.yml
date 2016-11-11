@@ -78,6 +78,24 @@ haproxy:
     - "443:443"
     - "1936:1936"
 
+drush:
+  container_name: drush
+  image: fulcrum/drush:latest-alpine
+  tty: true
+  volumes:
+    - /mnt/fulcrum/etc/php5:/etc/php5:ro
+    - /mnt/fulcrum/log/php:/var/log
+    - /mnt/fulcrum/files:/drupal_files
+    - /mnt/fulcrum/private:/private
+    - /mnt/fulcrum/webroots:/var/www/html
+    - /mnt/fulcrum/php:/var/www/html/fulcrum/php:ro
+    - /mnt/repos:/var/repos
+  entrypoint: /bin/sh
+  links:
+    - redis
+    - mariadb
+    - varnish
+
 # needed for rails, but only local dev
 # solr:
 #   container_name: solr
