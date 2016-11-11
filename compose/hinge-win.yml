@@ -80,6 +80,24 @@ services:
       - "443:443"
       - "1936:1936"
 
+  drush:
+    container_name: drush
+    image: fulcrum/drush:latest-alpine
+    tty: true
+    volumes:
+      - c:/Users/$USERNAME/fulcrum/etc/php5:/etc/php5:ro
+      - c:/Users/$USERNAME/fulcrum/log/php:/var/log
+      - c:/Users/$USERNAME/fulcrum/files:/drupal_files
+      - c:/Users/$USERNAME/fulcrum/private:/private
+      - c:/Users/$USERNAME/fulcrum/webroots:/var/www/html
+      - c:/Users/$USERNAME/fulcrum/php:/var/www/html/fulcrum/php:ro
+      - c:/Users/$USERNAME/repos:/var/repos
+    entrypoint: /bin/sh
+    links:
+      - redis
+      - mariadb
+      - varnish
+
 # needed for rails, but only local dev
 # solr:
 #   container_name: solr
