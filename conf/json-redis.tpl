@@ -10,7 +10,7 @@
             "database" : "${FULCRUM_DBNAME}",
             "username" : "${FULCRUM_DBUSER}",
             "password" : "${FULCRUM_DBPASS}",
-            "host"     : "mariadb10-0",
+            "host"     : "mariadb",
             "prefix"   : ""
           }
         }
