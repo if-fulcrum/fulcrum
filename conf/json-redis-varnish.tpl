@@ -30,7 +30,7 @@
         "lock_inc"                   : "sites/all/modules/contrib/redis/redis.lock.inc",
         "varnish_control_terminal"   : "varnish:6082",
         "varnish_version"            : "4",
-        "varnish_control_key"        : "05f41c5c8787aa214e1966c155990488"
+        "varnish_control_key"        : "${FULCRUM_VARN_SECRET}"
       }
     },
     "append" : {
