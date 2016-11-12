@@ -41,27 +41,31 @@ cloneCodebase() {
       read -e -p "Do you want to update to the latest git commit? (y/n) " GITPULL
 
       if [ "$GITPULL" == "y" ]; then
-        chmod u+w ~/repos/$FULCRUM_SITE$FULCRUM_WRD/sites/default
+        chmod u+w $FULCRUM_DOCROOT/sites/default
         cd ~/repos/$FULCRUM_SITE
         git pull
-        chmod u-w ~/repos/$FULCRUM_SITE$FULCRUM_WRD/sites/default
+        chmod u-w $FULCRUM_DOCROOT/sites/default
       fi
     fi
   else
     vout "Cloning repo $FULCRUM_REPO to ~/repos/$FULCRUM_SITE"
-    git clone $FULCRUM_REPO $FULCRUM_DOCROOT
+    git clone $FULCRUM_REPO ~/repos/$FULCRUM_SITE
 
     if [ "$CLONING_SITE" = true ]; then
       vout "Removing original $FULCRUM_REPO .git directory from ~/repos/$FULCRUM_SITE"
       rm -rf ~/repos/$FULCRUM_SITE/.git
     fi
   fi
+
+  if ! grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php; then
+    eout "ERROR: You have not made the $FULCRUM_DOCROOT/sites/default/settings.php file compatible with Fulcrum/drush"
+  fi
 }
 
 drupalVersion() {
-  D8FILE=${FULCRUM_DOCROOT}core/lib/Drupal.php
-  D7FILE=${FULCRUM_DOCROOT}includes/bootstrap.inc
-  D_FILE=${FULCRUM_DOCROOT}modules/system/system.module
+  D8FILE=${FULCRUM_DOCROOT}/core/lib/Drupal.php
+  D7FILE=${FULCRUM_DOCROOT}/includes/bootstrap.inc
+  D_FILE=${FULCRUM_DOCROOT}/modules/system/system.module
 
   if   [ -e $D8FILE ]; then
     echo "Checking $D8FILE"
@@ -103,19 +107,19 @@ prepFileSystem() {
     chmod -R 777 $FULCRUM_DIRNAME/files/$FULCRUM_SITE # don't like that this is 777, but you have trouble with uploads otherwise
   fi
 
-  vout "Removing previous symlink if it existed ~/repos/$FULCRUM_SITE$FULCRUM_WRD/sites/default/files"
-  chmod u+w ~/repos/$FULCRUM_SITE$FULCRUM_WRD/sites/default
-  rm -f ~/repos/$FULCRUM_SITE$FULCRUM_WRD/sites/default/files
+  vout "Removing previous symlink if it existed $FULCRUM_DOCROOT/sites/default/files"
+  chmod u+w $FULCRUM_DOCROOT/sites/default
+  rm -f $FULCRUM_DOCROOT/sites/default/files
 
   # link to the files
   vout "Symlinking ~/repos/$FULCRUM_SITE/sites/default/files -> /drupal_files/$FULCRUM_SITE"
   ln -s /drupal_files/$FULCRUM_SITE $FULCRUM_DOCROOT/sites/default/files
 
-  chmod u-w ~/repos/$FULCRUM_SITE$FULCRUM_WRD/sites/default
+  chmod u-w $FULCRUM_DOCROOT/sites/default
 
-  if ! grep "$FULCRUM_SITE 127.0.0.1" /etc/hosts; then
-    vout "Adding $FULCRUM_SITE 127.0.0.1 to /etc/hosts"
-    echo "$FULCRUM_SITE 127.0.0.1" | sudo tee -a /etc/hosts
+  if ! grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts; then
+    vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
+    echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts
   fi
 }
 
@@ -134,11 +138,11 @@ nginxConf() {
     REDIS=""
     VARNISH=""
 
-    if [ -d ~/repos/$FULCRUM_SITE$FULCRUM_WRD/sites/all/modules/contrib/redis ]; then
+    if [ -d $FULCRUM_DOCROOT/sites/all/modules/contrib/redis ]; then
       REDIS="-redis"
     fi
 
-    if [ -d ~/repos/$FULCRUM_SITE$FULCRUM_WRD/sites/all/modules/contrib/varnish ]; then
+    if [ -d $FULCRUM_DOCROOT/sites/all/modules/contrib/varnish ]; then
       VARNISH="-varnish"
     fi
 
