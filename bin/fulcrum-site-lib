@@ -29,7 +29,8 @@ restoreDatabaseBackup() {
     fi
 
     vout "Restoring $FULCRUM_DBNAME from $FULCRUM_DBGZ"
-    gzcat "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
+    # gzcat "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
+    gunzip -c "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
   fi
 }
 
