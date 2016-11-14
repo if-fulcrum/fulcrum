@@ -1,4 +1,4 @@
-source ${SDIR}/fulcrum-lib
+source ${FULCRUM_BINDIR}/fulcrum-lib
 
 restoreDatabaseBackup() {
   DO_RESTORE=true
@@ -225,8 +225,7 @@ drushUserLogin() {
 setupEnv() {
   CLONING_SITE=false
 
-  FULCRUM_DIRNAME=$(dirname $SDIR)
-  vout "FULCRUM_DIRNAME: $FULCRUM_DIRNAME"
+  FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
 
   if [[ "$1" = "--clone" ]]; then
     CLONING_SITE=true
@@ -249,49 +248,36 @@ setupEnv() {
     FULCRUM_AWSPROFILE=$6
   fi
 
-  if [ ! -z $FULCRUM_AWSPROFILE ];
-  then
+  if [ ! -z $FULCRUM_AWSPROFILE ]; then
       FULCRUM_AWSPROFILE="--profile $FULCRUM_AWSPROFILE"
   fi
 
   if [ -z $FULCRUM_SITE ]; then
       eout "Error, FULCRUM_SITE not provided!"
-  else
-      vout "FULCRUM_SITE: $FULCRUM_SITE"
   fi
 
   if [ -z $FULCRUM_DBGZ ]; then
       eout "Error, FULCRUM_DBGZ not provided!"
-  else
-      vout "FULCRUM_DBGZ: $FULCRUM_DBGZ"
   fi
 
   if [ -z $FULCRUM_DBNAME ]; then
       eout "Error, FULCRUM_DBNAME not provided!"
-  else
-      vout "FULCRUM_DBNAME: $FULCRUM_DBNAME"
   fi
 
   if [ -z $FULCRUM_REPO ]; then
       eout "Error, FULCRUM_REPO not provided!"
-  else
-      vout "FULCRUM_REPO: $FULCRUM_REPO"
   fi
 
   if [[ -z $FULCRUM_WRD || ! "$FULCRUM_WRD" == "/"* ]]; then
       FULCRUM_WRD="/$FULCRUM_WRD"
   fi
-  vout "FULCRUM_WRD: $FULCRUM_WRD"
 
   FULCRUM_DBBAK=$FULCRUM_DIRNAME/bak/$FULCRUM_SITE.sql.gz
   FULCRUM_CONF=$FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json
   FULCRUM_DOCROOT=$HOME/repos/$FULCRUM_SITE$FULCRUM_WRD
   FULCRUM_DOCROOT_REL=../../repos/$FULCRUM_SITE$FULCRUM_WRD
   FULCRUM_DBUSER=fulcrum_$FULCRUM_DBNAME
-
-  # generate a random password
   FULCRUM_DBPASS=$(rndStr 32)
-  vout "FULCRUM_DBPASS: $FULCRUM_DBPASS"
 
   # see if we need to add the docroot
   if [ -d $FULCRUM_DOCROOT/docroot ]; then
@@ -305,6 +291,20 @@ setupEnv() {
     echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
   fi
 
+  vout "FULCRUM_BINDIR:      $FULCRUM_BINDIR"
+  vout "FULCRUM_DIRNAME:     $FULCRUM_DIRNAME"
+  vout "FULCRUM_SITE:        $FULCRUM_SITE"
+  vout "FULCRUM_CONF:        $FULCRUM_CONF"
+  vout "FULCRUM_REPO:        $FULCRUM_REPO"
+  vout "FULCRUM_WRD:         $FULCRUM_WRD"
+  vout "FULCRUM_DOCROOT:     $FULCRUM_DOCROOT"
+  vout "FULCRUM_DOCROOT_REL: $FULCRUM_DOCROOT_REL"
+  vout "FULCRUM_DBBAK:       $FULCRUM_DBBAK"
+  vout "FULCRUM_DBGZ:        $FULCRUM_DBGZ"
+  vout "FULCRUM_DBUSER:      $FULCRUM_DBUSER"
+  vout "FULCRUM_DBNAME:      $FULCRUM_DBNAME"
+  vout "FULCRUM_DBPASS:      $FULCRUM_DBPASS"
+  vout "FULCRUM_AWSPROFILE:  $FULCRUM_AWSPROFILE"
   vout "FULCRUM_VARN_SECRET: $FULCRUM_VARN_SECRET"
 }
 

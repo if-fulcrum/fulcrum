@@ -3,9 +3,9 @@
 # exit script if anything returns an error
 set -e
 
-SDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
+FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 
-source ${SDIR}/fulcrum-site-lib
+source ${FULCRUM_BINDIR}/fulcrum-site-lib
 
 setupEnv $@
 
