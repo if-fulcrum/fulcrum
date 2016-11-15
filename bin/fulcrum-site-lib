@@ -75,9 +75,18 @@ cloneCodebase() {
     fi
   fi
 
-  vout "Making $FULCRUM_REPO/sites/default/files and .htaccess if it doesn't already exist"
-  mkdir -p $FULCRUM_REPO/sites/default/files
-  cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_REPO/sites/default/files/.htaccess
+  vout "Making $FULCRUM_REPODIR/sites/default/files and .htaccess if it doesn't already exist"
+  chmod u+w $FULCRUM_REPODIR/sites/default
+  mkdir -p $FULCRUM_REPODIR/sites/default/files
+  chmod u+w $FULCRUM_REPODIR/sites/default/files
+
+  # remove if is it already exists
+  if [ -e $FULCRUM_REPODIR/sites/default/files/.htaccess ]; then
+    rm -f $FULCRUM_REPODIR/sites/default/files/.htaccess
+  fi
+
+  cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_REPODIR/sites/default/files/.htaccess
+  chmod u-w $FULCRUM_REPODIR/sites/default $FULCRUM_REPODIR/sites/default/files/.htaccess
 
   if ! grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php; then
     eout "ERROR: You have not made the $FULCRUM_DOCROOT/sites/default/settings.php file compatible with Fulcrum/drush"
@@ -127,13 +136,16 @@ etcHosts() {
 nginxConf() {
   FUCRUM_CNF_TPL=json.tpl
 
-  echo "Making $FULCRUM_DIRNAME/conf/tmp.vars to hand off to docker util"
-  echo "export FULCRUM_DBPASS=$FULCRUM_DBPASS"                          >  $FULCRUM_DIRNAME/conf/tmp.vars
-  echo "export FULCRUM_DBNAME=$FULCRUM_DBNAME"                          >> $FULCRUM_DIRNAME/conf/tmp.vars
-  echo "export FULCRUM_ENVIRONMENT=dev"                                 >> $FULCRUM_DIRNAME/conf/tmp.vars
-  echo "export FULCRUM_DBUSER=$FULCRUM_DBUSER"                          >> $FULCRUM_DIRNAME/conf/tmp.vars
-  echo "export FULCRUM_WEBROOT=$FULCRUM_SITE$FULCRUM_WRD"               >> $FULCRUM_DIRNAME/conf/tmp.vars
-  echo "export FULCRUM_COOKIE=.$(echo $FULCRUM_SITE|sed 's;^www\.;;g')" >> $FULCRUM_DIRNAME/conf/tmp.vars
+  vout "Making $FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json"
+  FULCRUM_COOKIE=.$(echo $FULCRUM_SITE|sed 's;^www\.;;g')
+  FULCRUM_VARS=$(cat <<SETVAR
+  -eFULCRUM_DBPASS=$FULCRUM_DBPASS
+  -eFULCRUM_DBNAME=$FULCRUM_DBNAME
+  -eFULCRUM_ENVIRONMENT=dev
+  -eFULCRUM_DBUSER=$FULCRUM_DBUSER
+  -eFULCRUM_WEBROOT=$FULCRUM_SITE$FULCRUM_WRD
+  -eFULCRUM_COOKIE=$FULCRUM_COOKIE
+SETVAR)
 
   if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
     REDIS=""
@@ -145,40 +157,37 @@ nginxConf() {
 
     if [ -d $FULCRUM_DOCROOT/sites/all/modules/contrib/varnish ]; then
       VARNISH="-varnish"
+      FULCRUM_VARS="$FULCRUM_VARS -eFULCRUM_VARN_SECRET=$FULCRUM_VARN_SECRET "
     fi
 
     FUCRUM_CNF_TPL=json${REDIS}${VARNISH}.tpl
   else
-    echo "export FULCRUM_SALT=$(rndStr 74)"       >> $FULCRUM_DIRNAME/conf/tmp.vars
-    echo "export FULCRUM_D8CONFIG=../config/sync" >> $FULCRUM_DIRNAME/conf/tmp.vars
-
     FUCRUM_CNF_TPL=json8.tpl
+    FULCRUM_SALT=$(rndStr 74)
+    FULCRUM_VARS="$FULCRUM_VARS -eFULCRUM_SALT=$FULCRUM_SALT -eFULCRUM_D8CONFIG=../config/sync "
   fi
 
-  FULCRUM_VOL=$FULCRUM_DIRNAME
-  # correct for windows
-  if [[ "$FULCRUM_OS" == "WIN" ]]; then
-    FULCRUM_VOL=$(echo $FULCRUM_DIRNAME|sed 's;^/\([a-z]\)/;\1:/;g')
-  fi
+  DOCKER_CMD="docker run --rm -i $FULCRUM_VARS fulcrum/util /usr/bin/envsubst"
 
-  echo "Writing $FULCRUM_VOL/conf/$FULCRUM_SITE.json"
-  echo "docker run --rm --volume $FULCRUM_VOL/conf:/fulcrum/conf --volume $FULCRUM_VOL/etc/nginx/fulcrum:/fulcrum/etc/nginx/fulcrum fulcrum/util //fulcrum/bin/nginxConfig $FUCRUM_CNF_TPL $FULCRUM_SITE"
-  ### for this to work, we need all the variables in json.tpl
-  docker run --rm \
-    --volume $FULCRUM_VOL/conf:/fulcrum/conf \
-    --volume $FULCRUM_VOL/etc/nginx/fulcrum:/fulcrum/etc/nginx/fulcrum \
-    fulcrum/util //fulcrum/bin/nginxConfig $FUCRUM_CNF_TPL $FULCRUM_SITE
+  cat $FULCRUM_DIRNAME/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json
+
+  # combine all confs seperated by a comma into a single var
+  CONFS=$(for f in ~/fulcrum/conf/*.json;do cat $f;echo ",";done)
+
+  # remove last comma and enclose in brackets
+  CONFS="[${CONFS%?}]"
+
+  # overwrite fulcrum_config.conf
+  echo "$CONFS"|(docker run --rm -i fulcrum/util node /fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 
   docker exec nginx kill -HUP 1
-
-  rm $FULCRUM_DIRNAME/conf/tmp.vars
 }
 
 fulcrumDBUser() {
+  SQL="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $FULCRUM_DBNAME.* TO '$FULCRUM_DBUSER'@'172.17.%' IDENTIFIED BY '$FULCRUM_DBPASS'; FLUSH PRIVILEGES"
   # ensure fulcrum user is in mysql
-  vout "Ensuring fulcrum user exists in mysql"
-
-  echo "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $FULCRUM_DBNAME.* TO '$FULCRUM_DBUSER'@'172.17.%' IDENTIFIED BY '$FULCRUM_DBPASS'; FLUSH PRIVILEGES"|docker exec -i mariadb mysql
+  vout "Ensuring fulcrum user exists in mysql: $SQL"
+  echo "$SQL"|docker exec -i mariadb mysql
 }
 
 drushSysVars() {
