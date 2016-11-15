@@ -161,7 +161,8 @@ nginxConf() {
     FULCRUM_VOL=$(echo $FULCRUM_DIRNAME|sed 's;^/\([a-z]\)/;\1:/;g')
   fi
 
-  echo "Writing $FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json"
+  echo "Writing $FULCRUM_VOL/conf/$FULCRUM_SITE.json"
+  echo "docker run --rm --volume $FULCRUM_VOL/conf:/fulcrum/conf --volume $FULCRUM_VOL/etc/nginx/fulcrum:/fulcrum/etc/nginx/fulcrum fulcrum/util //fulcrum/bin/nginxConfig $FUCRUM_CNF_TPL $FULCRUM_SITE"
   ### for this to work, we need all the variables in json.tpl
   docker run --rm \
     --volume $FULCRUM_VOL/conf:/fulcrum/conf \
