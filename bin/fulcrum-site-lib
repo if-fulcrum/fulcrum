@@ -168,7 +168,7 @@ SETVAR
     FULCRUM_VARS="$FULCRUM_VARS -eFULCRUM_SALT=$FULCRUM_SALT -eFULCRUM_D8CONFIG=../config/sync "
   fi
 
-  DOCKER_CMD="docker run --rm -i $FULCRUM_VARS fulcrum/util /usr/bin/envsubst"
+  DOCKER_CMD="docker run --rm -i $FULCRUM_VARS fulcrum/util //usr/bin/envsubst"
 
   cat $FULCRUM_DIRNAME/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json
 
@@ -179,7 +179,7 @@ SETVAR
   CONFS="[${CONFS%?}]"
 
   # overwrite fulcrum_config.conf
-  echo "$CONFS"|(docker run --rm -i fulcrum/util node /fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
+  echo "$CONFS"|(docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 
   docker exec nginx kill -HUP 1
 }
