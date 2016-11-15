@@ -31,7 +31,6 @@ services:
       - c:/Users/$USERNAME/fulcrum/php:/fulcrum:ro
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files
       - c:/Users/$USERNAME/fulcrum/webroots:/var/www/html
-      - /mnt/repos:/var/repos
     links:
       - redis
       - mariadb
@@ -46,7 +45,6 @@ services:
       - c:/Users/$USERNAME/fulcrum/log/nginx:/var/log
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files:ro
       - c:/Users/$USERNAME/fulcrum/webroots:/var/www/html:ro
-      - /mnt/repos:/var/repos:ro
     links:
       - phpfpm
     ports:
@@ -91,7 +89,6 @@ services:
       - c:/Users/$USERNAME/fulcrum/private:/private
       - c:/Users/$USERNAME/fulcrum/webroots:/var/www/html
       - c:/Users/$USERNAME/fulcrum/php:/var/www/html/fulcrum/php:ro
-      - c:/Users/$USERNAME/repos:/var/repos
     entrypoint: /bin/sh
     links:
       - redis
