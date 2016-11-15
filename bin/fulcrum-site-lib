@@ -344,6 +344,8 @@ copyConf() {
 }
 
 drushCmd() {
-  echo "docker exec -i drush //usr/local/bin/drush --uri=http://$FULCRUM_SITE --root=/var/www/html/$FULCRUM_SITE$FULCRUM_WRD $@"
-  docker exec -i drush //usr/local/bin/drush --uri=http://$FULCRUM_SITE --root=/var/www/html/$FULCRUM_SITE$FULCRUM_WRD $@
+  echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@"
+  echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush /bin/sh
+
+  # docker exec -i drush //usr/local/bin/drush --uri=http://$FULCRUM_SITE --root=/var/www/html/$FULCRUM_SITE$FULCRUM_WRD $@
 }
