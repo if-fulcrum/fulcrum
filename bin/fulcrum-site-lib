@@ -28,7 +28,7 @@ restoreDatabaseBackup() {
       FULCRUM_DBGZ=$FULCRUM_DBBAK
     fi
 
-    vout "Restoring $FULCRUM_DBNAME from $FULCRUM_DBGZ"
+    vout "Restoring: gunzip -c \"$FULCRUM_DBGZ\" | docker exec -i mariadb mysql $FULCRUM_DBNAME"
     # gzcat "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
     gunzip -c "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
   fi
@@ -112,7 +112,7 @@ drupalVersion() {
   echo "DRUPAL_MAJOR_VERSION: $DRUPAL_MAJOR_VERSION"
 }
 
-ectHosts() {
+etcHosts() {
   if ! grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts; then
     vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
     echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts

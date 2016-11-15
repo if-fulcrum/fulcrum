@@ -15,7 +15,7 @@ cloneCodebase
 
 drupalVersion
 
-ectHosts
+etcHosts
 
 nginxConf
 
