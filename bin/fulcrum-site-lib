@@ -36,27 +36,48 @@ restoreDatabaseBackup() {
 
 cloneCodebase() {
   # get the repo
-  if [ -d ~/repos/$FULCRUM_SITE ]; then
+  if [ -d $FULCRUM_REPODIR ]; then
     vout "You appear to already have the repo, skipping git clone."
-    if [ -e ~/repos/$FULCRUM_SITE/.git ]; then
+    if [ -e $FULCRUM_REPODIR/.git ]; then
       read -e -p "Do you want to update to the latest git commit? (y/n) " GITPULL
 
       if [ "$GITPULL" == "y" ]; then
         chmod u+w $FULCRUM_DOCROOT/sites/default
-        cd ~/repos/$FULCRUM_SITE
+        cd $FULCRUM_REPODIR
         git pull
         chmod u-w $FULCRUM_DOCROOT/sites/default
       fi
     fi
   else
-    vout "Cloning repo $FULCRUM_REPO to ~/repos/$FULCRUM_SITE"
-    git clone $FULCRUM_REPO ~/repos/$FULCRUM_SITE
+    # if the top level is not the docroot, then we want to do a sparse checkout
+    if [ "$FULCRUM_DOCROOT" != "$FULCRUM_REPODIR" ]; then
+      vout "Sparse checkout of $FULCRUM_REPO$FULCRUM_WRD to $FULCRUM_REPODIR"
+
+      mkdir $FULCRUM_REPODIR
+
+      cd $FULCRUM_REPODIR
+
+      git init
+      git remote add -f origin $FULCRUM_REPO
+      git config core.sparseCheckout true
+
+      echo "$FULCRUM_WRD" >> .git/info/sparse-checkout
+
+      git pull origin master
+    else
+      vout "Cloning repo $FULCRUM_REPO to $FULCRUM_REPODIR"
+      git clone $FULCRUM_REPO $FULCRUM_REPODIR
+    fi
 
     if [ "$CLONING_SITE" = true ]; then
-      vout "Removing original $FULCRUM_REPO .git directory from ~/repos/$FULCRUM_SITE"
-      rm -rf ~/repos/$FULCRUM_SITE/.git
+      vout "Removing original $FULCRUM_REPO .git directory from $FULCRUM_REPODIR"
+      rm -rf $FULCRUM_REPODIR/.git
     fi
   fi
+
+  vout "Making $FULCRUM_REPO/sites/default/files and .htaccess if it doesn't already exist"
+  mkdir -p $FULCRUM_REPO/sites/default/files
+  cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_REPO/sites/default/files/.htaccess
 
   if ! grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php; then
     eout "ERROR: You have not made the $FULCRUM_DOCROOT/sites/default/settings.php file compatible with Fulcrum/drush"
@@ -91,33 +112,7 @@ drupalVersion() {
   echo "DRUPAL_MAJOR_VERSION: $DRUPAL_MAJOR_VERSION"
 }
 
-prepFileSystem() {
-  # remove webroot link if it exists
-  if [ -L $FULCRUM_DIRNAME/webroots/$FULCRUM_SITE ]; then
-    vout "Removing previous symlink $FULCRUM_DIRNAME/webroots/$FULCRUM_SITE"
-    rm -f $FULCRUM_DIRNAME/webroots/$FULCRUM_SITE
-  fi
-
-  vout "Symlinking ../../repos/$FULCRUM_SITE$FULCRUM_WRD -> $FULCRUM_DOCROOT"
-  ln -s $FULCRUM_DOCROOT_REL $FULCRUM_DIRNAME/webroots/$FULCRUM_SITE
-
-  # make local files dir
-  if [ ! -d $FULCRUM_DIRNAME/files/$FULCRUM_SITE ]; then
-    vout "Making file directory $FULCRUM_DIRNAME/files/$FULCRUM_SITE and symlink from /repos/$FULCRUM_SITE/sites/default/files"
-    mkdir -p $FULCRUM_DIRNAME/files/$FULCRUM_SITE
-    chmod -R 777 $FULCRUM_DIRNAME/files/$FULCRUM_SITE # don't like that this is 777, but you have trouble with uploads otherwise
-  fi
-
-  vout "Removing previous symlink if it existed $FULCRUM_DOCROOT/sites/default/files"
-  chmod u+w $FULCRUM_DOCROOT/sites/default
-  rm -f $FULCRUM_DOCROOT/sites/default/files
-
-  # link to the files
-  vout "Symlinking ~/repos/$FULCRUM_SITE/sites/default/files -> /drupal_files/$FULCRUM_SITE"
-  ln -s /drupal_files/$FULCRUM_SITE $FULCRUM_DOCROOT/sites/default/files
-
-  chmod u-w $FULCRUM_DOCROOT/sites/default
-
+ectHosts() {
   if ! grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts; then
     vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
     echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts
@@ -132,7 +127,7 @@ nginxConf() {
   echo "export FULCRUM_DBNAME=$FULCRUM_DBNAME"                          >> $FULCRUM_DIRNAME/conf/tmp.vars
   echo "export FULCRUM_ENVIRONMENT=dev"                                 >> $FULCRUM_DIRNAME/conf/tmp.vars
   echo "export FULCRUM_DBUSER=$FULCRUM_DBUSER"                          >> $FULCRUM_DIRNAME/conf/tmp.vars
-  echo "export FULCRUM_WEBROOT=$FULCRUM_SITE"                           >> $FULCRUM_DIRNAME/conf/tmp.vars
+  echo "export FULCRUM_WEBROOT=$FULCRUM_SITE$FULCRUM_WRD"               >> $FULCRUM_DIRNAME/conf/tmp.vars
   echo "export FULCRUM_COOKIE=.$(echo $FULCRUM_SITE|sed 's;^www\.;;g')" >> $FULCRUM_DIRNAME/conf/tmp.vars
 
   if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
@@ -177,7 +172,7 @@ fulcrumDBUser() {
 drushSysVars() {
   copyConf
 
-  cd ~/repos/$FULCRUM_SITE
+  cd $FULCRUM_REPODIR
 
   # set public directory
   vout "Running drush to set public directory"
@@ -268,22 +263,24 @@ setupEnv() {
       eout "Error, FULCRUM_REPO not provided!"
   fi
 
-  if [[ -z $FULCRUM_WRD || ! "$FULCRUM_WRD" == "/"* ]]; then
-      FULCRUM_WRD="/$FULCRUM_WRD"
-  fi
-
   FULCRUM_DBBAK=$FULCRUM_DIRNAME/bak/$FULCRUM_SITE.sql.gz
   FULCRUM_CONF=$FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json
-  FULCRUM_DOCROOT=$HOME/repos/$FULCRUM_SITE$FULCRUM_WRD
-  FULCRUM_DOCROOT_REL=../../repos/$FULCRUM_SITE$FULCRUM_WRD
+  FULCRUM_REPODIR=$FULCRUM_DIRNAME/webroots/$FULCRUM_SITE
+  FULCRUM_DOCROOT=$FULCRUM_REPODIR
   FULCRUM_DBUSER=fulcrum_$FULCRUM_DBNAME
   FULCRUM_DBPASS=$(rndStr 32)
 
-  # see if we need to add the docroot
-  if [ -d $FULCRUM_DOCROOT/docroot ]; then
-    FULCRUM_DOCROOT=$FULCRUM_DOCROOT/docroot
-    FULCRUM_DOCROOT_REL=$FULCRUM_DOCROOT_REL/docroot
+  if [[ -z $FULCRUM_WRD || $FULCRUM_WRD == "" || $FULCRUM_WRD == "/" ]]; then
+    if [ -d $FULCRUM_DOCROOT/docroot ]; then
+      FULCRUM_WRD=/docroot
+    else
+      FULCRUM_WRD=""
+    fi
+  elif [[ ! "$FULCRUM_WRD" == "/"* ]]; then
+    FULCRUM_WRD="/$FULCRUM_WRD"
   fi
+
+  FULCRUM_DOCROOT=$FULCRUM_REPODIR$FULCRUM_WRD
 
   if [ -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
     FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret)
@@ -296,9 +293,9 @@ setupEnv() {
   vout "FULCRUM_SITE:        $FULCRUM_SITE"
   vout "FULCRUM_CONF:        $FULCRUM_CONF"
   vout "FULCRUM_REPO:        $FULCRUM_REPO"
+  vout "FULCRUM_REPODIR:     $FULCRUM_REPODIR"
   vout "FULCRUM_WRD:         $FULCRUM_WRD"
   vout "FULCRUM_DOCROOT:     $FULCRUM_DOCROOT"
-  vout "FULCRUM_DOCROOT_REL: $FULCRUM_DOCROOT_REL"
   vout "FULCRUM_DBBAK:       $FULCRUM_DBBAK"
   vout "FULCRUM_DBGZ:        $FULCRUM_DBGZ"
   vout "FULCRUM_DBUSER:      $FULCRUM_DBUSER"
