@@ -115,7 +115,12 @@ drupalVersion() {
 etcHosts() {
   if ! grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts; then
     vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
-    echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts
+
+    if [[ "$FULCRUM_OS" == "WIN" ]]; then
+      echo -e "\n127.0.0.1 $FULCRUM_SITE\n" >> /etc/hosts
+    else
+      echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts
+    fi
   fi
 }
 
@@ -286,6 +291,17 @@ setupEnv() {
     FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret)
   else
     echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
+  fi
+
+  UNAMEA=$(uname -a)
+  FULCRUM_OS=UNK;
+
+  if [[ "$UNAMEA" == *"Darwin"* ]]; then
+    FULCRUM_OS=MAC;
+  elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
+    FULCRUM_OS=WIN;
+  elif [[ "$UNAMEA" == *"Linux"* ]]; then
+    FULCRUM_OS=LIN;
   fi
 
   vout "FULCRUM_BINDIR:      $FULCRUM_BINDIR"
