@@ -155,11 +155,17 @@ nginxConf() {
     FUCRUM_CNF_TPL=json8.tpl
   fi
 
+  FULCRUM_VOL=$FULCRUM_DIRNAME
+  # correct for windows
+  if [[ "$FULCRUM_OS" == "WIN" ]]; then
+    FULCRUM_VOL=$(echo $FULCRUM_DIRNAME|sed 's;^/\([a-z]\)/;\1:/;g')
+  fi
+
   echo "Writing $FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json"
   ### for this to work, we need all the variables in json.tpl
   docker run --rm \
-    --volume /$FULCRUM_DIRNAME/conf:/fulcrum/conf \
-    --volume /$FULCRUM_DIRNAME/etc/nginx/fulcrum:/fulcrum/etc/nginx/fulcrum \
+    --volume $FULCRUM_VOL/conf:/fulcrum/conf \
+    --volume $FULCRUM_VOL/etc/nginx/fulcrum:/fulcrum/etc/nginx/fulcrum \
     fulcrum/util //fulcrum/bin/nginxConfig $FUCRUM_CNF_TPL $FULCRUM_SITE
 
   docker exec nginx kill -HUP 1
