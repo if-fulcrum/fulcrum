@@ -242,7 +242,10 @@ drushSysVars() {
 
 drushUserLogin() {
   vout "Running drush to get UID 1 login"
-  drushCmd uli --uri=http://$FULCRUM_SITE
+  ULI_URL=$(drushCmd uli --uri=http://$FULCRUM_SITE)
+
+  vout "$ULI_URL"
+  git web--browse $ULI_URL
 }
 
 setupEnv() {
