@@ -92,7 +92,7 @@ cloneCodebase() {
   cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_REPODIR/sites/default/files/.htaccess
   chmod u-w $FULCRUM_REPODIR/sites/default $FULCRUM_REPODIR/sites/default/files/.htaccess
 
-  if ! grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php; then
+  if ! $(grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php > /dev/null 2>&1); then
     eout "ERROR: You have not made the $FULCRUM_DOCROOT/sites/default/settings.php file compatible with Fulcrum/drush"
   fi
 }
@@ -127,12 +127,12 @@ drupalVersion() {
 
 etcHosts() {
   if [[ "$FULCRUM_OS" == "WIN" ]]; then
-    if ! grep "127.0.0.1 $FULCRUM_SITE" /c/windows/system32/drivers/etc/hosts; then
+    if ! $(grep "127.0.0.1 $FULCRUM_SITE" /c/windows/system32/drivers/etc/hosts > /dev/null 2>&1); then
       vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
       $FULCRUM_BINDIR/win/elevate_x64 $FULCRUM_BINDIR/win/addHost $FULCRUM_SITE
     fi
   else
-    if ! grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts; then
+    if ! $(grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts > /dev/null 2>&1); then
       vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
       echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts
     fi
@@ -244,8 +244,8 @@ drushUserLogin() {
   vout "Running drush to get UID 1 login"
   ULI_URL=$(drushCmd uli --uri=http://$FULCRUM_SITE)
 
-  vout "$ULI_URL"
-  git web--browse $ULI_URL
+  vout "$FULCRUM_SITE login: git web--browse \"$ULI_URL\""
+  git web--browse "$ULI_URL"
 }
 
 setupEnv() {
