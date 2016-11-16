@@ -70,35 +70,37 @@ function drestart()
   # update dnsmasq entries
   # address=/ifdev/127.0.0.1 - /usr/local/etc/dnsmasq.d/ifdev.config
   # TODO we need to figure out our ending domain and how we will help people install this part
-  IFDEV_LOCAL=$(grep "127.0.0.1" /usr/local/etc/dnsmasq.d/ifdev.config | wc -l )
-  if [ $IFDEV_LOCAL -ne 1 ]; then
-    vout "could not find 127.0.0.1 for dnsmasq"
-    eout "You do not appear to have *.ifdev pointing to 127.0.0.1, which is needed for docker for mac.  Please update /usr/local/etc/dnsmasq.d/ifdev.config -- address=/ifdev/127.0.0.1"
-  fi
+  # IFDEV_LOCAL=$(grep "127.0.0.1" /usr/local/etc/dnsmasq.d/ifdev.config | wc -l )
+  # if [ $IFDEV_LOCAL -ne 1 ]; then
+  #   vout "could not find 127.0.0.1 for dnsmasq"
+  #   eout "You do not appear to have *.ifdev pointing to 127.0.0.1, which is needed for docker for mac.  Please update /usr/local/etc/dnsmasq.d/ifdev.config -- address=/ifdev/127.0.0.1"
+  # fi
 
-  DNSMASQ_RECENT=$(find /usr/local/etc/dnsmasq.d/ -type f -mmin -3 | wc -l)
-  if [ $DNSMASQ_RECENT -gt 0 ]; then
-    vout "found recent dnsmasq edits"
-    sendalert "You appear to have recently edied dnsmasq files, you MAY be prompted for your login password to restart dnsmasq"
-    sudo launchctl stop homebrew.mxcl.dnsmasq
-    sudo launchctl start homebrew.mxcl.dnsmasq
-  fi
+  # DNSMASQ_RECENT=$(find /usr/local/etc/dnsmasq.d/ -type f -mmin -3 | wc -l)
+  # if [ $DNSMASQ_RECENT -gt 0 ]; then
+  #   vout "found recent dnsmasq edits"
+  #   sendalert "You appear to have recently edied dnsmasq files, you MAY be prompted for your login password to restart dnsmasq"
+  #   sudo launchctl stop homebrew.mxcl.dnsmasq
+  #   sudo launchctl start homebrew.mxcl.dnsmasq
+  # fi
 
   #ensure that whitelist.vcl gets made else varnish dies on boot
   bash ~/fulcrum/bin/varnish-whitelist
 
   # fulcrum-node to ensure our sites config is compiled
-  MYFILE=~/fulcrum/bin/fulcrum-node
-  if [ -f ${MYFILE} ]; then
-    vout "running ${MYFILE}"
-    ${MYFILE}
-  fi
+  # MYFILE=~/fulcrum/bin/fulcrum-node
+  # if [ -f ${MYFILE} ]; then
+  #   vout "running ${MYFILE}"
+  #   ${MYFILE}
+  # fi
 
   # Quit Docker if it is running
   # osascript -e 'quit app "Docker"'
 
   # run d4m-nfs in order to allow using NFS volume mounts
-  ~/repos/d4m-nfs/d4m-nfs.sh
+  if [[ "$FULCRUM_OS" == "MAC" ]]; then
+    ~/repos/d4m-nfs/d4m-nfs.sh
+  fi
 
   # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
   RUNNING_CONTAINERS=$(docker ps -q | wc -l)
@@ -228,8 +230,24 @@ drush8()
   mac-drush8 ${SITE} ${CMD}
 }
 
+UNAMEA=$(uname -a)
+FULCRUM_OS=UNK;
+
+if [[ "$UNAMEA" == *"Darwin"* ]]; then
+  FULCRUM_OS=MAC;
+elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
+  FULCRUM_OS=WIN;
+elif [[ "$UNAMEA" == *"Linux"* ]]; then
+  FULCRUM_OS=LIN;
+fi
+
+FULCRUM_OS_LC=$(echo $FULCRUM_OS|tr '[:upper:]' '[:lower:]')
+
 # make sure mac fulcrum hinge enviroment is healthy
-mac-doctor
+if [[ "$FULCRUM_OS" == "MAC" ]]; then
+  mac-doctor
+fi
+
 
 
 
@@ -284,7 +302,7 @@ export FULCRUM_HOST_GID=$(id -g $FULCRUM_HOST_USER)
 export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2)
 
 # must come after FULCRUM_HOST_USER
-DCFILE="/Users/${FULCRUM_HOST_USER}/fulcrum/compose/hinge-mac.yml"
+DCFILE="/Users/${FULCRUM_HOST_USER}/fulcrum/compose/hinge-${FULCRUM_OS_LC}.yml"
 
 # debug
 vout "FULCRUM_HOST_USER = $FULCRUM_HOST_USER"
