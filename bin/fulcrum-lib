@@ -1,3 +1,16 @@
+FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
+
+UNAMEA=$(uname -a)
+FULCRUM_OS=UNK;
+
+if [[ "$UNAMEA" == *"Darwin"* ]]; then
+  FULCRUM_OS=MAC;
+elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
+  FULCRUM_OS=WIN;
+elif [[ "$UNAMEA" == *"Linux"* ]]; then
+  FULCRUM_OS=LIN;
+fi
+
 vout() {
   echo "$1"
 }

@@ -3,6 +3,8 @@
 # http://www.davidpashley.com/articles/writing-robust-shell-scripts/
 set -eu
 
+FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
+source ${FULCRUM_BINDIR}/fulcrum-lib
 
 function sendalert()
 {
@@ -85,10 +87,10 @@ function drestart()
   # fi
 
   #ensure that whitelist.vcl gets made else varnish dies on boot
-  bash ~/fulcrum/bin/varnish-whitelist
+  bash $FULCRUM_BINDIR/varnish-whitelist
 
   # fulcrum-node to ensure our sites config is compiled
-  # MYFILE=~/fulcrum/bin/fulcrum-node
+  # MYFILE=$FULCRUM_BINDIR/fulcrum-node
   # if [ -f ${MYFILE} ]; then
   #   vout "running ${MYFILE}"
   #   ${MYFILE}
@@ -302,7 +304,7 @@ export FULCRUM_HOST_GID=$(id -g $FULCRUM_HOST_USER)
 export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2)
 
 # must come after FULCRUM_HOST_USER
-DCFILE="/Users/${FULCRUM_HOST_USER}/fulcrum/compose/hinge-${FULCRUM_OS_LC}.yml"
+DCFILE="$FULCRUM_DIRNAME/compose/hinge-${FULCRUM_OS_LC}.yml"
 
 # debug
 vout "FULCRUM_HOST_USER = $FULCRUM_HOST_USER"

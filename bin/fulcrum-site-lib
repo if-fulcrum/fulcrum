@@ -251,8 +251,6 @@ drushUserLogin() {
 setupEnv() {
   CLONING_SITE=false
 
-  FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
-
   if [[ "$1" = "--clone" ]]; then
     CLONING_SITE=true
     FULCRUM_SITE=$2
@@ -313,17 +311,6 @@ setupEnv() {
     FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret)
   else
     echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
-  fi
-
-  UNAMEA=$(uname -a)
-  FULCRUM_OS=UNK;
-
-  if [[ "$UNAMEA" == *"Darwin"* ]]; then
-    FULCRUM_OS=MAC;
-  elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
-    FULCRUM_OS=WIN;
-  elif [[ "$UNAMEA" == *"Linux"* ]]; then
-    FULCRUM_OS=LIN;
   fi
 
   vout "FULCRUM_BINDIR:      $FULCRUM_BINDIR"
