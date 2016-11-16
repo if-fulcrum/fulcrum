@@ -350,7 +350,8 @@ copyConf() {
 }
 
 drushCmd() {
-  echo "drush $@"
+  DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
+  echo "$DRUSHCMD"
   # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
-  docker exec -i drush //bin/sh -c "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
+  docker exec -i drush //bin/sh -c "$DRUSHCMD"
 }
