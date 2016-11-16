@@ -242,10 +242,10 @@ drushSysVars() {
 
 drushUserLogin() {
   vout "Running drush to get UID 1 login"
-  ULI_URL=$(drushCmd uli --uri=http://$FULCRUM_SITE)
+  drushCmd uli --uri=http://$FULCRUM_SITE
 
-  vout "$FULCRUM_SITE login: git web--browse \"$ULI_URL\""
-  git web--browse "$ULI_URL"
+  vout "$FULCRUM_SITE login: git web--browse \"$DRUSHCMDRESULT\""
+  git web--browse "$DRUSHCMDRESULT"
 }
 
 setupEnv() {
@@ -356,5 +356,5 @@ drushCmd() {
   DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
   echo "$DRUSHCMD"
   # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
-  docker exec -i drush //bin/sh -c "$DRUSHCMD"
+  DRUSHCMDRESULT=$(docker exec -i drush //bin/sh -c "$DRUSHCMD")
 }
