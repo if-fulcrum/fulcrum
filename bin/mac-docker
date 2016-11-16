@@ -140,6 +140,11 @@ function drestart()
 # step into docker container
 dbash()
 {
+  FULCRUM_OS_INT_PREFIX=""
+  if [[ "$FULCRUM_OS" == "WIN" ]]; then
+    FULCRUM_OS_INT_PREFIX="winpty "
+  fi
+
   DOCKER_IMAGES=$(docker ps --format '{{.Names}}' | sort | awk '{ print FNR " " $0 }')
   echo "$DOCKER_IMAGES"
   read -p "Please enter container number to enter: " MYNUMBER
@@ -147,7 +152,7 @@ dbash()
 
   echo "${ENTER_IMAGE}"
   # https://github.com/docker/docker/issues/9299
-  docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
+  $FULCRUM_OS_INT_PREFIX docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
 }
 
 
