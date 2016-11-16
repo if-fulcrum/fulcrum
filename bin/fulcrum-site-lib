@@ -2,21 +2,21 @@ source ${FULCRUM_BINDIR}/fulcrum-lib
 
 restoreDatabaseBackup() {
   DO_RESTORE=true
-  DB_COUNT=$(echo "SHOW DATABASES LIKE '$FULCRUM_DBNAME'"|docker exec -i mariadb mysql -s|wc -l)
+  DB_COUNT=$(docker exec mariadb mysql -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
 
   if [ "$DB_COUNT" -gt 0 ]; then
     read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
 
     if [ "$DROPDB" == "y" ]; then
       vout "DROPPING $FULCRUM_DBNAME"
-      echo "DROP DATABASE $FULCRUM_DBNAME;"|docker exec -i mariadb mysql
+      docker exec mariadb mysql -e "DROP DATABASE $FULCRUM_DBNAME;"
     else
       vout "Skipping DB replacement."
       DO_RESTORE=false
     fi
   fi
 
-  echo "CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME"|docker exec -i mariadb mysql
+  docker exec mariadb mysql -e "CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME;"
 
   if [ $DO_RESTORE == true ]; then
     if [[ "$FULCRUM_DBGZ" == "s3://"* ]]; then
@@ -33,10 +33,6 @@ restoreDatabaseBackup() {
 
     vout "Restoring $FULCRUM_DBGZ to $FULCRUM_DBNAME"
     docker exec mariadb sh -c "gunzip -c /tmp/tmp.sql.gz | mysql $FULCRUM_DBNAME ; exit"
-
-    # vout "Restoring: gunzip -c \"$FULCRUM_DBGZ\" | docker exec -i mariadb mysql $FULCRUM_DBNAME"
-    # gzcat "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
-    # gunzip -c "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
   fi
 }
 
@@ -128,12 +124,14 @@ drupalVersion() {
 }
 
 etcHosts() {
-  if ! grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts; then
-    vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
-
-    if [[ "$FULCRUM_OS" == "WIN" ]]; then
+  if [[ "$FULCRUM_OS" == "WIN" ]]; then
+    if ! grep "127.0.0.1 $FULCRUM_SITE" /c/windows/system32/drivers/etc/hosts; then
+      vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
       $FULCRUM_BINDIR/win/elevate_x64 $FULCRUM_BINDIR/win/addHost $FULCRUM_SITE
-    else
+    fi
+  else
+    if ! grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts; then
+      vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
       echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts
     fi
   fi
@@ -242,7 +240,7 @@ drushSysVars() {
 
 drushUserLogin() {
   vout "Running drush to get UID 1 login"
-  drushCmd uli
+  drushCmd uli --uri=http://$FULCRUM_SITE
 }
 
 setupEnv() {
@@ -352,6 +350,4 @@ copyConf() {
 drushCmd() {
   echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@"
   echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
-
-  # docker exec -i drush //usr/local/bin/drush --uri=http://$FULCRUM_SITE --root=/var/www/html/$FULCRUM_SITE$FULCRUM_WRD $@
 }
