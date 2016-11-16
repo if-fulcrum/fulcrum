@@ -126,7 +126,7 @@ etcHosts() {
     vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
 
     if [[ "$FULCRUM_OS" == "WIN" ]]; then
-      echo -e "\n127.0.0.1 $FULCRUM_SITE\n" >> /etc/hosts
+      $FULCRUM_BINDIR/win/elevate_x64 $FULCRUM_BINDIR/win/addHost $FULCRUM_SITE
     else
       echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts
     fi
