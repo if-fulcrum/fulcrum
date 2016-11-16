@@ -8,7 +8,7 @@ restoreDatabaseBackup() {
     read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
 
     if [ "$DROPDB" == "y" ]; then
-      vout "DROPPING $FULCRUM_DBNAME"
+      vout "Dropping $FULCRUM_DBNAME"
       docker exec mariadb mysql -e "DROP DATABASE $FULCRUM_DBNAME;"
     else
       vout "Skipping DB replacement."
@@ -16,6 +16,7 @@ restoreDatabaseBackup() {
     fi
   fi
 
+  vout "Creating $FULCRUM_DBNAME"
   docker exec mariadb mysql -e "CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME;"
 
   if [ $DO_RESTORE == true ]; then
@@ -24,6 +25,7 @@ restoreDatabaseBackup() {
         eout "Cannot find AWS on your path!"
       fi
 
+      vout "Downloading $FULCRUM_DBGZ"
       aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK
       FULCRUM_DBGZ=$FULCRUM_DBBAK
     fi
@@ -348,6 +350,7 @@ copyConf() {
 }
 
 drushCmd() {
-  echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@"
-  echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
+  echo "drush $@"
+  # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
+  docker exec -i drush //bin/sh -c "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
 }
