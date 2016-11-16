@@ -28,9 +28,15 @@ restoreDatabaseBackup() {
       FULCRUM_DBGZ=$FULCRUM_DBBAK
     fi
 
-    vout "Restoring: gunzip -c \"$FULCRUM_DBGZ\" | docker exec -i mariadb mysql $FULCRUM_DBNAME"
+    vout "Copying $FULCRUM_DBGZ to mariadb:/tmp/tmp.sql.gz"
+    docker cp $FULCRUM_DBGZ mariadb:/tmp/tmp.sql.gz
+
+    vout "Restoring $FULCRUM_DBGZ to $FULCRUM_DBNAME"
+    docker exec mariadb sh -c "gunzip -c /tmp/tmp.sql.gz | mysql $FULCRUM_DBNAME ; exit"
+
+    # vout "Restoring: gunzip -c \"$FULCRUM_DBGZ\" | docker exec -i mariadb mysql $FULCRUM_DBNAME"
     # gzcat "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
-    gunzip -c "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
+    # gunzip -c "$FULCRUM_DBGZ" | docker exec -i mariadb mysql $FULCRUM_DBNAME
   fi
 }
 
@@ -188,7 +194,7 @@ fulcrumDBUser() {
   SQL="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $FULCRUM_DBNAME.* TO '$FULCRUM_DBUSER'@'172.16.0.0/255.240.0.0' IDENTIFIED BY '$FULCRUM_DBPASS'; FLUSH PRIVILEGES"
   # ensure fulcrum user is in mysql
   vout "Ensuring fulcrum user exists in mysql: $SQL"
-  echo "$SQL"|docker exec -i mariadb mysql
+  docker exec mariadb mysql -e "$SQL"
 }
 
 drushSysVars() {
@@ -222,8 +228,8 @@ drushSysVars() {
   #   drushCmd config-set system.file path.private /private
   # fi
 
-  vout "Running drush to run update.php"
-  drushCmd updb
+  # vout "Running drush to run update.php"
+  # drushCmd updb
 
   # clear all caches
   vout "Running drush to clear caches"
