@@ -343,7 +343,7 @@ case ${MYCOMMAND} in
     drestart
     ;;
 
-  "dbash"|"bash")
+  "dbash"|"bash"|"dsh"|"sh")
     vout "running dbash command"
     dbash
     ;;
