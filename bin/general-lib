@@ -57,7 +57,7 @@ function sendalert() {
 
 function etcHosts() {
   ETC_HOSTS_IP=$1
-  ETC_HOSTS_HOST=$1
+  ETC_HOSTS_HOST=$2
 
   if ! $(egrep "^$ETC_HOSTS_IP\s+$ETC_HOSTS_HOST" $FULCRUM_ETC_HOSTS > /dev/null 2>&1); then
     vout "Adding $ETC_HOSTS_IP $ETC_HOSTS_HOST to $FULCRUM_ETC_HOSTS"

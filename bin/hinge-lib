@@ -34,9 +34,6 @@ function dlogs() {
 
 # start/restart all our containers
 function drestart() {
-  # ensure that whitelist.vcl gets made else varnish dies on boot
-  bash $FULCRUM_BINDIR/varnish-whitelist
-
   # run d4m-nfs in order to allow using NFS volume mounts
   if [[ "$FULCRUM_OS" == "MAC" ]]; then
     ~/repos/d4m-nfs/d4m-nfs.sh

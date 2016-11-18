@@ -7,8 +7,8 @@ etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
 etcHosts 127.0.0.1 varnish
 
-echo 'acl internal  { "0.0.0.0"/0; }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
-echo 'acl whitelist { "0.0.0.0"/0; }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl
-echo 'acl blacklist { "0.0.0.0"/0; }' > $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl
+echo 'acl internal  { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
+echo 'acl whitelist { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl
+echo 'acl blacklist { "0.0.0.0"/32; }' > $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl
 
-${FULCRUM_BINDIR}/doctor-$FULCRUM_OS_LC
+source ${FULCRUM_BINDIR}/doctor-$FULCRUM_OS_LC
