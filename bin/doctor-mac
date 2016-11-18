@@ -3,14 +3,10 @@
 # get d4m-nfs if it doesn't already exist
 if [ ! -e ~/repos/d4m-nfs ]; then
   vout "Cannot find Docker for Mac NFS (d4m-nfs) repo, cloning from github"
-  cd ~/repos/
+  mkdir -p ~/repos
+  cd ~/repos
   git clone https://github.com/IFSight/d4m-nfs.git
   cd -
-fi
-
-if ! $(which -s brew); then
-  vout "Cannot find the brew command, installing homebrew"
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 
 TAPDIR=$(brew --prefix)/Library/Taps/homebrew
