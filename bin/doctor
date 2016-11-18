@@ -11,8 +11,15 @@ echo 'acl internal  { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/internal.v
 echo 'acl whitelist { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl
 echo 'acl blacklist { "0.0.0.0"/32; }' > $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl
 
+# make a minimal fulcrum_config.conf
 if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf ]; then
   echo -e 'map $host $fulcrum_env {default "unk";}\nmap $host $fulcrum_webroot {default "unk";}\nmap $host $fulcrum_conf {default "unk";}' > $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
+fi
+
+# make a new varnish/secret
+if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
+  FULCRUM_VARN_SECRET=$(rndStr 32)
+  echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
 fi
 
 source ${FULCRUM_BINDIR}/doctor-$FULCRUM_OS_LC
