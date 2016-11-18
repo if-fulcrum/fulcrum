@@ -1,0 +1,73 @@
+FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
+
+UNAMEA=$(uname -a)
+FULCRUM_OS=UNK;
+FULCRUM_ETC_HOSTS=/etc/hosts
+
+if [[ "$UNAMEA" == *"Darwin"* ]]; then
+  FULCRUM_OS=MAC;
+elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
+  FULCRUM_OS=WIN;
+elif [[ "$UNAMEA" == *"Linux"* ]]; then
+  FULCRUM_OS=LIN;
+  FULCRUM_ETC_HOSTS=/c/windows/system32/drivers/etc/hosts
+fi
+
+FULCRUM_OS_LC=$(echo $FULCRUM_OS|tr '[:upper:]' '[:lower:]')
+
+function dout() {
+  if [ ${VERBOSE} -eq 1 ]; then
+    echo "DEBUG: $1"
+  fi
+}
+
+function vout() {
+  echo "$1"
+}
+
+function eout() {
+  echo "******************"
+  echo "$1"
+  echo "******************"
+  exit 1
+}
+
+function now() {
+  echo date +"%Y%m%d%H%M%S"
+}
+
+function dialog() {
+  osascript -e 'on run args
+  try
+  tell app "SystemUIServer" to display dialog (item 1 of args)
+  end
+  activate app (path to frontmost application as text)
+  end' "$1"
+}
+
+function rndStr() {
+  docker run --rm fulcrum/util //fulcrum/bin/rndstr $1
+}
+
+function sendalert() {
+  if [ ${QUIET} -eq 0 ]; then
+    echo "$1"
+  fi
+}
+
+function etcHosts() {
+  ETC_HOSTS_IP=$1
+  ETC_HOSTS_HOST=$1
+
+  if ! $(egrep "^$ETC_HOSTS_IP\s+$ETC_HOSTS_HOST" $FULCRUM_ETC_HOSTS > /dev/null 2>&1); then
+    vout "Adding $ETC_HOSTS_IP $ETC_HOSTS_HOST to $FULCRUM_ETC_HOSTS"
+
+    if [[ "$FULCRUM_OS" == "WIN" ]]; then
+      $FULCRUM_BINDIR/win/elevate_x64 $FULCRUM_BINDIR/win/addHost $ETC_HOSTS_HOST
+    else
+      echo -e "\n$ETC_HOSTS_IP $ETC_HOSTS_HOST\n" | sudo tee -a /etc/hosts
+    fi
+  else
+    vout "Already exists in $FULCRUM_ETC_HOSTS: $ETC_HOSTS_IP $ETC_HOSTS_HOST"
+  fi
+}

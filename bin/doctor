@@ -1,0 +1,14 @@
+#!/bin/bash
+
+FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
+source ${FULCRUM_BINDIR}/general-lib
+
+etcHosts 127.0.0.1 mariadb
+etcHosts 127.0.0.1 redis
+etcHosts 127.0.0.1 varnish
+
+echo 'acl internal  { "0.0.0.0"/0; }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
+echo 'acl whitelist { "0.0.0.0"/0; }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl
+echo 'acl blacklist { "0.0.0.0"/0; }' > $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl
+
+${FULCRUM_BINDIR}/doctor-$FULCRUM_OS_LC

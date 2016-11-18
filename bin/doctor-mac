@@ -1,4 +1,4 @@
-#!/bin/bash
+# functions to make sure that fulcrum hinge is healthy on the Mac
 
 # get d4m-nfs if it doesn't already exist
 if [ ! -e ~/repos/d4m-nfs ]; then
@@ -7,29 +7,6 @@ if [ ! -e ~/repos/d4m-nfs ]; then
   cd -
 fi
 
-# mariadb -> /etc/hosts
-if ! $(egrep "^127.0.0.1\s+mariadb$" /etc/hosts > /dev/null 2>&1); then
-  echo "Adding: mariadb to /etc/hosts."
-  echo -e "\n127.0.0.1 mariadb\n" | sudo tee -a /etc/hosts
-else
-  echo "Check: mariadb exists in /etc/hosts."
-fi
-
-# redis -> /etc/hosts
-if ! $(egrep "^127.0.0.1\s+redis$" /etc/hosts > /dev/null 2>&1); then
-  echo "Adding: redis to /etc/hosts."
-  echo -e "\n127.0.0.1 redis\n" | sudo tee -a /etc/hosts
-else
-  echo "Check: redis exists in /etc/hosts."
-fi
-
-# varnish -> /etc/hosts
-if ! $(egrep "^127.0.0.1\s+varnish$" /etc/hosts > /dev/null 2>&1); then
-  echo "Adding: varnish to /etc/hosts."
-  echo -e "\n127.0.0.1 varnish\n" | sudo tee -a /etc/hosts
-else
-  echo "Check: varnish exists in /etc/hosts."
-fi
 
 TAPDIR=$(brew --prefix)/Library/Taps/homebrew
 if [ ! -e $TAPDIR ]; then
@@ -102,4 +79,4 @@ if [[ ! "$BREWLIST" == *"drush"* ]]; then
   brew install drush
 else
   echo "Check: homebrew 'drush' package is installed."
-fi
+fi{}

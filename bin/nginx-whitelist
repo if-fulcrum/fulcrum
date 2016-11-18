@@ -1,5 +1,0 @@
-#!/bin/bash
-MYFILE=~/fulcrum/etc/nginx/whitelist-ips
-if [ ! -f $MYFILE ]; then
-  echo "allow 172.0.0.0/8;" > $MYFILE
-fi

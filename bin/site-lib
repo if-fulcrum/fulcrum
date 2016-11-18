@@ -1,6 +1,6 @@
-source ${FULCRUM_BINDIR}/fulcrum-lib
+source ${FULCRUM_BINDIR}/general-lib
 
-restoreDatabaseBackup() {
+function restoreDatabaseBackup() {
   DO_RESTORE=true
   DB_COUNT=$(docker exec mariadb mysql -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
 
@@ -38,7 +38,7 @@ restoreDatabaseBackup() {
   fi
 }
 
-cloneCodebase() {
+function cloneCodebase() {
   # get the repo
   if [ -d $FULCRUM_REPODIR ]; then
     vout "You appear to already have the repo, skipping git clone."
@@ -97,7 +97,7 @@ cloneCodebase() {
   fi
 }
 
-drupalVersion() {
+function drupalVersion() {
   D8FILE=${FULCRUM_DOCROOT}/core/lib/Drupal.php
   D7FILE=${FULCRUM_DOCROOT}/includes/bootstrap.inc
   D_FILE=${FULCRUM_DOCROOT}/modules/system/system.module
@@ -125,21 +125,7 @@ drupalVersion() {
   echo "DRUPAL_MAJOR_VERSION: $DRUPAL_MAJOR_VERSION"
 }
 
-etcHosts() {
-  if [[ "$FULCRUM_OS" == "WIN" ]]; then
-    if ! $(grep "127.0.0.1 $FULCRUM_SITE" /c/windows/system32/drivers/etc/hosts > /dev/null 2>&1); then
-      vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
-      $FULCRUM_BINDIR/win/elevate_x64 $FULCRUM_BINDIR/win/addHost $FULCRUM_SITE
-    fi
-  else
-    if ! $(grep "127.0.0.1 $FULCRUM_SITE" /etc/hosts > /dev/null 2>&1); then
-      vout "Adding 127.0.0.1 $FULCRUM_SITE to /etc/hosts"
-      echo -e "\n127.0.0.1 $FULCRUM_SITE\n" | sudo tee -a /etc/hosts
-    fi
-  fi
-}
-
-nginxConf() {
+function nginxConf() {
   FUCRUM_CNF_TPL=json.tpl
 
   vout "Making $FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json"
@@ -190,14 +176,14 @@ SETVAR
   docker exec nginx kill -HUP 1
 }
 
-fulcrumDBUser() {
+function fulcrumDBUser() {
   SQL="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $FULCRUM_DBNAME.* TO '$FULCRUM_DBUSER'@'172.16.0.0/255.240.0.0' IDENTIFIED BY '$FULCRUM_DBPASS'; FLUSH PRIVILEGES"
   # ensure fulcrum user is in mysql
   vout "Ensuring fulcrum user exists in mysql: $SQL"
   docker exec mariadb mysql -e "$SQL"
 }
 
-drushSysVars() {
+function drushSysVars() {
   copyConf
 
   cd $FULCRUM_REPODIR
@@ -240,7 +226,7 @@ drushSysVars() {
   fi
 }
 
-drushUserLogin() {
+function drushUserLogin() {
   vout "Running drush to get UID 1 login"
   drushCmd uli --uri=http://$FULCRUM_SITE
 
@@ -248,7 +234,7 @@ drushUserLogin() {
   git web--browse "$DRUSHCMDRESULT"
 }
 
-setupEnv() {
+function setupEnv() {
   CLONING_SITE=false
 
   if [[ "$1" = "--clone" ]]; then
@@ -330,12 +316,12 @@ setupEnv() {
   vout "FULCRUM_VARN_SECRET: $FULCRUM_VARN_SECRET"
 }
 
-copyConf() {
+function copyConf() {
   echo "docker cp $FULCRUM_CONF drush:/config.json"
   docker cp $FULCRUM_CONF drush:/config.json  
 }
 
-drushCmd() {
+function drushCmd() {
   DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
   echo "$DRUSHCMD"
   # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh

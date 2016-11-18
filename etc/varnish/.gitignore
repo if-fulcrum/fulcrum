@@ -1,3 +1,4 @@
-whitelist.vcl
 internal.vcl
+blacklist.vcl
+whitelist.vcl
 secret
