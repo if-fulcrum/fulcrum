@@ -7,7 +7,7 @@ if [ ! -e ~/repos/d4m-nfs ]; then
   cd ~/repos
   git clone https://github.com/IFSight/d4m-nfs.git
   cp d4m-nfs/examples/d4m-nfs-mounts.txt d4m-nfs/etc/
-  echo -e "\n/Users/$USER:/mnt:0:0" >> d4m-nfs/etc/d4m-nfs-mounts.txt
+  echo -e "/Users/$USER:/mnt:0:0" >> d4m-nfs/etc/d4m-nfs-mounts.txt
   cd -
 fi
 
