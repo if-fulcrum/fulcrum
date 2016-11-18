@@ -9,7 +9,7 @@ if [ ! -e ~/repos/d4m-nfs ]; then
 fi
 
 if ! $(which -s brew); then
-  vout "Cannot find brew command, installing homebrew"
+  vout "Cannot find the brew command, installing homebrew"
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 
