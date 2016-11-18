@@ -12,7 +12,7 @@ echo 'acl whitelist { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.
 echo 'acl blacklist { "0.0.0.0"/32; }' > $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl
 
 if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf ]; then
-  touch $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
+  echo -e 'set $fulcrum_env ""\nset $fulcrum_conf ""\nset $fulcrum_webroot ""' > $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 fi
 
 source ${FULCRUM_BINDIR}/doctor-$FULCRUM_OS_LC
