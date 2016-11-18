@@ -4,7 +4,7 @@
 if [ ! -e ~/repos/d4m-nfs ]; then
   vout "Cannot find Docker for Mac NFS (d4m-nfs) repo, cloning from github"
   cd ~/repos/
-  git clone git@github.com:IFSight/d4m-nfs.git
+  git clone https://github.com/IFSight/d4m-nfs.git
   cd -
 fi
 
