@@ -122,7 +122,7 @@ function drupalVersion() {
       eout "Not compatible with Drupal version '$DRUPAL_MAJOR_VERSION' in $FULCRUM_DOCROOT!"
   fi
 
-  echo "DRUPAL_MAJOR_VERSION: $DRUPAL_MAJOR_VERSION"
+  vout "DRUPAL_MAJOR_VERSION: $DRUPAL_MAJOR_VERSION"
 }
 
 function nginxConf() {
@@ -317,13 +317,13 @@ function setupEnv() {
 }
 
 function copyConf() {
-  echo "docker cp $FULCRUM_CONF drush:/config.json"
+  vout "docker cp $FULCRUM_CONF drush:/config.json"
   docker cp $FULCRUM_CONF drush:/config.json  
 }
 
 function drushCmd() {
   DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
-  echo "$DRUSHCMD"
+  vout "$DRUSHCMD"
   # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
   DRUSHCMDRESULT=$(docker exec -i drush //bin/sh -c "$DRUSHCMD")
 }
