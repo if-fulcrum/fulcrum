@@ -4,7 +4,7 @@
 set -eu
 
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
-source ${FULCRUM_BINDIR}/hinge-lib
+source ${FULCRUM_BINDIR}/fulcrum-lib
 
 ${FULCRUM_BINDIR}/doctor
 
