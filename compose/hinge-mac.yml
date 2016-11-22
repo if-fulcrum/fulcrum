@@ -28,6 +28,7 @@ phpfpm:
     - /mnt/fulcrum/log/php:/var/log
     - /mnt/fulcrum/php:/fulcrum:ro
     - /mnt/fulcrum/files:/drupal_files
+    - /mnt/fulcrum/private:/private
     - /mnt/fulcrum/webroots:/var/www/html
     - /mnt/repos:/var/repos
   links:

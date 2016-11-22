@@ -30,6 +30,7 @@ services:
       - c:/Users/$USERNAME/fulcrum/log/php:/var/log
       - c:/Users/$USERNAME/fulcrum/php:/fulcrum:ro
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files
+      - c:/Users/$USERNAME/fulcrum/private:/private
       - c:/Users/$USERNAME/fulcrum/webroots:/var/www/html
     links:
       - redis
