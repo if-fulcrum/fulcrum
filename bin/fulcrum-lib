@@ -71,6 +71,36 @@ function drestart() {
     vout "verbose docker-compose up"
     docker-compose --file "${DCFILE}" up -d
   fi
+
+  waitForDB
+
+  helloSites
+}
+
+function waitForDB() {
+  echo -n "Waiting until database is available"
+  while ! $(docker logs mariadb 2>&1 |grep 'ready for connections' > /dev/null 2>&1); do
+    echo -n '.'
+    sleep .25
+  done
+
+  echo ""
+}
+
+function helloSites() {
+  FULCRUM_STATUS_INI="$FULCRUM_DIRNAME/data/fulcrum/status.ini"
+
+  # if $FULCRUM_STATUS_INI doesn't exist or hello7_site doesn't exist in $FULCRUM_STATUS_INI
+  if [ ! -e "$FULCRUM_STATUS_INI" ] || ! $(grep hello7_site $FULCRUM_STATUS_INI > /dev/null 2>&1); then
+    vout "Creating Hello Fulcrum 7 site"
+    mkdir -p $(dirname $FULCRUM_STATUS_INI)
+
+    $FULCRUM_BINDIR/site hello7.fulcrum.ifdev \
+      $FULCRUM_DIRNAME/bak/hello7.sql.gz \
+      hello7dev git@github.com:if-fulcrum/hello7.git
+
+    echo "hello7_site = 7.52" >> $FULCRUM_STATUS_INI
+  fi
 }
 
 # step into docker container
