@@ -20,7 +20,7 @@ if (isset($_SERVER['FULCRUM_CONF'])) {
     file_exists($json)
   ) {
     global $base_url;
-    $base_url = "http://{$matches[3]}";
+    $base_url = "http://{$matches[2]}";
     ini_set('memory_limit','512M');
     $_FULCRUM['conf'] = json_decode(preg_replace('/\\\\\\\\/', '\\', file_get_contents($json)), 1);
   }
