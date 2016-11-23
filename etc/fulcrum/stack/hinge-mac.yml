@@ -3,7 +3,7 @@ mariadb:
   image: fulcrum/mariadb
   volumes:
    - /mnt/fulcrum/etc/mysql:/etc/mysql
-   - /mnt/fulcrum/log/mariadb:/var/log
+   - /mnt/fulcrum/var/log/mariadb:/var/log
    - /mnt/fulcrum/data/mysql:/var/lib/mysql
    - /mnt/fulcrum/data:/data
   environment:
@@ -16,7 +16,7 @@ redis:
   image: fulcrum/redis:latest-alpine
   volumes:
     - /mnt/fulcrum/etc/redis/redis.conf:/etc/redis/redis.conf
-    - /mnt/fulcrum/log/redis:/var/log
+    - /mnt/fulcrum/var/log/redis:/var/log
   ports:
     - "6379:6379"
 
@@ -25,7 +25,7 @@ phpfpm:
   image: fulcrum/php:latest-alpine
   volumes:
     - /mnt/fulcrum/etc/php5:/etc/php5
-    - /mnt/fulcrum/log/php:/var/log
+    - /mnt/fulcrum/var/log/php:/var/log
     - /mnt/fulcrum/etc/fulcrum/php:/fulcrum:ro
     - /mnt/fulcrum/files:/drupal_files
     - /mnt/fulcrum/files/priv:/private
@@ -42,7 +42,7 @@ nginx:
   image: fulcrum/nginx:latest-alpine
   volumes:
     - /mnt/fulcrum/etc/nginx:/etc/nginx
-    - /mnt/fulcrum/log/nginx:/var/log
+    - /mnt/fulcrum/var/log/nginx:/var/log
     - /mnt/fulcrum/files:/drupal_files:ro
     - /mnt/fulcrum/sites:/var/www/html:ro
     - /mnt/repos:/var/repos:ro
@@ -56,7 +56,7 @@ varnish:
   image: fulcrum/varnish:latest-alpine
   volumes:
     - /mnt/fulcrum/etc/varnish:/etc/varnish
-    - /mnt/fulcrum/log/varnish:/var/log
+    - /mnt/fulcrum/var/log/varnish:/var/log
   command: -F -P /var/run/varnish.pid -a :80,PROXY -f /etc/varnish/default.vcl -S /etc/varnish/secret -T 0.0.0.0:6082 -t 120 -s malloc,128M
   links:
     - nginx
@@ -71,7 +71,7 @@ haproxy:
     - /mnt/fulcrum/etc/haproxy:/etc/haproxy
     - /mnt/fulcrum/etc/haproxy/haproxy-1.6.cfg:/etc/haproxy/haproxy.cfg
     - /mnt/fulcrum/etc/certs.d:/etc/certs.d
-    - /mnt/fulcrum/log/haproxy:/var/log
+    - /mnt/fulcrum/var/log/haproxy:/var/log
   links:
     - varnish
   ports:
@@ -85,7 +85,7 @@ drush:
   tty: true
   volumes:
     - /mnt/fulcrum/etc/php5:/etc/php5:ro
-    - /mnt/fulcrum/log/drush:/var/log
+    - /mnt/fulcrum/var/log/drush:/var/log
     - /mnt/fulcrum/files:/drupal_files
     - /mnt/fulcrum/files/priv:/private
     - /mnt/fulcrum/sites:/var/www/html
@@ -106,6 +106,6 @@ drush:
 #   ports:
 #     - "8983:8983"
 #   volumes:
-#     - /mnt/fulcrum/log/solr:/opt/solr/server/logs
+#     - /mnt/fulcrum/var/log/solr:/opt/solr/server/logs
 #     - /mnt/fulcrum/etc/solr:/opt/solr/server/etc
 #     - /mnt/fulcrum/data/solr:/opt/solr/server/solr

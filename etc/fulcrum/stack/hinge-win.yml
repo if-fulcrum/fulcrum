@@ -5,7 +5,7 @@ services:
     image: fulcrum/mariadb
     volumes:
      - c:/Users/$USERNAME/fulcrum/etc/mysql:/etc/mysql
-     - c:/Users/$USERNAME/fulcrum/log/mariadb:/var/log
+     - c:/Users/$USERNAME/fulcrum/var/log/mariadb:/var/log
      - c:/Users/$USERNAME/fulcrum/data/mysql:/var/lib/mysql
      - mariadbdata:/data
     environment:
@@ -18,7 +18,7 @@ services:
     image: fulcrum/redis:latest-alpine
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/redis/redis.conf:/etc/redis/redis.conf
-      - c:/Users/$USERNAME/fulcrum/log/redis:/var/log
+      - c:/Users/$USERNAME/fulcrum/var/log/redis:/var/log
     ports:
       - "6379:6379"
 
@@ -27,7 +27,7 @@ services:
     image: fulcrum/php:latest-alpine
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/php5:/etc/php5
-      - c:/Users/$USERNAME/fulcrum/log/php:/var/log
+      - c:/Users/$USERNAME/fulcrum/var/log/php:/var/log
       - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php:/fulcrum:ro
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files
       - c:/Users/$USERNAME/fulcrum/files/priv:/private
@@ -43,7 +43,7 @@ services:
     image: fulcrum/nginx:latest-alpine
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/nginx:/etc/nginx
-      - c:/Users/$USERNAME/fulcrum/log/nginx:/var/log
+      - c:/Users/$USERNAME/fulcrum/var/log/nginx:/var/log
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files:ro
       - c:/Users/$USERNAME/fulcrum/sites:/var/www/html:ro
     links:
@@ -56,7 +56,7 @@ services:
     image: fulcrum/varnish:latest-alpine
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/varnish:/etc/varnish
-      - c:/Users/$USERNAME/fulcrum/log/varnish:/var/log
+      - c:/Users/$USERNAME/fulcrum/var/log/varnish:/var/log
     command: -F -P /var/run/varnish.pid -a :80,PROXY -f /etc/varnish/default.vcl -S /etc/varnish/secret -T 0.0.0.0:6082 -t 120 -s malloc,128M
     links:
       - nginx
@@ -71,7 +71,7 @@ services:
       - c:/Users/$USERNAME/fulcrum/etc/haproxy:/etc/haproxy
       - c:/Users/$USERNAME/fulcrum/etc/haproxy/haproxy-1.6.cfg:/etc/haproxy/haproxy.cfg
       - c:/Users/$USERNAME/fulcrum/etc/certs.d:/etc/certs.d
-      - c:/Users/$USERNAME/fulcrum/log/haproxy:/var/log
+      - c:/Users/$USERNAME/fulcrum/var/log/haproxy:/var/log
     links:
       - varnish
     ports:
@@ -85,7 +85,7 @@ services:
     tty: true
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/php5:/etc/php5:ro
-      - c:/Users/$USERNAME/fulcrum/log/drush:/var/log
+      - c:/Users/$USERNAME/fulcrum/var/log/drush:/var/log
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files
       - c:/Users/$USERNAME/fulcrum/files/priv:/private
       - c:/Users/$USERNAME/fulcrum/sites:/var/www/html
@@ -105,7 +105,7 @@ services:
 #   ports:
 #     - "8983:8983"
 #   volumes:
-#     - c:/Users/$USERNAME/fulcrum/log/solr:/opt/solr/server/logs
+#     - c:/Users/$USERNAME/fulcrum/var/log/solr:/opt/solr/server/logs
 #     - c:/Users/$USERNAME/fulcrum/etc/solr:/opt/solr/server/etc
 #     - c:/Users/$USERNAME/fulcrum/data/solr:/opt/solr/server/solr
 volumes:
