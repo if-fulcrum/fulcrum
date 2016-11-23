@@ -29,7 +29,7 @@ phpfpm:
     - /mnt/fulcrum/php:/fulcrum:ro
     - /mnt/fulcrum/files:/drupal_files
     - /mnt/fulcrum/files/priv:/private
-    - /mnt/fulcrum/webroots:/var/www/html
+    - /mnt/fulcrum/sites:/var/www/html
     - /mnt/repos:/var/repos
   links:
     - redis
@@ -44,7 +44,7 @@ nginx:
     - /mnt/fulcrum/etc/nginx:/etc/nginx
     - /mnt/fulcrum/log/nginx:/var/log
     - /mnt/fulcrum/files:/drupal_files:ro
-    - /mnt/fulcrum/webroots:/var/www/html:ro
+    - /mnt/fulcrum/sites:/var/www/html:ro
     - /mnt/repos:/var/repos:ro
   links:
     - phpfpm
@@ -88,7 +88,7 @@ drush:
     - /mnt/fulcrum/log/drush:/var/log
     - /mnt/fulcrum/files:/drupal_files
     - /mnt/fulcrum/files/priv:/private
-    - /mnt/fulcrum/webroots:/var/www/html
+    - /mnt/fulcrum/sites:/var/www/html
     - /mnt/fulcrum/php:/var/www/html/fulcrum/php:ro
     - /mnt/repos:/var/repos
   entrypoint: /bin/sh
