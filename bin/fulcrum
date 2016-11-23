@@ -57,7 +57,7 @@ export FULCRUM_HOST_GID=$(id -g $FULCRUM_HOST_USER)
 export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2)
 
 # must come after FULCRUM_HOST_USER
-DCFILE="$FULCRUM_DIRNAME/stack/hinge-${FULCRUM_OS_LC}.yml"
+DCFILE="$FULCRUM_DIRNAME/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
 
 # debug
 vout "FULCRUM_HOST_USER = $FULCRUM_HOST_USER"
