@@ -1,4 +1,4 @@
-source ${FULCRUM_BINDIR}/general-lib
+source ${FULCRUM_BINDIR}/lib/general
 
 function restoreDatabaseBackup() {
   DO_RESTORE=true

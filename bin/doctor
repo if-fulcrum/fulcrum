@@ -1,7 +1,7 @@
 #!/bin/bash
 
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
-source ${FULCRUM_BINDIR}/general-lib
+source ${FULCRUM_BINDIR}/lib/general
 
 etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
@@ -22,4 +22,4 @@ if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
   echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
 fi
 
-source ${FULCRUM_BINDIR}/doctor-$FULCRUM_OS_LC
+source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC

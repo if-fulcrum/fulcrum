@@ -4,7 +4,7 @@
 set -e
 
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
-source ${FULCRUM_BINDIR}/site-lib
+source ${FULCRUM_BINDIR}/lib/site
 
 setupEnv $@
 
