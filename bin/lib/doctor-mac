@@ -84,6 +84,6 @@ else
   vout "Check: homebrew 'drush' package is installed."
 fi
 
-if [ ! -d $FULCRUM_DIRNAME/data/mysql ]; then
-  mkdir $FULCRUM_DIRNAME/data/mysql
+if [ ! -d $FULCRUM_DIRNAME/var/lib/mysql ]; then
+  mkdir $FULCRUM_DIRNAME/var/lib/mysql
 fi

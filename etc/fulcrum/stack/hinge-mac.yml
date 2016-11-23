@@ -4,8 +4,8 @@ mariadb:
   volumes:
    - /mnt/fulcrum/etc/mysql:/etc/mysql
    - /mnt/fulcrum/var/log/mariadb:/var/log
-   - /mnt/fulcrum/data/mysql:/var/lib/mysql
-   - /mnt/fulcrum/data:/data
+   - /mnt/fulcrum/var/lib/mysql:/var/lib/mysql
+   - /mnt/fulcrum/var/lib:/data
   environment:
    - MYSQL_ALLOW_EMPTY_PASSWORD=yes
   ports:
@@ -108,4 +108,4 @@ drush:
 #   volumes:
 #     - /mnt/fulcrum/var/log/solr:/opt/solr/server/logs
 #     - /mnt/fulcrum/etc/solr:/opt/solr/server/etc
-#     - /mnt/fulcrum/data/solr:/opt/solr/server/solr
+#     - /mnt/fulcrum/var/lib/solr:/opt/solr/server/solr

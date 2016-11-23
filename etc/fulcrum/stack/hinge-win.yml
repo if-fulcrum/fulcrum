@@ -6,7 +6,7 @@ services:
     volumes:
      - c:/Users/$USERNAME/fulcrum/etc/mysql:/etc/mysql
      - c:/Users/$USERNAME/fulcrum/var/log/mariadb:/var/log
-     - c:/Users/$USERNAME/fulcrum/data/mysql:/var/lib/mysql
+     - c:/Users/$USERNAME/fulcrum/var/lib/mysql:/var/lib/mysql
      - mariadbdata:/data
     environment:
      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
@@ -107,6 +107,6 @@ services:
 #   volumes:
 #     - c:/Users/$USERNAME/fulcrum/var/log/solr:/opt/solr/server/logs
 #     - c:/Users/$USERNAME/fulcrum/etc/solr:/opt/solr/server/etc
-#     - c:/Users/$USERNAME/fulcrum/data/solr:/opt/solr/server/solr
+#     - c:/Users/$USERNAME/fulcrum/var/lib/solr:/opt/solr/server/solr
 volumes:
   mariadbdata:
