@@ -85,7 +85,7 @@ services:
     tty: true
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/php5:/etc/php5:ro
-      - c:/Users/$USERNAME/fulcrum/log/php:/var/log
+      - c:/Users/$USERNAME/fulcrum/log/drush:/var/log
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files
       - c:/Users/$USERNAME/fulcrum/private:/private
       - c:/Users/$USERNAME/fulcrum/webroots:/var/www/html

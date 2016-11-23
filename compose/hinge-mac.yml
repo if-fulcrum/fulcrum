@@ -85,7 +85,7 @@ drush:
   tty: true
   volumes:
     - /mnt/fulcrum/etc/php5:/etc/php5:ro
-    - /mnt/fulcrum/log/php:/var/log
+    - /mnt/fulcrum/log/drush:/var/log
     - /mnt/fulcrum/files:/drupal_files
     - /mnt/fulcrum/private:/private
     - /mnt/fulcrum/webroots:/var/www/html
