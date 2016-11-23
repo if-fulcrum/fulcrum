@@ -16,7 +16,7 @@ if (isset($_SERVER['FULCRUM_CONF'])) {
     $_FULCRUM['conf'] = json_decode(preg_replace('/\\\\\\\\/', '\\', file_get_contents('/config.json')), 1);
   } else if (
     preg_match(          "#(.*)/(?:repos(?:/docroot)?|fulcrum/webroots)/([^/]+).*#", getcwd(), $matches) AND
-    $json = preg_replace("#(.*)/(?:repos(?:/docroot)?|fulcrum/webroots)/([^/]+).*#", "$1/fulcrum/conf/$2.json", getcwd()) AND
+    $json = preg_replace("#(.*)/(?:repos(?:/docroot)?|fulcrum/webroots)/([^/]+).*#", "$1/fulcrum/etc/fulcrum/conf/$2.json", getcwd()) AND
     file_exists($json)
   ) {
     global $base_url;

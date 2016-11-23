@@ -128,7 +128,7 @@ function drupalVersion() {
 function nginxConf() {
   FUCRUM_CNF_TPL=json.tpl
 
-  vout "Making $FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json"
+  vout "Making $FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json"
   FULCRUM_COOKIE=.$(echo $FULCRUM_SITE|sed 's;^www\.;;g')
   FULCRUM_VARS=$(cat <<SETVAR
   -eFULCRUM_DBPASS=$FULCRUM_DBPASS
@@ -162,10 +162,10 @@ SETVAR
 
   DOCKER_CMD="docker run --rm -i $FULCRUM_VARS fulcrum/util //usr/bin/envsubst"
 
-  cat $FULCRUM_DIRNAME/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json
+  cat $FULCRUM_DIRNAME/etc/fulcrum/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
 
   # combine all confs seperated by a comma into a single var
-  CONFS=$(for f in ~/fulcrum/conf/*.json;do cat $f;echo ",";done)
+  CONFS=$(for f in $FULCRUM_DIRNAME/etc/fulcrum/conf/*.json;do cat $f;echo ",";done)
 
   # remove last comma and enclose in brackets
   CONFS="[${CONFS%?}]"
@@ -275,7 +275,7 @@ function setupEnv() {
   fi
 
   FULCRUM_DBBAK=$FULCRUM_DIRNAME/bak/$FULCRUM_SITE.sql.gz
-  FULCRUM_CONF=$FULCRUM_DIRNAME/conf/$FULCRUM_SITE.json
+  FULCRUM_CONF=$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
   FULCRUM_REPODIR=$FULCRUM_DIRNAME/sites/$FULCRUM_SITE
   FULCRUM_DOCROOT=$FULCRUM_REPODIR
   FULCRUM_DBUSER=fulcrum_$FULCRUM_DBNAME
