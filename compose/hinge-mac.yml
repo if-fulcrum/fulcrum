@@ -28,7 +28,7 @@ phpfpm:
     - /mnt/fulcrum/log/php:/var/log
     - /mnt/fulcrum/php:/fulcrum:ro
     - /mnt/fulcrum/files:/drupal_files
-    - /mnt/fulcrum/priv:/private
+    - /mnt/fulcrum/files/priv:/private
     - /mnt/fulcrum/webroots:/var/www/html
     - /mnt/repos:/var/repos
   links:
@@ -87,7 +87,7 @@ drush:
     - /mnt/fulcrum/etc/php5:/etc/php5:ro
     - /mnt/fulcrum/log/drush:/var/log
     - /mnt/fulcrum/files:/drupal_files
-    - /mnt/fulcrum/priv:/private
+    - /mnt/fulcrum/files/priv:/private
     - /mnt/fulcrum/webroots:/var/www/html
     - /mnt/fulcrum/php:/var/www/html/fulcrum/php:ro
     - /mnt/repos:/var/repos
