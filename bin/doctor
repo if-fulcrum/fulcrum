@@ -3,6 +3,8 @@
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/general
 
+vout "Running doctor"
+
 etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
 etcHosts 127.0.0.1 varnish
@@ -20,6 +22,9 @@ fi
 if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
   FULCRUM_VARN_SECRET=$(rndStr 32)
   echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
+  vout "$FULCRUM_DIRNAME/etc/varnish/secret doesn't exist, creating with $FULCRUM_VARN_SECRET"
+else
+  FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret)
 fi
 
 source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
