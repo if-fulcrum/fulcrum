@@ -295,14 +295,7 @@ function setupEnv() {
 
   FULCRUM_DOCROOT=$FULCRUM_REPODIR$FULCRUM_WRD
 
-  # make a new varnish/secret
-  if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
-    FULCRUM_VARN_SECRET=$(rndStr 32)
-    echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
-    vout "$FULCRUM_DIRNAME/etc/varnish/secret doesn't exist, creating with $FULCRUM_VARN_SECRET"
-  else
-    FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret)
-  fi
+  FULCRUM_VARN_SECRET=$(varnishSecret)
 
   vout "FULCRUM_BINDIR:      $FULCRUM_BINDIR"
   vout "FULCRUM_DIRNAME:     $FULCRUM_DIRNAME"

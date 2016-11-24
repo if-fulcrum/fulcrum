@@ -45,6 +45,18 @@ function dialog() {
   end' "$1"
 }
 
+# make a new varnish/secret
+function varnishSecret() {
+  if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
+    FULCRUM_VARN_SECRET=$(rndStr 32)
+    echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
+  else
+    FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret)
+  fi
+
+  echo -n "$FULCRUM_VARN_SECRET"
+}
+
 function waitForDocker() {
   # wait until docker is running
   (>&2 echo -n "Wait until Docker is running.")
