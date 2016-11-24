@@ -2,14 +2,14 @@ source ${FULCRUM_BINDIR}/lib/general
 
 function restoreDatabaseBackup() {
   DO_RESTORE=true
-  DB_COUNT=$(docker exec mariadb mysql -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
+  DB_COUNT=$(docker exec mariadb mysql -h 127.0.0.1 -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
 
   if [ "$DB_COUNT" -gt 0 ]; then
     read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
 
     if [ "$DROPDB" == "y" ]; then
       vout "Dropping $FULCRUM_DBNAME"
-      docker exec mariadb mysql -e "DROP DATABASE $FULCRUM_DBNAME;"
+      docker exec mariadb mysql -h 127.0.0.1 -e "DROP DATABASE $FULCRUM_DBNAME;"
     else
       vout "Skipping DB replacement."
       DO_RESTORE=false
@@ -17,7 +17,7 @@ function restoreDatabaseBackup() {
   fi
 
   vout "Creating $FULCRUM_DBNAME"
-  docker exec mariadb mysql -e "CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME;"
+  docker exec mariadb mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME;"
 
   if [ $DO_RESTORE == true ]; then
     if [[ "$FULCRUM_DBGZ" == "s3://"* ]]; then
@@ -180,7 +180,7 @@ function fulcrumDBUser() {
   SQL="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $FULCRUM_DBNAME.* TO '$FULCRUM_DBUSER'@'172.16.0.0/255.240.0.0' IDENTIFIED BY '$FULCRUM_DBPASS'; FLUSH PRIVILEGES"
   # ensure fulcrum user is in mysql
   vout "Ensuring fulcrum user exists in mysql: $SQL"
-  docker exec mariadb mysql -e "$SQL"
+  docker exec mariadb mysql -h 127.0.0.1 -e "$SQL"
 }
 
 function drushSysVars() {
