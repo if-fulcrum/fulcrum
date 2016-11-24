@@ -18,6 +18,6 @@ if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf ]; then
   echo -e 'map $host $fulcrum_env {default "unk";}\nmap $host $fulcrum_webroot {default "unk";}\nmap $host $fulcrum_conf {default "unk";}' > $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 fi
 
-varnishSecret
+varnishSecret > /dev/null
 
 source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
