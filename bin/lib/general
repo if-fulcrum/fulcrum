@@ -58,13 +58,14 @@ function varnishSecret() {
 }
 
 function waitForDocker() {
-  # wait until docker is running
-  (>&2 echo -n "Wait until Docker is running.")
+  (>&2 echo -n "Waiting until Docker is running.")
 
   while ! $(docker run --rm hello-world > /dev/null 2>&1); do
     (>&2 echo -n ".")
     sleep 0.25
   done
+
+  (>&2 echo -e "\n")
 }
 
 function rndStr() {
