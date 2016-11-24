@@ -18,20 +18,4 @@ if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf ]; then
   echo -e 'map $host $fulcrum_env {default "unk";}\nmap $host $fulcrum_webroot {default "unk";}\nmap $host $fulcrum_conf {default "unk";}' > $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 fi
 
-# wait until docker is running
-echo -n "Wait until Docker is running."
-while ! $(docker run --rm hello-world > /dev/null 2>&1); do
-  echo -n "."
-  sleep 0.25
-done
-
-# make a new varnish/secret
-if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
-  FULCRUM_VARN_SECRET=$(rndStr 32)
-  echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
-  vout "$FULCRUM_DIRNAME/etc/varnish/secret doesn't exist, creating with $FULCRUM_VARN_SECRET"
-else
-  FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret)
-fi
-
 source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
