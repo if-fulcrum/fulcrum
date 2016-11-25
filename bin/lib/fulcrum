@@ -91,6 +91,8 @@ function waitForDB() {
   while [ "$(cat $ROOT_COUNT)" -ne 1 ] && [ "$(cat $ERROR_CODE)" -ne 0 ]; do
     if (docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> $ERROR_LOG 1> $ROOT_COUNT); then
       echo -n "0" > $ERROR_CODE
+    else
+      echo -n "-1" > $ROOT_COUNT
     fi
 
     echo -n "."
