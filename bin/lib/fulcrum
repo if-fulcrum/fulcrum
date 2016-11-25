@@ -81,18 +81,19 @@ function waitForDB() {
   mkdir -p $FULCRUM_DIRNAME/fulcrum/tmp
   ROOT_COUNT=$FULCRUM_DIRNAME/fulcrum/tmp/count
   ERROR_CODE=$FULCRUM_DIRNAME/fulcrum/tmp/error
+  ERROR_LOG=$FULCRUM_DIRNAME/fulcrum/tmp/error.log
 
   echo -n "Waiting until database is available."
   # while ! $(docker logs mariadb 2>&1 |grep 'ready for connections' > /dev/null 2>&1); do
   while [ "$(cat $ROOT_COUNT)" -ne 1 ] && [ "$(cat $ERROR_CODE)" -ne 0 ]; do
-    docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> $ERROR_CODE 1> $ROOT_COUNT
+    docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> $ERROR_LOG 1> $ROOT_COUNT
     cat $? > $ERROR_CODE
 
     echo -n "."
     sleep .25
   done
 
-  # rm $ROOT_COUNT $ERROR_CODE
+  # rm $ROOT_COUNT $ERROR_CODE $ERROR_LOG
   echo ""
 }
 
