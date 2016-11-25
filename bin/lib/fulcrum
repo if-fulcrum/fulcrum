@@ -78,20 +78,17 @@ function drestart() {
 }
 
 function waitForDB() {
-  # mkdir -p $FULCRUM_DIRNAME/var/fulcrum/tmp
-  # ROOT_COUNT=$FULCRUM_DIRNAME/var/fulcrum/tmp/count
-  ROOT_COUNT=-1
+  mkdir -p $FULCRUM_DIRNAME/var/fulcrum/tmp
+  ROOT_COUNT=$FULCRUM_DIRNAME/var/fulcrum/tmp/count
 
-  # echo -n "-1" > $ROOT_COUNT
+  echo -n "-1" > $ROOT_COUNT
 
   echo -n "Waiting until database is available."
   # while ! $(docker logs mariadb 2>&1 |grep 'ready for connections' > /dev/null 2>&1); do
-  # while [ "$(cat $ROOT_COUNT)" -ne 1 ] ; do
-  while [ "$ROOT_COUNT" -ne 1 ] ; do
-    # if ! (docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> /dev/null 1> $ROOT_COUNT); then
-    if ! (ROOT_COUNT=$(docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> /dev/null)); then
-      ROOT_COUNT=-1
-    fi
+  while ! (docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> /dev/null 1> $ROOT_COUNT) || [ "$(cat $ROOT_COUNT)" != "1" ] ; do
+    # if ; then
+    #   echo -n "-1" > $ROOT_COUNT
+    # fi
 
     echo -n "."
     sleep .25
