@@ -28,7 +28,8 @@ services:
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/php5:/etc/php5
       - c:/Users/$USERNAME/fulcrum/var/log/php:/var/log
-      - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php:/fulcrum:ro
+      - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+      - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files
       - c:/Users/$USERNAME/fulcrum/files/priv:/private
       - c:/Users/$USERNAME/fulcrum/sites:/var/www/html
@@ -89,7 +90,8 @@ services:
       - c:/Users/$USERNAME/fulcrum/files:/drupal_files
       - c:/Users/$USERNAME/fulcrum/files/priv:/private
       - c:/Users/$USERNAME/fulcrum/sites:/var/www/html
-      - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php:/var/www/html/fulcrum/php:ro
+      - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+      - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
     entrypoint: /bin/sh
     links:
       - redis

@@ -79,18 +79,18 @@ function cloneCodebase() {
     fi
   fi
 
-  vout "Making $FULCRUM_REPODIR/sites/default/files and .htaccess if it doesn't already exist"
-  chmod u+w $FULCRUM_REPODIR/sites/default
-  mkdir -p $FULCRUM_REPODIR/sites/default/files
-  chmod u+w $FULCRUM_REPODIR/sites/default/files
+  vout "Making $FULCRUM_DOCROOT/sites/default/files and .htaccess if it doesn't already exist"
+  chmod u+w $FULCRUM_DOCROOT/sites/default
+  mkdir -p $FULCRUM_DOCROOT/sites/default/files
+  chmod u+w $FULCRUM_DOCROOT/sites/default/files
 
   # remove if is it already exists
-  if [ -e $FULCRUM_REPODIR/sites/default/files/.htaccess ]; then
-    rm -f $FULCRUM_REPODIR/sites/default/files/.htaccess
+  if [ -e $FULCRUM_DOCROOT/sites/default/files/.htaccess ]; then
+    rm -f $FULCRUM_DOCROOT/sites/default/files/.htaccess
   fi
 
-  cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_REPODIR/sites/default/files/.htaccess
-  chmod u-w $FULCRUM_REPODIR/sites/default $FULCRUM_REPODIR/sites/default/files/.htaccess
+  cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_DOCROOT/sites/default/files/.htaccess
+  chmod u-w $FULCRUM_DOCROOT/sites/default $FULCRUM_DOCROOT/sites/default/files/.htaccess
 
   if ! $(grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php > /dev/null 2>&1); then
     eout "ERROR: You have not made the $FULCRUM_DOCROOT/sites/default/settings.php file compatible with Fulcrum/drush"
@@ -135,6 +135,7 @@ function nginxConf() {
   -eFULCRUM_DBNAME=$FULCRUM_DBNAME
   -eFULCRUM_ENVIRONMENT=dev
   -eFULCRUM_DBUSER=$FULCRUM_DBUSER
+  -eFULCRUM_SITE=$FULCRUM_SITE
   -eFULCRUM_WEBROOT=$FULCRUM_SITE$FULCRUM_WRD
   -eFULCRUM_COOKIE=$FULCRUM_COOKIE
 SETVAR

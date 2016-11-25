@@ -26,11 +26,11 @@ phpfpm:
   volumes:
     - /mnt/fulcrum/etc/php5:/etc/php5
     - /mnt/fulcrum/var/log/php:/var/log
-    - /mnt/fulcrum/etc/fulcrum/php:/fulcrum:ro
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
     - /mnt/fulcrum/files:/drupal_files
     - /mnt/fulcrum/files/priv:/private
     - /mnt/fulcrum/sites:/var/www/html
-    - /mnt/repos:/var/repos
   links:
     - redis
     - mariadb
@@ -45,7 +45,6 @@ nginx:
     - /mnt/fulcrum/var/log/nginx:/var/log
     - /mnt/fulcrum/files:/drupal_files:ro
     - /mnt/fulcrum/sites:/var/www/html:ro
-    - /mnt/repos:/var/repos:ro
   links:
     - phpfpm
   ports:
@@ -89,8 +88,8 @@ drush:
     - /mnt/fulcrum/files:/drupal_files
     - /mnt/fulcrum/files/priv:/private
     - /mnt/fulcrum/sites:/var/www/html
-    - /mnt/fulcrum/etc/fulcrum/php:/var/www/html/fulcrum/php:ro
-    - /mnt/repos:/var/repos
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
   entrypoint: /bin/sh
   links:
     - redis

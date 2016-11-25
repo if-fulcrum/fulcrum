@@ -1,4 +1,5 @@
 {
+  "site" : "${FULCRUM_SITE}",
   "env" : "${FULCRUM_ENVIRONMENT}",
   "webroot" : "${FULCRUM_WEBROOT}",
   "pre" :  {
