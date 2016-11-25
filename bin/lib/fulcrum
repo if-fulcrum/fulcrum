@@ -84,7 +84,7 @@ function waitForDB() {
   ERROR_LOG=$FULCRUM_DIRNAME/var/fulcrum/tmp/error.log
 
   echo -n "-1" > $ROOT_COUNT
-  echo 0n "-1" > $ERROR_CODE
+  echo -n "-1" > $ERROR_CODE
 
   echo -n "Waiting until database is available."
   # while ! $(docker logs mariadb 2>&1 |grep 'ready for connections' > /dev/null 2>&1); do
