@@ -78,13 +78,13 @@ function drestart() {
 }
 
 function waitForDB() {
-  mkdir -p $FULCRUM_DIRNAME/fulcrum/tmp
-  ROOT_COUNT=$FULCRUM_DIRNAME/fulcrum/tmp/count
-  ERROR_CODE=$FULCRUM_DIRNAME/fulcrum/tmp/error
-  ERROR_LOG=$FULCRUM_DIRNAME/fulcrum/tmp/error.log
+  mkdir -p $FULCRUM_DIRNAME/var/fulcrum/tmp
+  ROOT_COUNT=$FULCRUM_DIRNAME/var/fulcrum/tmp/count
+  ERROR_CODE=$FULCRUM_DIRNAME/var/fulcrum/tmp/error
+  ERROR_LOG=$FULCRUM_DIRNAME/var/fulcrum/tmp/error.log
 
-  touch $ROOT_COUNT
-  touch $ERROR_CODE
+  echo -n "-1" > $ROOT_COUNT
+  echo 0n "-1" > $ERROR_CODE
 
   echo -n "Waiting until database is available."
   # while ! $(docker logs mariadb 2>&1 |grep 'ready for connections' > /dev/null 2>&1); do
