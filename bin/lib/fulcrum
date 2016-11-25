@@ -77,6 +77,9 @@ function drestart() {
   helloSites
 }
 
+# mariadb has a ready for connections twice,
+# so we have to wait until there is only 1 root user
+# until everything is setup and we can use it
 function waitForDB() {
   mkdir -p $FULCRUM_DIRNAME/var/fulcrum/tmp
   ROOT_COUNT=$FULCRUM_DIRNAME/var/fulcrum/tmp/count
