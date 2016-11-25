@@ -89,8 +89,9 @@ function waitForDB() {
   echo -n "Waiting until database is available."
   # while ! $(docker logs mariadb 2>&1 |grep 'ready for connections' > /dev/null 2>&1); do
   while [ "$(cat $ROOT_COUNT)" -ne "1" ] && [ "$(cat $ERROR_CODE)" -ne "0" ]; do
-    docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> $ERROR_LOG 1> $ROOT_COUNT || true
-    cat $? > $ERROR_CODE
+    if (docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> $ERROR_LOG 1> $ROOT_COUNT); then
+      echo -n "0" > $ERROR_CODE
+    fi
 
     echo -n "."
     sleep .25
