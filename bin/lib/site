@@ -93,7 +93,10 @@ function cloneCodebase() {
   chmod u-w $FULCRUM_DOCROOT/sites/default $FULCRUM_DOCROOT/sites/default/files/.htaccess
 
   if ! $(grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php > /dev/null 2>&1); then
-    eout "ERROR: You have not made the $FULCRUM_DOCROOT/sites/default/settings.php file compatible with Fulcrum/drush"
+    SNIPPET_DIR=$FULCRUM_DIRNAME/etc/fulcrum/php
+    SNIPPET_EXP=$(cat $SNIPPET_DIR/fulcrum-d$DRUPAL_MAJOR_VERSION-settings-snippet.php)
+
+    eout "ERROR: You have not made $FULCRUM_DOCROOT/sites/default/settings.php compatible with Fulcrum Drush.\n\nHere is a simple snippet to add:\n\n$SNIPPET_EXP\n\nYou can find more information here: $SNIPPET_DIR"
   fi
 }
 
