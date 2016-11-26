@@ -28,8 +28,7 @@ phpfpm:
     - /mnt/fulcrum/var/log/php:/var/log
     - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
     - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
-    - /mnt/fulcrum/files:/drupal_files
-    - /mnt/fulcrum/files/priv:/private
+    - /mnt/fulcrum/var/fulcrum/private_files:/private
     - /mnt/fulcrum/sites:/var/www/html
   links:
     - redis
@@ -43,7 +42,6 @@ nginx:
   volumes:
     - /mnt/fulcrum/etc/nginx:/etc/nginx
     - /mnt/fulcrum/var/log/nginx:/var/log
-    - /mnt/fulcrum/files:/drupal_files:ro
     - /mnt/fulcrum/sites:/var/www/html:ro
   links:
     - phpfpm
@@ -85,8 +83,7 @@ drush:
   volumes:
     - /mnt/fulcrum/etc/php5:/etc/php5:ro
     - /mnt/fulcrum/var/log/drush:/var/log
-    - /mnt/fulcrum/files:/drupal_files
-    - /mnt/fulcrum/files/priv:/private
+    - /mnt/fulcrum/var/fulcrum/private_files:/private
     - /mnt/fulcrum/sites:/var/www/html
     - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
     - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro

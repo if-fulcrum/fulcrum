@@ -30,8 +30,7 @@ services:
       - c:/Users/$USERNAME/fulcrum/var/log/php:/var/log
       - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
       - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
-      - c:/Users/$USERNAME/fulcrum/files:/drupal_files
-      - c:/Users/$USERNAME/fulcrum/files/priv:/private
+      - c:/Users/$USERNAME/fulcrum/var/fulcrum/private_files:/private
       - c:/Users/$USERNAME/fulcrum/sites:/var/www/html
     links:
       - redis
@@ -45,7 +44,6 @@ services:
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/nginx:/etc/nginx
       - c:/Users/$USERNAME/fulcrum/var/log/nginx:/var/log
-      - c:/Users/$USERNAME/fulcrum/files:/drupal_files:ro
       - c:/Users/$USERNAME/fulcrum/sites:/var/www/html:ro
     links:
       - phpfpm
@@ -87,8 +85,7 @@ services:
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/php5:/etc/php5:ro
       - c:/Users/$USERNAME/fulcrum/var/log/drush:/var/log
-      - c:/Users/$USERNAME/fulcrum/files:/drupal_files
-      - c:/Users/$USERNAME/fulcrum/files/priv:/private
+      - c:/Users/$USERNAME/fulcrum/var/fulcrum/private_files:/private
       - c:/Users/$USERNAME/fulcrum/sites:/var/www/html
       - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
       - c:/Users/$USERNAME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
