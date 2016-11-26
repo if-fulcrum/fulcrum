@@ -8,6 +8,8 @@ source ${FULCRUM_BINDIR}/lib/site
 
 setupEnv $@
 
+requireSudo
+
 restoreDatabaseBackup
 
 cloneCodebase

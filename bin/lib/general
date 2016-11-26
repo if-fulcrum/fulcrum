@@ -45,6 +45,15 @@ function dialog() {
   end' "$1"
 }
 
+function requireSudo() {
+  # see if sudo is needed
+  if which sudo && ! $(sudo -n cat /dev/null > /dev/null 2>&1); then
+    # get sudo first so the focus for the password is kept in the term, instead of Docker.app
+    vout "You will need to provide your user password."
+    sudo cat /dev/null
+  fi
+}
+
 # make a new varnish/secret
 function varnishSecret() {
   if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then

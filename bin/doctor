@@ -5,6 +5,8 @@ source ${FULCRUM_BINDIR}/lib/general
 
 vout "Running doctor"
 
+requireSudo
+
 etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
 etcHosts 127.0.0.1 varnish
