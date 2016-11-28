@@ -95,6 +95,12 @@ case ${MYCOMMAND} in
     haproxyrestart
     ;;
 
+  "conf")
+    vout "regenerate nginx .conf file from json"
+    source ${FULCRUM_BINDIR}/lib/site
+    nginxConf
+    ;;
+
   *)
     vout "command not found..."
     sendalert ""

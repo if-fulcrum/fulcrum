@@ -11,6 +11,7 @@ function usage() {
   echo "up    - restart all containers, also use to start them [restart] [start]"
   echo "dps   - show containers (running or stopped) [ps]"
   echo "haproxyrestart - restart haproxy, for when modifying the config [haproxy] [haproxy-restart]"
+  echo "conf   - regenerate nginx .conf file from json"
   echo ""
   echo "dbash - step inside a running container [bash] [sh]"
   echo "dlogs - show logs being put out from containers, ctrl+C to stop following [dlog]"
