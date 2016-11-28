@@ -97,8 +97,7 @@ case ${MYCOMMAND} in
 
   "conf")
     vout "regenerate nginx .conf file from json"
-    source ${FULCRUM_BINDIR}/lib/site
-    nginxConf
+    nginxConfAll
     ;;
 
   *)

@@ -16,7 +16,7 @@ cloneCodebase
 
 etcHosts 127.0.0.1 $FULCRUM_SITE
 
-nginxConf
+nginxConfSite
 
 fulcrumDBUser
 

@@ -104,3 +104,16 @@ function etcHosts() {
     vout "Already exists in $FULCRUM_ETC_HOSTS: $ETC_HOSTS_IP $ETC_HOSTS_HOST"
   fi
 }
+
+function nginxConfAll() {
+  # combine all confs seperated by a comma into a single var
+  CONFS=$(for f in $FULCRUM_DIRNAME/etc/fulcrum/conf/*.json;do cat $f;echo ",";done)
+
+  # remove last comma and enclose in brackets
+  CONFS="[${CONFS%?}]"
+
+  # overwrite fulcrum_config.conf
+  echo "$CONFS"|(docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
+
+  docker exec nginx kill -HUP 1
+}
