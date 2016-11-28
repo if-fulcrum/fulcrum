@@ -57,13 +57,15 @@ function requireSudo() {
 # make a new varnish/secret
 function varnishSecret() {
   if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
+    # file should have a newline
     FULCRUM_VARN_SECRET=$(rndStr 32)
-    echo -n "$FULCRUM_VARN_SECRET" > $FULCRUM_DIRNAME/etc/varnish/secret
+    echo -n "$FULCRUM_VARN_SECRET\n" > $FULCRUM_DIRNAME/etc/varnish/secret
   else
-    FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret)
+    # variable should not have a newline
+    FULCRUM_VARN_SECRET=$(cat $FULCRUM_DIRNAME/etc/varnish/secret|tr -d '\n')
   fi
 
-  echo -n "$FULCRUM_VARN_SECRET"
+  echo -n "$FULCRUM_VARN_SECRET\n"
 }
 
 function waitForDocker() {
