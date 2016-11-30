@@ -66,7 +66,6 @@ haproxy:
   image: fulcrum/haproxy:latest-1.6-alpine
   volumes:
     - /mnt/fulcrum/etc/haproxy:/etc/haproxy
-    - /mnt/fulcrum/etc/haproxy/haproxy-1.6.cfg:/etc/haproxy/haproxy.cfg
     - /mnt/fulcrum/etc/certs.d:/etc/certs.d
     - /mnt/fulcrum/var/log/haproxy:/var/log
   links:
