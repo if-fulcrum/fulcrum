@@ -10,6 +10,7 @@ requireSudo
 etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
 etcHosts 127.0.0.1 varnish
+etcHosts 127.0.0.1 certbot
 
 echo 'acl internal  { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
 echo 'acl whitelist { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl
