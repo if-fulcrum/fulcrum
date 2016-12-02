@@ -8,3 +8,4 @@ curl -fsSL https://raw.githubusercontent.com/if-fulcrum/install/master/mac.sh | 
 
 ## Install Fulcrum on Windows
 Download and run: https://raw.githubusercontent.com/if-fulcrum/install/master/win.ps1
+
