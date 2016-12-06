@@ -1,10 +1,12 @@
 # functions to make sure that fulcrum hinge is healthy on the Mac
 
-# get d4m-nfs if it doesn't already exist
-if [ ! -e ~/repos/d4m-nfs ]; then
+# move old location or get d4m-nfs if it doesn't already exist
+if [ -e ~/repos/d4m-nfs ]; then
+  mv ~/repos/d4m-nfs ~/fulcrum/var/fulcrum/d4m-nfs
+elif [ ! -e ~/fulcrum/var/fulcrum/d4m-nfs ]; then
   vout "Cannot find Docker for Mac NFS (d4m-nfs) repo, cloning from github"
-  mkdir -p ~/repos
-  cd ~/repos
+  mkdir -p ~/fulcrum/var/fulcrum
+  cd ~/fulcrum/var/fulcrum
   git clone https://github.com/IFSight/d4m-nfs.git
   cp d4m-nfs/examples/d4m-nfs-mounts.txt d4m-nfs/etc/
   echo -e "/Users/$USER:/mnt:0:0" >> d4m-nfs/etc/d4m-nfs-mounts.txt
@@ -26,21 +28,21 @@ if ! $(ls -d $TAPDIR/homebrew-dupes > /dev/null 2>&1); then
   brew tap homebrew/dupes
 else
   vout "Check: homebrew dupes"
-fi  
+fi
 
 if ! $(ls -d $TAPDIR/homebrew-versions > /dev/null 2>&1); then
   vout "Tapping: homebrew versions"
   brew tap homebrew/versions
 else
   vout "Check: homebrew versions"
-fi  
+fi
 
 if ! $(ls -d $TAPDIR/homebrew-php > /dev/null 2>&1); then
   vout "Tapping: homebrew homebrew-php"
   brew tap homebrew/homebrew-php
 else
   vout "Check: homebrew homebrew-php"
-fi  
+fi
 
 # kludge for Homebrew 0.9
 if [[ ! "$TAPDIR" == *"Homebrew"* ]]; then

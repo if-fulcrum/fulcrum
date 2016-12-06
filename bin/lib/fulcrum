@@ -37,7 +37,7 @@ function dlogs() {
 function drestart() {
   # run d4m-nfs in order to allow using NFS volume mounts
   if [[ "$FULCRUM_OS" == "MAC" ]]; then
-    ~/repos/d4m-nfs/d4m-nfs.sh
+    ~/fulcrum/var/fulcrum/d4m-nfs/d4m-nfs.sh
   fi
 
   # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
