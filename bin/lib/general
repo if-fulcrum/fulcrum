@@ -10,9 +10,9 @@ if [[ "$UNAMEA" == *"Darwin"* ]]; then
   FULCRUM_OS=MAC;
 elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
   FULCRUM_OS=WIN;
+  FULCRUM_ETC_HOSTS=/c/windows/system32/drivers/etc/hosts
 elif [[ "$UNAMEA" == *"Linux"* ]]; then
   FULCRUM_OS=LIN;
-  FULCRUM_ETC_HOSTS=/c/windows/system32/drivers/etc/hosts
 fi
 
 FULCRUM_OS_LC=$(echo $FULCRUM_OS|tr '[:upper:]' '[:lower:]')
