@@ -70,27 +70,32 @@ MYCOMMAND=${!#}
 vout "MYCOMMAND = ${MYCOMMAND}"
 
 case ${MYCOMMAND} in
-  "dps"|"ps")
-    vout "running dps command"
-    dps
-    ;;
-
-  "dlogs"|"dlog")
-    vout "running dlogs command"
-    dlogs
-    ;;
-
-  "start"|"restart"|"reload"|"up")
+  "up"|"start"|"restart"|"reload")
     vout "running restart command"
     drestart
     ;;
 
-  "dbash"|"bash"|"dsh"|"sh")
+  "stop"|"halt"|"down"|"shutdown")
+    vout "running stop command"
+    dStop
+    ;;
+
+  "sh"|"bash"|"shell"|"enter"|"dsh"|"dbash")
     vout "running dbash command"
     dbash
     ;;
 
-  "haproxyrestart"|"haproxy"|"haproxy-restart")
+  "ps"|"dps")
+    vout "running dps command"
+    dps
+    ;;
+
+  "log"|"logs"|"dlog"|"dlogs")
+    vout "running dlogs command"
+    dlogs
+    ;;
+
+  "haproxy"|"haproxyrestart"|"haproxy-restart")
     vout "running haproxyrestart command"
     haproxyrestart
     ;;

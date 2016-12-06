@@ -8,17 +8,17 @@ function usage() {
   echo " -n  No docker pull (default)"
   echo " -p  Do docker pull (update your images)"
   echo " -q  quiet"
-  echo " -v  verbose (debug"
+  echo " -v  verbose (debug)"
   echo ""
-  echo "up    - restart all containers, also use to start them [restart] [start]"
-  echo "dps   - show containers (running or stopped) [ps]"
+  echo "up             - restart all containers, also use to start them [start] [restart] [reload]"
+  echo "stop           - stop all containers and remove them [stop] [halt] [down] [shutdown]"
+  echo "sh             - step inside a running container [sh] [bash] [shell] [enter] [dsh] [dbash]"
+  echo "ps             - show containers (running or stopped) [dps]"
+  echo "log            - show logs being put out from containers, ctrl+C to stop following [log] [logs] [dlog] [dlogs]"
   echo "haproxyrestart - restart haproxy, for when modifying the config [haproxy] [haproxy-restart]"
-  echo "conf   - regenerate nginx .conf file from json"
+  echo "conf           - regenerate nginx .conf file from json"
   echo ""
-  echo "dbash - step inside a running container [bash] [sh]"
-  echo "dlogs - show logs being put out from containers, ctrl+C to stop following [dlog]"
-  echo ""
-  echo "This requires docker for mac, please get the stable version from https://docs.docker.com/docker-for-mac/"
+  echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   exit 0
 }
 
@@ -35,6 +35,33 @@ function dlogs() {
   exit 0
 }
 
+function stopAllContainers() {
+  # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
+  RUNNING_CONTAINERS=$(docker ps -q | wc -l)
+  if [ $RUNNING_CONTAINERS -gt 0 ]; then
+    sendalert "stopping any running containers"
+    docker stop $(docker ps -q) 1>/dev/null
+  fi
+}
+
+function rmAllContainers() {
+  STOPPED_CONTAINERS=$(docker ps -a -q | wc -l)
+  if [ $STOPPED_CONTAINERS -gt 0 ]; then
+    sendalert "killing any stopped containers"
+    docker rm -f $(docker ps -a -q) 1>/dev/null
+  fi
+}
+
+function stopAndRmAllContainers() {
+  stopAllContainers
+
+  rmAllContainers
+}
+
+function dStop() {
+  stopAndRmAllContainers
+}
+
 # start/restart all our containers
 function drestart() {
   # run d4m-nfs in order to allow using NFS volume mounts
@@ -42,19 +69,7 @@ function drestart() {
     ~/fulcrum/var/fulcrum/d4m-nfs/d4m-nfs.sh
   fi
 
-  # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
-  RUNNING_CONTAINERS=$(docker ps -q | wc -l)
-  if [ $RUNNING_CONTAINERS -gt 0 ]; then
-    sendalert "stopping any running containers"
-    docker stop $(docker ps -q) 1>/dev/null
-  fi
-
-  STOPPED_CONTAINERS=$(docker ps -a -q | wc -l)
-  if [ $STOPPED_CONTAINERS -gt 0 ]; then
-    sendalert "killing any stopped containers"
-    docker rm -f $(docker ps -a -q) 1>/dev/null
-  fi
-
+  stopAndRmAllContainers
 
   if [ $DOPULL -eq 1 ]; then
     vout "doing docker pull"
