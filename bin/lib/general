@@ -1,3 +1,5 @@
+#!/bin/bash
+
 FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
 
 UNAMEA=$(uname -a)
@@ -22,12 +24,12 @@ function dout() {
 }
 
 function vout() {
-  echo "$1"
+  echo "[hinge] $1"
 }
 
 function eout() {
   echo "******************"
-  echo -e "$1"
+  echo "[hinge] $1"
   echo "******************"
   exit 1
 }
@@ -46,6 +48,8 @@ function dialog() {
 }
 
 function requireSudo() {
+# !!! should check OS
+
   # see if sudo is needed
   if which sudo && ! $(sudo -n cat /dev/null > /dev/null 2>&1); then
     # get sudo first so the focus for the password is kept in the term, instead of Docker.app
