@@ -121,6 +121,10 @@ case ${MYCOMMAND} in
     opcacheStatus
     ;;
 
+  "etch"|"etchost")
+    etcHosts127
+    ;;
+
   *)
     vout "command not found..."
     sendalert ""

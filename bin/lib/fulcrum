@@ -21,6 +21,7 @@ function usage() {
   echo "ocof           - disable Zend OPcache [ocoff] [opcacheoff]"
   echo "ocon           - enable Zend OPcache [opcacheon]"
   echo "ocst           - status of Zend OPcache [opcachestatus]"
+  echo "etch           - add a 127.0.0.1 host to etc/hosts [etchost]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   exit 0
@@ -201,4 +202,9 @@ function opcacheStatus() {
   else
     vout "Zend OPcache status is unknown ($OCMODE)"
   fi
+}
+
+function etcHosts127() {
+  read -p "Please enter hostname your would like to map to 127.0.0.1: " ETCHOST
+  etcHosts 127.0.0.1 $ETCHOST
 }
