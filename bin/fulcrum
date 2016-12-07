@@ -105,6 +105,22 @@ case ${MYCOMMAND} in
     nginxConfAll
     ;;
 
+  "ocfl"|"opcacheflush")
+    opcacheFlush
+    ;;
+
+  "ocof"|"ocoff"|"opcacheoff")
+    opcacheOff
+    ;;
+
+  "ocon"|"opcacheon")
+    opcacheOn
+    ;;
+
+  "ocst"|"opcachestatus")
+    opcacheStatus
+    ;;
+
   *)
     vout "command not found..."
     sendalert ""
