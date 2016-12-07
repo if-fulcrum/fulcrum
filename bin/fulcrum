@@ -121,7 +121,7 @@ case ${MYCOMMAND} in
     opcacheStatus
     ;;
 
-  "etch"|"etchost")
+  "etch"|"etchost"|"etchosts")
     etcHosts127
     ;;
 

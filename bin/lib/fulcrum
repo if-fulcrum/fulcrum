@@ -21,7 +21,7 @@ function usage() {
   echo "ocof           - disable Zend OPcache [ocoff] [opcacheoff]"
   echo "ocon           - enable Zend OPcache [opcacheon]"
   echo "ocst           - status of Zend OPcache [opcachestatus]"
-  echo "etch           - add a 127.0.0.1 host to etc/hosts [etchost]"
+  echo "etch           - add a 127.0.0.1 host to etc/hosts [etchost] [etchosts]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   exit 0
