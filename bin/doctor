@@ -12,9 +12,17 @@ etcHosts 127.0.0.1 redis
 etcHosts 127.0.0.1 varnish
 etcHosts 127.0.0.1 certbot
 
-echo 'acl internal  { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
-echo 'acl whitelist { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl
-echo 'acl blacklist { "0.0.0.0"/32; }' > $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl
+if [ ! -e $FULCRUM_DIRNAME/etc/varnish/internal.vcl ]; then
+  echo 'acl internal  { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
+fi
+
+if [ ! -e $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl ]; then
+  echo 'acl whitelist { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl
+fi
+
+if [ ! -e $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl ]; then
+  echo 'acl blacklist { "0.0.0.0"/32; }' > $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl
+fi
 
 # make a minimal fulcrum_config.conf
 if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf ]; then
