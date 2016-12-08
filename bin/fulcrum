@@ -125,6 +125,10 @@ case ${MYCOMMAND} in
     etcHosts127
     ;;
 
+  "rnd"|"rand"|"random"|"randomstr")
+    rndStrInput
+    ;;
+
   *)
     vout "command not found..."
     sendalert ""
