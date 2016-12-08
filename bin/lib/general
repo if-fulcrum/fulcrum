@@ -112,14 +112,28 @@ function etcHosts() {
 }
 
 function nginxConfAll() {
-  # combine all confs seperated by a comma into a single var
-  CONFS=$(for f in $FULCRUM_DIRNAME/etc/fulcrum/conf/*.json;do cat $f;echo ",";done)
+  CONFDIR=$FULCRUM_DIRNAME/etc/fulcrum/conf/
 
-  # remove last comma and enclose in brackets
-  CONFS="[${CONFS%?}]"
+  # get all the aliases if there are any
+  ALIASES='{}'
+  if [ -e $CONFDIR/aliases.json ]; then
+    ALIASES=$(cat $CONFDIR/aliases.json)
+  fi
+
+  # combine all sites seperated by a comma into a single var
+  SITES=$(
+    for f in $CONFDIR/*.json;do
+      if [[ "$f" != "$CONFDIR/aliases.json" ]]; then
+        cat $f;echo ",";
+      fi
+    done
+  )
+
+  # combine aliases and sites, remove last comma & enclose in brackets for sites
+  CONF="{\"aliases\":$ALIASES,\"sites\":[${SITES%?}]}"
 
   # overwrite fulcrum_config.conf
-  echo "$CONFS"|(docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
+  echo "$CONF"|(docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 
   docker exec nginx kill -HUP 1
 }
