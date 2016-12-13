@@ -61,6 +61,7 @@ varnish:
     - "6081:80"
     - "6082:6082"
 
+# 4433 is for testing, bypass varnish on TLS
 haproxy:
   container_name: haproxy
   image: fulcrum/haproxy:latest-1.6-alpine
@@ -70,9 +71,11 @@ haproxy:
     - /mnt/fulcrum/var/log/haproxy:/var/log
   links:
     - varnish
+    - nginx
   ports:
     - "80:80"
     - "443:443"
+    - "4433:4433"
     - "1936:1936"
 
 drush:
