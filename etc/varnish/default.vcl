@@ -27,13 +27,6 @@ sub vcl_recv {
   #
   # set req.grace = 6h;
 
-  # Do not cache these paths.
-  if (req.url ~ "^/(status|update)\.php$" ||
-      req.url ~ "^/(admin/build/features|info/|flag/)" ||
-      req.url ~ "^.*/(ajax|ahah)/") {
-       return (pass);
-  }
-
 # This is for the Varnish 3, not needed after Varnish 4 beresp.uncacheable
 #  # large file kludge (see vcl_backend_response section)
 #  if (req.http.x-pipe && req.restarts > 0) {
@@ -64,6 +57,13 @@ sub vcl_recv {
           req.url ~ "(?i)^/((index.php)?\?q=)?(admin.*|user.*|node/add)")
   )) {
     return (synth(403, "Access Denied."));
+  }
+
+  # Do not cache these paths.
+  if (req.url ~ "^/(status|update)\.php$" ||
+      req.url ~ "^/(admin/build/features|info/|flag/)" ||
+      req.url ~ "^.*/(ajax|ahah)/") {
+       return (pass);
   }
 
   # Handle compression correctly. Different browsers send different
