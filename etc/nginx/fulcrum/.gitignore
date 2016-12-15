@@ -1,3 +1,4 @@
 *
 !fulcrum_debug.conf
+!fulcrum_fastcgi.conf
 !.gitignore
