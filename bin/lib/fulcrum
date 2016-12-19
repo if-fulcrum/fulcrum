@@ -10,6 +10,7 @@ function usage() {
   echo " -q  quiet"
   echo " -s  sudo - if you cannot run 'docker' without sudo, pass this flag"
   echo " -v  verbose (debug)"
+  echo " -x  turn 'set -x' on (deep debug)"
   echo ""
   echo "up             - restart all containers, also use to start them [start] [restart] [reload]"
   echo "stop           - stop all containers and remove them [stop] [halt] [down] [shutdown]"

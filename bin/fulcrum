@@ -16,7 +16,7 @@ SUDO=""
 MYCOMMAND=""
 
 # read in command line args
-while getopts ":hnpqvs" opt; do
+while getopts ":hnpqvsx" opt; do
   case ${opt} in
     h)
       usage
@@ -35,6 +35,9 @@ while getopts ":hnpqvs" opt; do
       ;;
     v)
       VERBOSE=1
+      ;;
+    x)
+      set -x
       ;;
     \?)
       echo "Invalid Option: -$OPTARG" >&2
