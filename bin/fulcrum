@@ -12,10 +12,11 @@ ${FULCRUM_BINDIR}/doctor
 DOPULL=0
 VERBOSE=0
 QUIET=0
+SUDO=""
 MYCOMMAND=""
 
 # read in command line args
-while getopts ":hnpqv" opt; do
+while getopts ":hnpqvs" opt; do
   case ${opt} in
     h)
       usage
@@ -28,6 +29,9 @@ while getopts ":hnpqv" opt; do
       ;;
     q)
       QUIET=1
+      ;;
+    s)
+      SUDO="sudo "
       ;;
     v)
       VERBOSE=1
@@ -104,8 +108,8 @@ case ${MYCOMMAND} in
     haproxyrestart
     ;;
 
-  "conf")
-    vout "regenerate nginx .conf file from json"
+  "conf"|"nginx"|"nginx-restart")
+    vout "regenerate nginx .conf file from json & restart nginx"
     nginxConfAll
     ;;
 
