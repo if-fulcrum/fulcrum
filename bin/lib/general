@@ -144,7 +144,11 @@ function nginxConfAll() {
 
   # overwrite fulcrum_config.conf, keep the double slashes for windows support
   vout "writing final nginx config to $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf"
-  $SUDO echo "$CONF"|($SUDO docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
+  if [ -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf ]; then
+    vout "fixing ownership of $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf to $FULCRUM_HOST_USER"
+    $SUDO chown $FULCRUM_HOST_USER $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
+  fi
+  echo "$CONF"|($SUDO docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 
   vout "send nginx container the reload signal"
   $SUDO docker exec nginx kill -HUP 1
