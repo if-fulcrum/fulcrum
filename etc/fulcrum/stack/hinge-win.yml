@@ -69,7 +69,7 @@ services:
     image: fulcrum/haproxy:latest-1.6-alpine
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/haproxy:/etc/haproxy
-      - c:/Users/$USERNAME/fulcrum/etc/haproxy/haproxy-1.6.cfg:/etc/haproxy/haproxy.cfg
+      - c:/Users/$USERNAME/fulcrum/etc/haproxy/local-dev.cfg:/etc/haproxy/haproxy.cfg
       - c:/Users/$USERNAME/fulcrum/etc/certs.d:/etc/certs.d
       - c:/Users/$USERNAME/fulcrum/var/log/haproxy:/var/log
     links:
