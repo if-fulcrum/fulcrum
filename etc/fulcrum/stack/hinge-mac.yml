@@ -1,11 +1,10 @@
 mariadb:
   container_name: mariadb
-  image: fulcrum/mariadb
+  image: fulcrum/mariadb:latest-alpine
   volumes:
    - /mnt/fulcrum/etc/mysql:/etc/mysql
    - /mnt/fulcrum/var/log/mariadb:/var/log
    - /mnt/fulcrum/var/lib/mysql:/var/lib/mysql
-   - /mnt/fulcrum/var/lib:/data
   environment:
    - MYSQL_ALLOW_EMPTY_PASSWORD=yes
   ports:

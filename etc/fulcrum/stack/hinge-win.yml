@@ -2,7 +2,7 @@ version: '2'
 services:
   mariadb:
     container_name: mariadb
-    image: fulcrum/mariadb
+    image: fulcrum/mariadb:latest-alpine
     volumes:
      - c:/Users/$USERNAME/fulcrum/etc/mysql:/etc/mysql
      - c:/Users/$USERNAME/fulcrum/var/log/mariadb:/var/log
