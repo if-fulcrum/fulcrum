@@ -3,6 +3,8 @@
 # exit script if anything returns an error
 set -e
 
+export FULCRUM_HOST_USER=$(whoami)
+
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/site
 
