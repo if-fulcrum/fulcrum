@@ -1,6 +1,6 @@
 mariadb:
   container_name: mariadb
-  image: fulcrum/mariadb:latest-alpine
+  image: fulcrum/mariadb:latest
   volumes:
    - /mnt/fulcrum/etc/mysql:/etc/mysql
    - /mnt/fulcrum/var/log/mariadb:/var/log
