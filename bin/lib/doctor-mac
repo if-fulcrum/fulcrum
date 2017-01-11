@@ -91,3 +91,6 @@ fi
 if [ ! -d $FULCRUM_DIRNAME/var/lib/mysql ]; then
   mkdir $FULCRUM_DIRNAME/var/lib/mysql
 fi
+
+sudo chown -R 999:999 $FULCRUM_DIRNAME/var/lib/mysql
+sudo chmod -R u+w,u+r $FULCRUM_DIRNAME/var/lib/mysql
