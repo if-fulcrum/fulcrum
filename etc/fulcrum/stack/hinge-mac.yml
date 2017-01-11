@@ -1,3 +1,5 @@
+# /mnt/fulcrum/var/lib/mysql is exported twice
+# for compatibility with debian and alpine mariadb
 mariadb:
   container_name: mariadb
   image: fulcrum/mariadb:latest
@@ -5,6 +7,7 @@ mariadb:
    - /mnt/fulcrum/etc/mysql:/etc/mysql
    - /mnt/fulcrum/var/log/mariadb:/var/log
    - /mnt/fulcrum/var/lib/mysql:/var/lib/mysql
+   - /mnt/fulcrum/var/lib/mysql:/data/mysql
   environment:
    - MYSQL_ALLOW_EMPTY_PASSWORD=yes
   ports:
