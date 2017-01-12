@@ -12,7 +12,7 @@ include "backends-webs.vcl";
 sub vcl_recv {
   set req.backend_hint = web.backend();
 
-  include "include/x-forward-for-localdev.vcl";
+  include "include/x-forward-for.vcl";
 
   # save the left most IP for whitelisting
   set req.http.X-Client-IP = regsub(req.http.X-Forwarded-For, "[, ].*$", "");
