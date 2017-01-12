@@ -12,8 +12,9 @@ include "backends-webs.vcl";
 sub vcl_recv {
   set req.backend_hint = web.backend();
 
-  # save the left most IP for whitelisting, DEPRECATED, use client.ip since we are using the PROXY proto with haproxy
-  # should be able to remove once we verify the nginx/php/drupal logs are getting the correct IP of the user
+  include "include/x-forward-for-localdev.vcl";
+
+  # save the left most IP for whitelisting
   set req.http.X-Client-IP = regsub(req.http.X-Forwarded-For, "[, ].*$", "");
 
   # Use anonymous, cached pages if all backends are down.
@@ -165,12 +166,8 @@ sub vcl_hash {
 # Code determining what to do when serving items from the web servers.
 # beresp == Back-end response from the web server.
 sub vcl_backend_response {
-  # We need this to cache 404s, 301s, 500s. Otherwise, depending on backend but
-  # definitely in Drupal's case these responses are not cacheable by default.
-  if (beresp.status == 404 || beresp.status == 301 || beresp.status == 500) {
-#    set beresp.ttl = 10m;
-    set beresp.ttl = 1s;
-  }
+
+  include "include/beresp-ttl.vcl";
 
   # large file kludge: dont cache files > 1mb
   # https://gist.github.com/mcphersoncreative/7469629
