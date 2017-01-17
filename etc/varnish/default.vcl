@@ -5,6 +5,7 @@ import directors;
 
 include "internal.vcl";
 include "whitelist.vcl";
+include "blacklist.vcl";
 
 include "backends-webs.vcl";
 
@@ -38,6 +39,11 @@ sub vcl_recv {
   # Pipe these paths directly to web server for streaming.
   if (req.url ~ "^/admin/content/backup_migrate/export") {
     return (pipe);
+  }
+
+  # site wide ban, may need in future to do the right most, instead of left, most public ip
+  if ( std.ip(req.http.X-Client-IP, client.ip) ~ blacklist ) {
+    return (synth(403, "Access Denied."));
   }
 
   # Determines if the "public" part (not /user) can be hit.
