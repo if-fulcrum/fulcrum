@@ -28,7 +28,7 @@ function restoreDatabaseBackup() {
       fi
 
       vout "Downloading $FULCRUM_DBGZ"
-      aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK
+      aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK || eout "it seems your aws login information to pull the database is not working"
       FULCRUM_DBGZ=$FULCRUM_DBBAK
     fi
 
