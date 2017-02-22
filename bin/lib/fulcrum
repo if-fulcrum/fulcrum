@@ -175,7 +175,7 @@ function haproxyrestart() {
     eout "FATAL: syntax error in haproxy config it seems, quitting without restart"
   fi
 
-  docker kill -s HUP haproxy
+  docker kill -s USR1 haproxy
   sendalert "haproxy has been reloaded"
 }
 
