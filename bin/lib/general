@@ -182,7 +182,7 @@ function signCert() {
   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $TMP_DIR/$CERT_DOMAIN.crt
 
   vout "Making combined PEM file for HAProxy"
-  cat $TMP_DIR/$CERT_DOMAIN.key $TMP_DIR/$CERT_DOMAIN.crt > ~/fulcrum/etc/certs.d/$CERT_DOMAIN.pem
+  cat $TMP_DIR/$CERT_DOMAIN.key $TMP_DIR/$CERT_DOMAIN.crt > $FULCRUM_DIRNAME/etc/certs.d/$CERT_DOMAIN.pem
 
   vout "Restarting HAProxy to read the new certs"
   haproxyrestart
