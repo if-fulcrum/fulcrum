@@ -153,3 +153,51 @@ function nginxConfAll() {
   vout "send nginx container the reload signal"
   $SUDO docker exec nginx kill -HUP 1
 }
+
+function signCert() {
+  CERT_DOMAIN=$1
+  if [ -z "$CERT_DOMAIN" ]; then
+    read -p "Please enter domain name for the cert to sign: " CERT_DOMAIN
+  fi
+
+  requireSudo
+
+  vout "Creating self signed certificate for '$CERT_DOMAIN'"
+  TMP_DIR=/tmp/fulcrum-cert-$CERT_DOMAIN-$$
+
+  vout "Making temp directory $TMP_DIR"
+  mkdir $TMP_DIR
+
+  vout "Making private key"
+  openssl genrsa -des3 -passout pass:x -out $TMP_DIR/$CERT_DOMAIN.pass.key 2048
+  openssl rsa -passin pass:x -in $TMP_DIR/$CERT_DOMAIN.pass.key -out $TMP_DIR/$CERT_DOMAIN.key
+
+  vout "Making the cert signing request"
+  openssl req -new -key $TMP_DIR/$CERT_DOMAIN.key -out $TMP_DIR/$CERT_DOMAIN.csr -subj "/C=US/ST=Anywhere/L=Nowwhere/O=Fulcrum Inc/OU=Fulcrum Hinge/CN=$CERT_DOMAIN"
+
+  vout "Making the actual cert"
+  openssl x509 -req -sha256 -days 3652 -in $TMP_DIR/$CERT_DOMAIN.csr -signkey $TMP_DIR/$CERT_DOMAIN.key -out $TMP_DIR/$CERT_DOMAIN.crt
+
+  vout "Adding to the Mac keychain"
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $TMP_DIR/$CERT_DOMAIN.crt
+
+  vout "Making combined PEM file for HAProxy"
+  cat $TMP_DIR/$CERT_DOMAIN.key $TMP_DIR/$CERT_DOMAIN.crt > ~/fulcrum/etc/certs.d/$CERT_DOMAIN.pem
+
+  vout "Restarting HAProxy to read the new certs"
+  haproxyrestart
+
+  vout "Removing directory $TMP_DIR"
+  rm -vrf $TMP_DIR
+}
+
+function haproxyrestart() {
+  # ensure we have no syntax errors
+  docker exec haproxy /usr/local/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c 1>/dev/null 2>/dev/null
+  if [ $? -gt 0 ]; then
+    eout "FATAL: syntax error in HAProxy config it seems, quitting without restart"
+  fi
+
+  docker kill -s HUP haproxy
+  vout "HAProxy has been reloaded"
+}

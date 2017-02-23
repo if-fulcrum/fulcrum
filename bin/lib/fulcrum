@@ -25,6 +25,7 @@ function usage() {
   echo "ocst           - status of Zend OPcache [opcachestatus]"
   echo "etch           - add a 127.0.0.1 host to etc/hosts [etchost] [etchosts]"
   echo "rnd            - create a random string, will be prompted for length [rand] [random] [randomstr]"
+  echo "sc             - create a self-signed HTTPS certificate [signcert]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   exit 0
@@ -166,17 +167,6 @@ function dbash() {
   echo "${ENTER_IMAGE}"
   # https://github.com/docker/docker/issues/9299
   $FULCRUM_OS_INT_PREFIX docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
-}
-
-function haproxyrestart() {
-  # ensure we have no syntax errors
-  docker exec haproxy /usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c 1>/dev/null 2>/dev/null
-  if [ $? -gt 0 ]; then
-    eout "FATAL: syntax error in haproxy config it seems, quitting without restart"
-  fi
-
-  docker kill -s USR1 haproxy
-  sendalert "haproxy has been reloaded"
 }
 
 function opcacheFlush() {
