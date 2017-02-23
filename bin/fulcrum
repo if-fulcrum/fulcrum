@@ -20,24 +20,31 @@ while getopts ":hnpqvsx" opt; do
   case ${opt} in
     h)
       usage
+      shift 1
       ;;
     n)
       DOPULL=0
+      shift 1
       ;;
     p)
       DOPULL=1
+      shift 1
       ;;
     q)
       QUIET=1
+      shift 1
       ;;
     s)
       SUDO="sudo "
+      shift 1
       ;;
     v)
       VERBOSE=1
+      shift 1
       ;;
     x)
       set -x
+      shift 1
       ;;
     \?)
       echo "Invalid Option: -$OPTARG" >&2
@@ -81,7 +88,7 @@ vout "VERBOSE = $VERBOSE"
 vout "QUIET = $QUIET"
 vout "SUDO = $SUDO"
 
-MYCOMMAND=${!#}
+MYCOMMAND=${1:-}
 vout "MYCOMMAND = ${MYCOMMAND}"
 
 case ${MYCOMMAND} in
@@ -145,7 +152,11 @@ case ${MYCOMMAND} in
     ;;
 
   "sc"|"signcert")
-    signCert ""
+    signCert "${2:-}"
+    ;;
+
+  "fs"|"forcehttps")
+    forcehttps "${2:-}"
     ;;
 
   *)

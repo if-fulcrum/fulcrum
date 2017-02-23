@@ -26,6 +26,7 @@ function usage() {
   echo "etch           - add a 127.0.0.1 host to etc/hosts [etchost] [etchosts]"
   echo "rnd            - create a random string, will be prompted for length [rand] [random] [randomstr]"
   echo "sc             - create a self-signed HTTPS certificate [signcert]"
+  echo "fs             - force HTTPS via base_url [forcehttps]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   exit 0
@@ -206,4 +207,29 @@ function etcHosts127() {
 function rndStrInput() {
   read -p "Please enter the number random characters: " CHARCOUNT
   rndStr $CHARCOUNT
+}
+
+function forcehttps() {
+  # see if we were given a domain
+  DOMAIN=${1:-""}
+
+  # ask if we didn't fine a domain
+  if [ -z "$DOMAIN" ]; then
+    read -p "Please enter hostname your would like force https: " DOMAIN
+  fi
+
+  CONF_FILE=$FULCRUM_DIRNAME/etc/fulcrum/conf/$DOMAIN.json
+  if [ ! -e $CONF_FILE ]; then
+    eout "Cannot find $DOMAIN ($CONF_FILE)"
+  fi
+
+  # remove any previous base_url
+  grep -v base_url $CONF_FILE > $CONF_FILE.bak
+
+  # add in base_url
+  perl -p -i -e "s#(cookie_domain.*?,)#\$1\\n      \"base_url\" : \"https://$DOMAIN\",#" $CONF_FILE
+
+  nginxConfAll
+
+  opcacheFlush
 }
