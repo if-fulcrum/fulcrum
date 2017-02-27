@@ -1,0 +1,2 @@
+certs.d/*
+!certs.d/wc.ifdev.pem
