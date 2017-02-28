@@ -38,7 +38,7 @@ if (!function_exists('fulcrum_force_https')) {
 
 if (!function_exists('fulcrum_cfg')) {
   function fulcrum_cfg($phase, $fcfg, &$settings = NULL, &$databases = NULL) {
-    if (isset($fcfg['force_https']) && $fcfg['force_https'] == 'true') {
+    if (PHP_SAPI !== 'cli' && isset($fcfg['force_https']) && $fcfg['force_https'] == 'true') {
       fulcrum_force_https();
     }
 
