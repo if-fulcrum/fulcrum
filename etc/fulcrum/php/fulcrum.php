@@ -31,16 +31,17 @@ if (!function_exists('fulcrum_force_https')) {
     if (!isset($_SERVER['HTTP_X_FORWARDED_PROTO']) || $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
       header('HTTP/1.0 301 Moved Permanently');
       header('Location: https://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']);
-      exit();
+
+      if (PHP_SAPI !== 'cli' && isset($fcfg['force_https']) && $fcfg['force_https'] == 'true') {
+        exit();
+      }
     }
   }
 }
 
 if (!function_exists('fulcrum_cfg')) {
   function fulcrum_cfg($phase, $fcfg, &$settings = NULL, &$databases = NULL) {
-    if (PHP_SAPI !== 'cli' && isset($fcfg['force_https']) && $fcfg['force_https'] == 'true') {
-      fulcrum_force_https();
-    }
+    fulcrum_force_https();
 
     if (isset($fcfg[$phase])) {
       $special = array('settings', 'databases');
