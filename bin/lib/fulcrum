@@ -224,10 +224,15 @@ function forcehttps() {
   fi
 
   # remove any previous base_url
-  grep -v base_url $CONF_FILE > $CONF_FILE.bak
+  grep -v force_https $CONF_FILE | grep -v base_url > $CONF_FILE.bak
+
+  # add in force_https
+  perl -p -i -e "s#(webroot.*?,)#\$1\\n  \"force_https\" : \"true\",#" $CONF_FILE
 
   # add in base_url
   perl -p -i -e "s#(cookie_domain.*?,)#\$1\\n      \"base_url\" : \"https://$DOMAIN\",#" $CONF_FILE
+
+  rm $CONF_FILE.bak
 
   nginxConfAll
 
