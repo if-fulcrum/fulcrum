@@ -94,7 +94,7 @@ sub vcl_recv {
   # Always cache the following file types for all users. This list of extensions
   # appears twice, once here and again in vcl_backend_response so make sure you edit both
   # and keep them equal.
-  if (req.url ~ "(?i)\.(png|gif|jpe?g|ico|swf|css|js|html?|ttf)(\?[a-z0-9_=\?&\.-]+)?$") {
+  if (req.url ~ "(?i)\.(svg|woff|png|gif|jpe?g|ico|swf|css|js|html?|ttf)(\?[a-z0-9_=\?&\.-]+)?$") {
     unset req.http.Cookie;
   }
 
@@ -185,7 +185,7 @@ sub vcl_backend_response {
   # Don't allow static files to set cookies.
   # This list of extensions appears twice, once here and again in vcl_recv so
   # make sure you edit both and keep them equal.
-  if (bereq.url ~ "(?i)\.(png|gif|jpe?g|ico|swf|css|js|html?|ttf)(\?[a-z0-9_=\?&\.-]+)?$") {
+  if (bereq.url ~ "(?i)\.(svg|woff|png|gif|jpe?g|ico|swf|css|js|html?|ttf)(\?[a-z0-9_=\?&\.-]+)?$") {
     # beresp == Back-end response from the web server.
     unset beresp.http.set-cookie;
   }
