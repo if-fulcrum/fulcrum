@@ -29,13 +29,6 @@ sub vcl_recv {
   #
   # set req.grace = 6h;
 
-# This is for the Varnish 3, not needed after Varnish 4 beresp.uncacheable
-#  # large file kludge (see vcl_backend_response section)
-#  if (req.http.x-pipe && req.restarts > 0) {
-#    unset req.http.x-pipe;
-#    return (pipe);
-#  }
-
   # Pipe these paths directly to web server for streaming.
   if (req.url ~ "^/admin/content/backup_migrate/export") {
     return (pipe);
