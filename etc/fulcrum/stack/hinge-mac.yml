@@ -55,6 +55,7 @@ varnish:
   image: fulcrum/varnish:latest-alpine
   volumes:
     - /mnt/fulcrum/etc/varnish:/etc/varnish
+    - /mnt/fulcrum/etc/varnish/include/audience-public.vcl:/etc/varnish/include/audience.vcl
     - /mnt/fulcrum/etc/varnish/include/x-forward-for-localdev.vcl:/etc/varnish/include/x-forward-for.vcl
     - /mnt/fulcrum/etc/varnish/include/beresp-ttl-dev.vcl:/etc/varnish/include/beresp-ttl.vcl
     - /mnt/fulcrum/var/log/varnish:/var/log

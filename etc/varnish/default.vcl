@@ -3,10 +3,10 @@ vcl 4.0;
 import std;
 import directors;
 
+include "include/audience.vcl";
 include "internal.vcl";
-include "whitelist.vcl";
 include "blacklist.vcl";
-
+include "whitelist.vcl";
 include "backends-webs.vcl";
 
 # Respond to incoming requests.
@@ -17,6 +17,24 @@ sub vcl_recv {
 
   # save the left most IP for whitelisting
   set req.http.X-Client-IP = regsub(req.http.X-Forwarded-For, "[, ].*$", "");
+
+  # Only allow BAN requests from IP addresses in the 'purge' ACL.
+  if (req.method == "BAN") {
+      # Same ACL check as above:
+      if (!client.ip ~ internal) {
+          return (synth(403, "Not allowed."));
+      }
+      # Logic for the ban, using the Cache-Tags header. For more info
+      # see https://github.com/geerlingguy/drupal-vm/issues/397.
+      if (req.http.Cache-Tags) {
+          ban("obj.http.Cache-Tags ~ " + req.http.Cache-Tags);
+      }
+      else {
+          return (synth(403, "Cache-Tags header missing."));
+      }
+      # Throw a synthetic page so the request won't go to the backend.
+      return (synth(200, "Ban added."));
+  }
 
   # Use anonymous, cached pages if all backends are down.
   if (!std.healthy(req.backend_hint)) {
@@ -40,10 +58,10 @@ sub vcl_recv {
   }
 
   # Determines if the "public" part (not /user) can be hit.
-  # internal.vcl should either be empty (dev/test) or 0.0.0.0/0 for a public (hinge/prd) setup
+  # audience.vcl should either be empty (dev/test) or 0.0.0.0/0 for a public (hinge/prd) setup
   # if IP in whitelist, you get access to both the frontend and /user
   # behind ELB -> HAproxy, it seems $_SERVER['HTTP_X_CLIENT_IP'];, not to be confused with HTTP_X_CLIENTIP
-  if ( client.ip !~ internal && std.ip(req.http.X-Client-IP, client.ip) !~ whitelist ) {
+  if ( client.ip !~ audience && std.ip(req.http.X-Client-IP, client.ip) !~ whitelist ) {
     return (synth(403, "Access Denied."));
   }
 
@@ -126,6 +144,13 @@ sub vcl_recv {
 
 # Set a header to track a cache HIT/MISS.
 sub vcl_deliver {
+  # Remove ban-lurker friendly custom headers when delivering to client.
+  unset resp.http.X-Url;
+  unset resp.http.X-Host;
+  # Comment these for easier Drupal cache tag debugging in development.
+  unset resp.http.Cache-Tags;
+  unset resp.http.X-Drupal-Cache-Contexts;
+
   set resp.http.Via = "1.1 varnish";
 
   if (obj.hits > 0) {
@@ -137,7 +162,6 @@ sub vcl_deliver {
 
 # Routine used to determine the cache key if storing/retrieving a cached page.
 sub vcl_hash {
-
   # hash data based on the domain (host) as to not have conflicts on foo.com/contact & bar.com/contact
   # also seperate based on http vs httpS else http will not redirect if its already in the cache
   # https://bensmann.no/seperate-varnish-caching-http-https/
@@ -165,6 +189,9 @@ sub vcl_hash {
 # Code determining what to do when serving items from the web servers.
 # beresp == Back-end response from the web server.
 sub vcl_backend_response {
+  # Set ban-lurker friendly custom headers.
+  set beresp.http.X-Url = bereq.url;
+  set beresp.http.X-Host = bereq.http.host;
 
   include "include/beresp-ttl.vcl";
 
