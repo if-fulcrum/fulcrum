@@ -104,34 +104,6 @@ function cloneCodebase() {
   fi
 }
 
-function drupalVersion() {
-  D8FILE=${FULCRUM_DOCROOT}/core/lib/Drupal.php
-  D7FILE=${FULCRUM_DOCROOT}/includes/bootstrap.inc
-  D_FILE=${FULCRUM_DOCROOT}/modules/system/system.module
-
-  if   [ -e $D8FILE ]; then
-    echo "Checking $D8FILE"
-    DRUPAL_FULL_VERSION=$( egrep "[ ']VERSION[ ']" $D8FILE|cut -d\' -f2)
-    DRUPAL_MAJOR_VERSION=$(egrep "[ ']VERSION[ ']" $D8FILE|cut -d\' -f2|cut -d. -f1)
-  elif [ -e $D7FILE ]; then
-    echo "Checking $D7FILE"
-    DRUPAL_FULL_VERSION=$( egrep "[ ']VERSION[ ']" $D7FILE|cut -d\' -f4)
-    DRUPAL_MAJOR_VERSION=$(egrep "[ ']VERSION[ ']" $D7FILE|cut -d\' -f4|cut -d. -f1)
-  elif [ -e $D_FILE ]; then
-    echo "Checking $D_FILE"
-    DRUPAL_FULL_VERSION=$( egrep "[ ']VERSION[ ']" $D_FILE|cut -d\' -f4)
-    DRUPAL_MAJOR_VERSION=$(egrep "[ ']VERSION[ ']" $D_FILE|cut -d\' -f4|cut -d. -f1)
-  else
-    eout "Could not find files to determine Drupal version under $FULCRUM_DOCROOT"
-  fi
-
-  if [[ "$DRUPAL_MAJOR_VERSION" != "7" && "$DRUPAL_MAJOR_VERSION" != "8" ]]; then
-      eout "Not compatible with Drupal version '$DRUPAL_MAJOR_VERSION' in $FULCRUM_DOCROOT!"
-  fi
-
-  vout "DRUPAL_MAJOR_VERSION: $DRUPAL_MAJOR_VERSION"
-}
-
 function nginxConfSite() {
   FUCRUM_CNF_TPL=json.tpl
 
