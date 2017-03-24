@@ -55,25 +55,8 @@ function cloneCodebase() {
       fi
     fi
   else
-    # if the top level is not the docroot, then we want to do a sparse checkout
-    if [ "$FULCRUM_DOCROOT" != "$FULCRUM_REPODIR" ]; then
-      vout "Sparse checkout of $FULCRUM_REPO$FULCRUM_WRD to $FULCRUM_REPODIR"
-
-      mkdir $FULCRUM_REPODIR
-
-      cd $FULCRUM_REPODIR
-
-      git init
-      git remote add -f origin $FULCRUM_REPO
-      git config core.sparseCheckout true
-
-      echo "$FULCRUM_WRD" >> .git/info/sparse-checkout
-
-      git pull origin master
-    else
-      vout "Cloning repo $FULCRUM_REPO to $FULCRUM_REPODIR"
-      git clone $FULCRUM_REPO $FULCRUM_REPODIR
-    fi
+    vout "Cloning repo $FULCRUM_REPO to $FULCRUM_REPODIR"
+    git clone $FULCRUM_REPO $FULCRUM_REPODIR
 
     if [ "$CLONING_SITE" = true ]; then
       vout "Removing original $FULCRUM_REPO .git directory from $FULCRUM_REPODIR"
