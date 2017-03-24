@@ -159,6 +159,10 @@ case ${MYCOMMAND} in
     forcehttps "${2:-}"
     ;;
 
+  "ac"|"addcron")
+    addCron "${2:-}"
+    ;;
+
   *)
     vout "command not found..."
     sendalert ""

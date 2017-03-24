@@ -27,6 +27,7 @@ function usage() {
   echo "rnd            - create a random string, will be prompted for length [rand] [random] [randomstr]"
   echo "sc             - create a self-signed HTTPS certificate [signcert]"
   echo "fs             - force HTTPS via base_url [forcehttps]"
+  echo "ac             - add drupal cron entry for a site [addcron]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   exit 0
@@ -305,4 +306,57 @@ function stackExports() {
   export FULCRUM_VARNISH_07
   export FULCRUM_VARNISH_08
   export FULCRUM_VARNISH_09
+}
+
+function addCron() {
+  # see if we were given a domain
+  FULCRUM_SITE=${1:-""}
+
+  # ask if we didn't fine a domain
+  if [ -z "$FULCRUM_SITE" ]; then
+    read -p "Please enter site you would like to add to cron: " FULCRUM_SITE
+  fi
+
+  SCHEME=http
+  CRON_PORT=80
+  CONF_FILE=$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
+  FULCRUM_REPODIR=$FULCRUM_DIRNAME/sites/$FULCRUM_SITE
+  FULCRUM_DOCROOT=$FULCRUM_REPODIR
+
+  if [ ! -e $CONF_FILE ]; then
+    eout "Config file not found!"
+  else
+    if [ -d $FULCRUM_DOCROOT/docroot ]; then
+      FULCRUM_WRD=/docroot
+    else
+      FULCRUM_WRD=""
+    fi
+
+    FULCRUM_DOCROOT=$FULCRUM_REPODIR$FULCRUM_WRD
+
+    drupalVersion
+
+    cd $FULCRUM_DOCROOT
+
+    if $(grep force_https $CONF_FILE > /dev/null 2>&1); then
+      SCHEME=https
+      CRON_PORT=443
+    fi
+
+    if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+      CRON_URL="$SCHEME://$FULCRUM_SITE/cron.php?cron_key=$(drush vget --exact --format=string cron_key)"
+    elif [[ "$DRUPAL_MAJOR_VERSION" = "8" ]]; then
+      CRON_URL="$SCHEME://$FULCRUM_SITE/cron/$(drush sget --format=string system.cron_key)"
+    else
+      eout "Must be Drupal 7 or 8"
+    fi
+
+    CRON_ETC_DIR=$FULCRUM_DIRNAME/etc/fulcrum/cron
+    CRON_FILE=$CRON_ETC_DIR/periodic/01min/${FULCRUM_SITE//"."/"_"}
+
+    vout "$CRON_FILE:"
+    echo -en "#!/bin/sh\n\nHOST_IP=\$(/sbin/ip route|awk '/default/ {print \$3}')\n\ncurl -s -k --resolve $FULCRUM_SITE:$CRON_PORT:\$HOST_IP $CRON_URL\n" | sudo tee $CRON_FILE
+
+    chmod +x $CRON_FILE
+  fi
 }

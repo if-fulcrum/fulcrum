@@ -1,3 +1,12 @@
+cron:
+  container_name: cron
+  image: fulcrum/util
+  tty: true
+  volumes:
+   - /mnt/fulcrum/etc/fulcrum/cron/periodic:/etc/periodic:ro
+  entrypoint: /usr/sbin/crond
+  command: -f
+
 # /mnt/fulcrum/var/lib/mysql is exported twice
 # for compatibility with debian and alpine mariadb
 mariadb:
