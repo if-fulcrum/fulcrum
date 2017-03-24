@@ -355,7 +355,7 @@ function addCron() {
     CRON_FILE=$CRON_ETC_DIR/periodic/01min/${FULCRUM_SITE//"."/"_"}
 
     vout "$CRON_FILE:"
-    echo -en "#!/bin/sh\n\nHOST_IP=\$(/sbin/ip route|awk '/default/ {print \$3}')\n\ncurl -s -k --resolve $FULCRUM_SITE:$CRON_PORT:\$HOST_IP $CRON_URL\n" | sudo tee $CRON_FILE
+    echo -en "#!/bin/sh\n\nHOST_IP=\$(/sbin/ip route|awk '/default/ {print \$3}')\n\ncurl -s -k --resolve $FULCRUM_SITE:$CRON_PORT:\$HOST_IP $CRON_URL\n" | tee $CRON_FILE
 
     chmod +x $CRON_FILE
   fi
