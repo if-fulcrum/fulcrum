@@ -1,0 +1,5 @@
+FULCRUM_SITE=hello7.fulcrum.ifdev
+FULCRUM_DBGZ=~/fulrum/var/fulcrum/bak/hello7.sql.gz
+FULCRUM_DBNAME=hello7dev
+FULCRUM_REPO=git@github.com:if-fulcrum/hello7.git
+

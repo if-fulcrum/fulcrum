@@ -191,9 +191,33 @@ function drushUserLogin() {
 function setupEnv() {
   ${FULCRUM_BINDIR}/doctor
 
+  FULCRUM_SITES_VARS_DIR=$FULCRUM_DIRNAME/etc/fulcrum/sites
   CLONING_SITE=false
 
-  if [[ "$1" = "--clone" ]]; then
+  if [ -z "$1" ]; then
+    if [ -d $FULCRUM_SITES_VARS_DIR ]; then
+      # update if a git repo
+      if [ -d .git ]; then
+        cd $FULCRUM_SITES_VARS_DIR
+        git pull
+      fi
+
+      SITES=$(find $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} \;|awk '{print FNR " " $0}')
+
+      if [ -n "$SITES" ]; then
+        echo "$SITES"
+        read -p "Please enter site to spin up: " MYNUMBER
+        SITE=$(echo "$SITES"|awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER {print $2}')
+
+        vout "Spinning up $SITE"
+        . $FULCRUM_SITES_VARS_DIR/$SITE
+      else
+        eout "Cannot call \"site\" without arguments, you do not yet have any .site files defined in $FULCRUM_SITES_VARS_DIR"
+      fi
+    else
+      eout "Cannot call \"site\" without arguments, you do not yet have a $FULCRUM_SITES_VARS_DIR"
+    fi
+  elif [[ "$1" = "--clone" ]]; then
     CLONING_SITE=true
     FULCRUM_SITE=$2
     FULCRUM_DBGZ=$3
