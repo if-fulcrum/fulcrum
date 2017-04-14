@@ -144,12 +144,8 @@ sub vcl_recv {
 
 # Set a header to track a cache HIT/MISS.
 sub vcl_deliver {
-  # Remove ban-lurker friendly custom headers when delivering to client.
-  unset resp.http.X-Url;
-  unset resp.http.X-Host;
-  # Comment these for easier Drupal cache tag debugging in development.
-  unset resp.http.Cache-Tags;
-  unset resp.http.X-Drupal-Cache-Contexts;
+
+  include "include/cache-tag-remove.vcl";
 
   set resp.http.Via = "1.1 varnish";
 
