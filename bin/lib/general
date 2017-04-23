@@ -168,15 +168,28 @@ function signCert() {
   vout "Making temp directory $TMP_DIR"
   mkdir $TMP_DIR
 
-  vout "Making private key"
-  openssl genrsa -des3 -passout pass:x -out $TMP_DIR/$CERT_DOMAIN.pass.key 2048
-  openssl rsa -passin pass:x -in $TMP_DIR/$CERT_DOMAIN.pass.key -out $TMP_DIR/$CERT_DOMAIN.key
+  # vout "Making private key"
+  # openssl genrsa -des3 -passout pass:x -out $TMP_DIR/$CERT_DOMAIN.pass.key 2048
+  # openssl rsa -passin pass:x -in $TMP_DIR/$CERT_DOMAIN.pass.key -out $TMP_DIR/$CERT_DOMAIN.key
+  #
+  # vout "Making the cert signing request"
+  # openssl req -new -key $TMP_DIR/$CERT_DOMAIN.key -out $TMP_DIR/$CERT_DOMAIN.csr -subj "/C=US/ST=Anywhere/L=Nowwhere/O=Fulcrum Inc/OU=Fulcrum Hinge/CN=$CERT_DOMAIN"
+  #
+  # vout "Making the actual cert"
+  # openssl x509 -req -sha256 -days 3652 -in $TMP_DIR/$CERT_DOMAIN.csr -signkey $TMP_DIR/$CERT_DOMAIN.key -out $TMP_DIR/$CERT_DOMAIN.crt
 
-  vout "Making the cert signing request"
-  openssl req -new -key $TMP_DIR/$CERT_DOMAIN.key -out $TMP_DIR/$CERT_DOMAIN.csr -subj "/C=US/ST=Anywhere/L=Nowwhere/O=Fulcrum Inc/OU=Fulcrum Hinge/CN=$CERT_DOMAIN"
-
-  vout "Making the actual cert"
-  openssl x509 -req -sha256 -days 3652 -in $TMP_DIR/$CERT_DOMAIN.csr -signkey $TMP_DIR/$CERT_DOMAIN.key -out $TMP_DIR/$CERT_DOMAIN.crt
+  vout "Making private key and cert"
+  openssl req \
+    -newkey rsa:4096 \
+    -x509 \
+    -nodes \
+    -keyout $TMP_DIR/$CERT_DOMAIN.key \
+    -out $TMP_DIR/$CERT_DOMAIN.crt \
+    -subj "/C=US/ST=Anywhere/L=Nowwhere/O=Fulcrum Inc/OU=Fulcrum Hinge/CN=$CERT_DOMAIN" \
+    -reqexts SAN \
+    -extensions SAN \
+    -config <(cat /usr/local/etc/openssl/openssl.cnf \
+      <(echo -e "\n\n[SAN]\nsubjectAltName=DNS:$CERT_DOMAIN"))
 
   vout "Adding to the Mac keychain"
   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $TMP_DIR/$CERT_DOMAIN.crt
