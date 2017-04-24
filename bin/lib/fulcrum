@@ -28,7 +28,7 @@ function usage() {
   echo "sc             - create a self-signed HTTPS certificate [signcert]"
   echo "fs             - force HTTPS via base_url [forcehttps]"
   echo "ac             - add drupal cron entry for a site [addcron]"
-  echo "rc             - remake certs [rc]"
+  echo "rc             - remake certs [remakeCerts]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   exit 0
