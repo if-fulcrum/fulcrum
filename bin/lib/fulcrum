@@ -28,6 +28,7 @@ function usage() {
   echo "sc             - create a self-signed HTTPS certificate [signcert]"
   echo "fs             - force HTTPS via base_url [forcehttps]"
   echo "ac             - add drupal cron entry for a site [addcron]"
+  echo "rc             - remake certs [rc]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   exit 0
@@ -359,4 +360,30 @@ function addCron() {
 
     chmod +x $CRON_FILE
   fi
+}
+
+function remakeCerts() {
+  echo -n "Enter top level domain of certs to delete? (e.g. .local): "
+  read TLD </dev/tty
+
+  CERTS=$(echo $(sudo security find-certificate -c $TLD -Z -a |egrep 'SHA-1 hash|alis')|tr ':' '\n'|grep alis|cut -d\" -f1,4|sed 's/ //g'|tr '"' ' '|sort -u)
+
+  while read -r CERT; do
+    SHA=$(echo "$CERT"|cut -f1 -d" ")
+    CERT_DOMAIN=$(echo "$CERT"|cut -f2 -d" ")
+
+    if [ -n "$CERT" ]; then
+      echo -n "Delete and remake certificate for \"$CERT_DOMAIN\"? (y/n): "
+      read DELETE </dev/tty
+
+      if [ "$DELETE" == "y" ]; then
+        echo "deleting $CERT_DOMAIN"
+        sudo security delete-certificate -Z $SHA
+
+        signCert $CERT_DOMAIN
+      fi
+    else
+      echo "No matching certs"
+    fi
+  done <<< "$CERTS"
 }
