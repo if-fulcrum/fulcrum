@@ -1,0 +1,4 @@
+Used for Load Balancer health checks, rm this file to tell the load balancer we are going into sick mode. <br />
+Recreate file to return to healthy state.                                                       <br />
+Suggest bypassing varnish as to not get a cached status health check                            <br />
+curl -iL localhost:8080/fulcrum-health-status.html                                              <br />
