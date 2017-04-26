@@ -163,6 +163,10 @@ case ${MYCOMMAND} in
     addCron "${2:-}"
     ;;
 
+  "rc"|"remakecerts")
+    remakeCerts
+    ;;
+
   *)
     vout "command not found..."
     sendalert ""
