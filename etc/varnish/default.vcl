@@ -145,7 +145,19 @@ sub vcl_recv {
 # Set a header to track a cache HIT/MISS.
 sub vcl_deliver {
 
-  include "include/cache-tag-remove.vcl";
+  # it seems varnish doesn't really run these durning the include for whatever reason
+  # include "include/cache-tag-remove.vcl";
+
+  # Remove ban-lurker friendly custom headers when delivering to client.
+  unset resp.http.X-Url;
+  unset resp.http.X-Host;
+
+  # Comment these for easier Drupal cache tag debugging in development.
+  unset resp.http.Cache-Tags;
+  unset resp.http.X-Drupal-Cache-Contexts;
+
+  # Just things to hide from the public
+  unset resp.http.X-Generator;
 
   set resp.http.Via = "1.1 varnish";
 
