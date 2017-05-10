@@ -73,6 +73,9 @@ if (!function_exists('fulcrum_cfg')) {
       if (isset($fcfg['force_https']) && $fcfg['force_https'] == 'true') {
         fulcrum_force_https();
       }
+      if (isset($fcfg['timezone'])) {
+        date_default_timezone_set($fcfg['timezone']);
+      }
     }
   }
 }
