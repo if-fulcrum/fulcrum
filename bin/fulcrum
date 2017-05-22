@@ -122,6 +122,11 @@ case ${MYCOMMAND} in
     haproxyrestart
     ;;
 
+  "varnish"|"varnishrestart"|"varnish-restart")
+    vout "running varnishrestart command"
+    varnishrestart
+    ;;
+
   "conf"|"nginx"|"nginx-restart")
     vout "regenerate nginx .conf file from json & restart nginx"
     nginxConfAll
