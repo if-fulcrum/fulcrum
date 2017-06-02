@@ -115,6 +115,13 @@ sub vcl_recv {
   # Varnish cache temporarily. The session cookie allows all authenticated users
   # to pass through as long as they're logged in.
   if (req.http.Cookie) {
+
+    # simple saml remove cookies else attempting to login goes into a loop
+    # https://www.drupal.org/node/2651192
+    if (req.http.Cookie ~ "NO_CACHE") {
+      return (pass);
+    }
+
     # 1. Append a semi-colon to the front of the cookie string.
     # 2. Remove all spaces that appear after semi-colons.
     # 3. Match the cookies we want to keep, adding the space we removed
