@@ -24,16 +24,18 @@ sub vcl_recv {
       if (!client.ip ~ internal) {
           return (synth(403, "Not allowed."));
       }
-      # Logic for the ban, using the Cache-Tags header. For more info
-      # see https://github.com/geerlingguy/drupal-vm/issues/397.
-      if (req.http.Cache-Tags && req.http.X-Host) {
-          ban( "obj.http.X-Host == " + req.http.X-Host + " && obj.http.Cache-Tags ~ " + "#" + req.http.Cache-Tags + "#" );
+      # We ban based on the url, not tags, as cloudflare business does not handle tags,
+      # and drupal likes to do full tags or urls, not both.
+      if (req.http.X-Url && req.http.X-Host) {
+         # X-Url is not just the part after the domain name, but the whole thing, so we have to chop it up
+         set req.http.X-Url = regsub(req.http.X-Url, "^https?://[^/]+/", "/");
+         ban("req.http.host == " + req.http.X-Host + " && req.url == " + req.http.X-Url);
       }
       else {
-          return (synth(403, "Cache-Tags header or X-Host header missing."));
+         return (synth(403, "X-Url header or X-Host header missing."));
       }
       # Throw a synthetic page so the request won't go to the backend.
-      return (synth(200, "Ban added."));
+      return (synth(200, "Purge added for " + req.http.X-Host + " - " + req.http.X-Url));
   }
 
   # Use anonymous, cached pages if all backends are down.
