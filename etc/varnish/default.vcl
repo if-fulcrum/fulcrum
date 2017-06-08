@@ -74,7 +74,7 @@ sub vcl_recv {
   if (req.url ~ "^/((wordpress|wp|old)/wp-admin/?|wp-login.php)$" ||
       ( !std.ip(req.http.X-Client-IP, client.ip) ~ whitelist &&
         ( req.url ~ "^/((apc|authorize|cron|install|phptest|status|update)\.php|[A-Z]{6,11}[a-z\.]*\.txt)$" ||
-          req.url ~ "(?i)^/((index.php)?\?q=)?(admin.*|user.*|node/add)")
+          req.url ~ "(?i)^/((index.php)?\?q=)?(admin.*|user.*|node/add|simplesaml*)" )
   )) {
     return (synth(403, "Access Denied."));
   }
