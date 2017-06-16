@@ -76,7 +76,7 @@ sub vcl_recv {
         ( req.url ~ "^/((apc|authorize|cron|install|phptest|status|update)\.php|[A-Z]{6,11}[a-z\.]*\.txt)$" ||
           req.url ~ "(?i)^/((index.php)?\?q=)?(admin.*|user.*|node/add|simplesaml*)" )
   )) {
-    return (synth(403, "Access Denied."));
+    return (synth(403, "Access Denied. " + std.ip(req.http.X-Client-IP, client.ip) ));
   }
 
   # Do not cache these paths.
