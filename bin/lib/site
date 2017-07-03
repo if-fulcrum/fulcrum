@@ -68,6 +68,8 @@ function cloneCodebase() {
   chmod u+w $FULCRUM_DOCROOT/sites/default
   mkdir -p $FULCRUM_DOCROOT/sites/default/files
   chmod u+w $FULCRUM_DOCROOT/sites/default/files
+  chmod g+w $FULCRUM_DOCROOT/sites/default/files
+  chmod o+w $FULCRUM_DOCROOT/sites/default/files
 
   # remove if is it already exists
   if [ -e $FULCRUM_DOCROOT/sites/default/files/.htaccess ]; then
