@@ -130,9 +130,9 @@ SETVAR
 
   cat $FULCRUM_DIRNAME/etc/fulcrum/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
 
-  read -e -p "Is this site forcing all HTTPS? (y/n)" FORCEHTTPS
+  read -e -p "Is this site forcing all HTTPS? New sites likely should. (y/n)" FORCEHTTPS
   if [ "$FORCEHTTPS" == "y" ]; then
-    fulcrum forcehttps $FULCRUM_SITE
+    ${FULCRUM_BINDIR}/fulcrum forcehttps $FULCRUM_SITE
   fi
 
   nginxConfAll
