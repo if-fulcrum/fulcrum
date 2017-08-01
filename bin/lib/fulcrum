@@ -140,7 +140,7 @@ function helloSites() {
 
     $FULCRUM_BINDIR/site hello7.fulcrum.ifdev \
       $FULCRUM_DIRNAME/var/fulcrum/bak/hello7.sql.gz \
-      hello7dev git@github.com:if-fulcrum/hello7.git
+      hello7dev https://github.com/if-fulcrum/hello7.git
 
     echo "hello7_site = 7.52" >> $FULCRUM_INI
   fi
@@ -152,7 +152,7 @@ function helloSites() {
 
     $FULCRUM_BINDIR/site hello8.fulcrum.ifdev \
       $FULCRUM_DIRNAME/var/fulcrum/bak/hello8.sql.gz \
-      hello8dev git@github.com:if-fulcrum/hello8.git docroot
+      hello8dev https://github.com/if-fulcrum/hello8.git docroot
 
     echo "hello8_site = 8.2.3" >> $FULCRUM_INI
   fi
