@@ -21,6 +21,26 @@
     },
     "set" : {
       "settings" : {
+        "container_yamls" : [
+          "sites/default/services.yml",
+          "modules/redis/example.services.yml"
+        ],
+        "redis.connection" : {
+          "interface" : "PhpRedis",
+          "host" : "redis",
+          "port" : "6379"
+        },
+        "cache_prefix" : {
+          "default" : "${FULCRUM_DBNAME}"
+        },
+        "cache" : {
+          "default" : "cache.backend.redis",
+          "bins" : {
+            "bootstrap" : "cache.backend.chainedfast",
+            "discovery" : "cache.backend.chainedfast",
+            "config" : "cache.backend.chainedfast"
+          }
+        },
         "hash_salt" : "${FULCRUM_SALT}",
         "install_profile" : "standard",
         "file_public_path" : "sites/default/files"
