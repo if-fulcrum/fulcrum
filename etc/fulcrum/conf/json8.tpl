@@ -34,7 +34,6 @@
           "default" : "${FULCRUM_DBNAME}"
         },
         "cache" : {
-          "default" : "cache.backend.redis",
           "bins" : {
             "bootstrap" : "cache.backend.chainedfast",
             "discovery" : "cache.backend.chainedfast",
