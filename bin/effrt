@@ -1,0 +1,275 @@
+#!/bin/sh
+
+# TODO: This should help the user install all this stuff and not just dump it to the screen
+# TODO: Maybe all docker containers too? Make Windows easier too...
+# ensure phpcs is installed
+# https://github.com/squizlabs/PHP_CodeSniffer
+# https://www.drupal.org/node/1419988
+which phpcs 2>&1 1>/dev/null
+if [ $? -ne 0 ]; then
+  echo "This should be a docker container so we don't have to worry about depencies and make windows easier to check."
+  echo ''
+  echo ''
+  echo "Note that drupal standards only work with codesniffer 2.* -- https://www.drupal.org/node/2809335"
+  echo "Please download it with composer"
+  echo '  composer global require "squizlabs/php_codesniffer=2.*"'
+  echo '  composer global require "drupal/coder"'
+  echo '  composer global require "dealerdirect/phpcodesniffer-composer-installer"'
+  echo '  composer global require "j13k/yaml-lint"'
+  echo '  composer global require "asm89/twig-lint" "@stable"'
+  echo '  composer global require "dealerdirect/qa-tools" <- currently blows up... so come back to this'
+  echo '  npm install -g eslint'
+  echo '  $EDITOR ~/.eslintrc # get content from someone else...'
+  echo ''
+  echo 'And then add ~/.composer/vendor/bin/php to your PATH'
+  echo 'This is typically done in one of the following files'
+  echo '~/.profile'
+  echo '~/.bashrc'
+  echo '~/.zshrc'
+  echo ''
+  echo 'Find a line similar to export PATH=$PATH and make it'
+  echo 'export PATH=$PATH:~/.composer/vendor/bin'
+  echo 'Then make a new terminal window and run echo $PATH'
+  echo ''
+  echo 'Add the drupal profiles to phpcs'
+  echo '  phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer'
+  echo ''
+  echo 'Ensure the profiles exist'
+  echo '  phpcs -i'
+  echo '  # should see Drupal and DrupalPractice'
+  echo ''
+  echo "If you do not have composer, you can install it with brew:"
+  echo "brew install homebrew/php/composer"
+  echo "brew install npm"
+  echo ''
+  echo "If you do not have brew, please visit https://brew.sh"
+  exit 1
+fi
+
+
+function usage() {
+  echo "Example Usage: "
+  echo " -h  Help"
+  echo " -s  Files to skip, comma seperated."
+  echo " -o  Files to validate, comma seperated. All other files skipped"
+  echo ""
+  echo "effrt -s docroot/foo.css,docroot/settings.php"
+  exit 0
+}
+
+
+# read in command line args
+SKIP_FILES=()
+ONLY_FILES=()
+while getopts "hs:o:" opt; do
+  case ${opt} in
+    h)
+      usage
+      shift 1
+      ;;
+    o)
+      ONLY_FILES=($(echo $OPTARG | sed 's;,; ;g'))
+      shift 1
+      ;;
+    s)
+      SKIP_FILES=($(echo $OPTARG | sed 's;,; ;g'))
+      shift 1
+      ;;
+    :)
+      echo "Option -$OPTARG Requires an Argument." >&2
+      echo "Try -h for Help."
+      exit 1
+      ;;
+  esac
+done
+
+
+# if files are staged, only check them (likely from githook, else check everything
+MYFILES=$(git diff-index --diff-filter=ACMRTUXB --cached --name-only HEAD --)
+HAS_STAGED=TRUE
+
+# even if array is empty, its size is 1 for some reason, so also check the first value
+if [ ${#MYFILES[@]} -eq 1 ] && [ -z ${MYFILES[0]} ]; then
+  MYFILES=$(git status --short | awk '{ print $2 }' )
+  HAS_STAGED=FALSE
+fi
+
+# loop over non deleted files to do syntax/lint/debugger_code checks
+ERRORS=( )
+for MYFILE in $MYFILES
+do
+
+  # if ONLY_FILES, then skip all other files
+  if [ -n "$( echo $ONLY_FILES )" ]; then
+
+    # loop over all options as they might be a wildcard
+    IS_MATCH=FALSE
+
+    for ONLY_FILE in "${ONLY_FILES[@]}"; do
+      if [ -n "$( echo $MYFILE | grep "$ONLY_FILE" )" ]; then
+	IS_MATCH=TRUE
+      fi
+    done
+
+    if [ "$IS_MATCH" == "FALSE" ]; then
+      echo "skipping checking of $MYFILE"
+      continue
+    fi
+  fi
+
+
+  # if SKIP_FILES, then skip the file
+  if [ -n "$( echo $SKIP_FILES )" ]; then
+
+    # loop over all options as they might be a wildcard
+    IS_MATCH=FALSE
+
+    for SKIP_FILE in "${SKIP_FILES[@]}"; do
+      if [ -n "$( echo $MYFILE | grep "$SKIP_FILE" )" ]; then
+	IS_MATCH=TRUE
+      fi
+    done
+
+    if [ "$IS_MATCH" == "TRUE" ]; then
+      echo "skipping checking of $MYFILE"
+      continue
+    fi
+  fi
+
+
+  # If there are whitespace errors, print the offending file names and fail.
+  O=$(git diff-index --check --cached HEAD --)
+  if [ $? -ne 0 ]; then
+    ERRORS+=("$O")
+  fi
+
+  # determine file type based on suffix and do some checking
+  # likely have to do some kind of `type` for things without file extensions
+  FILE_EXTENSION=$(echo $MYFILE | egrep -o "\.[a-z0-9]+$")
+
+
+  # figure out the top file extensions of a repo with
+  # cd $PATH_TO_REPO && find . -type f | egrep -o "\.[a-z0-9]+$" | sort | uniq -c |sort -n
+  case "$FILE_EXTENSION" in
+
+    # no checks to do for these types of files
+    .gitignore)
+      continue
+    ;;
+
+
+    .css)
+
+      ## https://stylelint.io/user-guide/cli/
+      ## likely need to figure out how to do scss and other new strange things that have come to the css world
+      O=$(docker run --rm --entrypoint stylelint -v $(pwd):/app willhallonline/stylelint --config /root/.stylelintrc $MYFILE 2>&1)
+      if [ $? -ne 0 ]; then
+        ERRORS+=("CSS issue $O")
+      fi
+
+    ;;
+
+
+    .js)
+
+      ## js lint testing, this seems broken if it doesn't include the index file?
+      O=$(eslint --quiet --config ~/.eslintrc $MYFILE 2>&1)
+      if [ $? -ne 0 ]; then
+        ERRORS+=("JAVASCRIPT issue $O")
+      fi
+
+    ;;
+
+
+    .php|.module)
+
+      ## php syntax error check
+      O=$(php -l $MYFILE 2>/dev/null)
+      if [ $? -ne 0 ]; then
+        ERRORS+=("PHP Syntax Error for $MYFILE $O")
+      fi
+
+      ## check for phpinfo outputs, error check is inversed as we do not want to find this
+      O=$(grep -Hn 'phpinfo()' $MYFILE)
+      if [ $? -ne 1 ]; then
+        ERRORS+=("phpinfo function found in $O")
+      fi
+
+      ## php lint testing, drupal prefered
+      O=$(phpcs --standard=Drupal $MYFILE 2>&1)
+      if [ $? -ne 0 ]; then
+        ERRORS+=("PHP LINT issue $O")
+      fi
+
+    ;;
+
+
+    .twig)
+
+      ## twig lint testing
+      O=$(~/.composer/vendor/bin/twig-lint lint $MYFILE 2>&1)
+      if [ $? -ne 0 ]; then
+        ERRORS+=("TWIG issue $O")
+      fi
+
+    ;;
+
+
+    .yml)
+
+      ## yaml lint testing
+      O=$(yaml-lint -q $MYFILE 2>&1)
+      if [ $? -ne 0 ]; then
+        ERRORS+=("YAML LINT issue $O")
+      fi
+
+    ;;
+
+    # anything else is likely a problem and should be added to the case statement above if its valid
+    *)
+      ERRORS+=("$FILE_EXTENSION is not a valid extension type for this repo. For $MYFILE")
+
+  esac
+
+# TODO
+# file size check
+# do not allow non ascii files unless maybe in themes?
+
+done
+
+
+
+
+if [ ${#ERRORS[@]} -gt 0 ]; then
+
+  echo ""
+  echo "***************"
+  echo "******** Issues found, please correct before commiting."
+  echo "***************"
+  echo ""
+
+
+  X=0
+  for ERROR in "${ERRORS[@]}"
+  do
+    X=$((X+1))
+    echo "-------------$X--------------"
+    echo "$ERROR"
+    echo ""
+    echo ""
+  done
+
+  echo ""
+  echo "***************"
+  echo "******** Issues found, please correct before commiting.  You may need to reset changes before commiting again."
+  echo "******** git reset HEAD <file>... to unstage"
+  echo "******** You can add '--no-verify' to skip the hook and commit anyway, if using this with git commit hooks"
+  echo "***************"
+  echo ""
+  exit 1
+
+elif [ $HAS_STAGED == TRUE ]; then
+  # TODO find a better way to output this without a sleep to ensure the user sees it
+  echo "WARNING: You have staged files, only checking those select files, skipping unstaged."
+  sleep "2"
+fi
