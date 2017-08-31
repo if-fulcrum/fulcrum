@@ -53,7 +53,12 @@ function usage() {
   echo " -s  Files to skip, comma seperated."
   echo " -o  Files to validate, comma seperated. All other files skipped"
   echo ""
+  echo "Skip 2 files"
   echo "effrt -s docroot/foo.css,docroot/settings.php"
+  echo ""
+  echo "Only check css and php files"
+  echo "effrt -o .css,.php"
+  echo ""
   exit 0
 }
 
