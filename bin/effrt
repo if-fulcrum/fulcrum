@@ -186,7 +186,7 @@ do
     ;;
 
 
-    .php|.module)
+    .php|.module|.theme)
 
       ## php syntax error check
       O=$(php -l $MYFILE 2>/dev/null)
