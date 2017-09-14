@@ -32,6 +32,11 @@ function usage() {
   echo "rc             - remake certs [remakecerts]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
+  echo ""
+  echo ""
+  echo "port :4433 bypasses the varnish layer"
+  echo "port :5433 bypasses the varnish layer and enables the xdebug php container"
+  echo ""
   exit 0
 }
 
