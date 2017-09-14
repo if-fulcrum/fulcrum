@@ -58,7 +58,7 @@ phpfpm:
 
 phpfpmxdebug:
   container_name: phpfpmxdebug
-  image: fulcrum/phpxdebug
+  image: fulcrum/php:latest-alpine-xdebug
   volumes:
     - /mnt/fulcrum/etc/php5:/etc/php5
     - /mnt/fulcrum/var/log/php:/var/log
