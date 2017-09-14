@@ -56,6 +56,32 @@ phpfpm:
     - "$FULCRUM_VARNISH_08:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_09:$FULCRUM_HOST_IP"
 
+phpfpmxdebug:
+  container_name: phpfpmxdebug
+  image: fulcrum/php:latest-alpine-xdebug
+  volumes:
+    - /mnt/fulcrum/etc/php5:/etc/php5
+    - /mnt/fulcrum/var/log/php:/var/log
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
+    - /mnt/fulcrum/var/fulcrum/private_files:/private
+    - /mnt/fulcrum/sites:/var/www/html
+  links:
+    - redis
+    - mariadb
+  extra_hosts:
+    - "mymac:172.16.222.111"
+    - "varnish:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_01:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_02:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_03:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_04:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_05:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_06:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_07:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_08:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_09:$FULCRUM_HOST_IP"
+
 nginx:
   container_name: nginx
   image: fulcrum/nginx:latest-alpine
@@ -67,6 +93,19 @@ nginx:
     - phpfpm
   ports:
     - "8080:80"
+
+nginxxdebug:
+  container_name: nginxxdebug
+  image: fulcrum/nginx:latest-alpine
+  volumes:
+    - /mnt/fulcrum/etc/nginx:/etc/nginx
+    - /mnt/fulcrum/etc/nginx/fulcrum/fulcrum_fastcgi-xdebug.conf:/etc/nginx/fulcrum/fulcrum_fastcgi.conf
+    - /mnt/fulcrum/var/log/nginx:/var/log
+    - /mnt/fulcrum/sites:/var/www/html:ro
+  links:
+    - phpfpmxdebug
+  ports:
+    - "8081:80"
 
 varnish:
   container_name: varnish
@@ -86,6 +125,7 @@ varnish:
     - "6082:6082"
 
 # 4433 is for testing, bypass varnish on TLS
+# 5433 is for testing running php with xdebug
 haproxy:
   container_name: haproxy
   image: fulcrum/haproxy:latest-1.6-alpine
@@ -97,10 +137,14 @@ haproxy:
   links:
     - varnish
     - nginx
+    - nginxxdebug
   ports:
     - "80:80"
     - "443:443"
+    - "4080:4080"
     - "4433:4433"
+    - "5080:5080"
+    - "5433:5433"
     - "1936:1936"
 
 drush:
