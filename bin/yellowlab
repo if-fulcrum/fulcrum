@@ -1,0 +1,59 @@
+#!/bin/bash
+# This script will launch a container with yellowlab and allow you to hit other local sites
+# using a proxy on your mac, otherwise you cannot hit local sites on your mac from yellowlab
+
+ALIAS_IP=172.16.222.111
+
+# install tinyproxy
+if [ -z "$( which tinyproxy )" ]; then
+  echo "Tiny proxy is required to run yellowlab against other sites on your mac"
+  echo "Run brew install tinyproxy?"
+  while true; do
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) brew install tinyproxy; break;;
+          [Nn]* ) echo "exiting out, tinyproxy required"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+
+# verify the ifconfig lo0 has the ip we need to container out to mac
+# set an alias for localhost so xdebug can transmit back the IDE
+# https://forums.docker.com/t/accessing-host-machine-from-within-docker-container/14248/14
+# sudo ifconfig lo0 remove 172.16.222.111  - to remove
+if [ -z "$(ifconfig lo0 | grep $ALIAS_IP)" ]; then
+  while true; do
+    echo "Alias IP required on mac to allow proxy out, run sudo ifconfig lo0 alias $ALIAS_IP?"
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) sudo ifconfig lo0 alias $ALIAS_IP; break;;
+            [Nn]* ) echo "exiting out, lo0 alias requried"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+
+
+# ensure given IP is allowed in tinyproxy config
+if [ -z "$(grep "Allow 172.16.0.0/16" /usr/local/etc/tinyproxy.conf)" ]; then
+  while true; do
+    echo "Need to allow $ALIAS_IP in /usr/local/etc/tinyproxy.conf config, run sed -iBAK 's;Allow 127.0.0.1;Allow 172.16.0.0/16;' tinyproxy.conf"
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) sed -i.BAK 's;Allow 127.0.0.1;Allow 172.16.0.0/16;' /usr/local/etc/tinyproxy.conf; break;;
+            [Nn]* ) echo "exiting out, allow 172.16.0.0 required"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+
+
+
+echo "===================================================================================================="
+echo "run 'docker run -it --rm  --name yellowlab -p 8383:8383 jguyomard/yellowlabtools' in a new terminal"
+echo "to stop this container, you will need to run 'docker stop yellowlab' in new terminal"
+echo "Go to http://localhost:8383 and click advanced and enter $ALIAS_IP:8888"
+echo "hit control C to stop this script"
+echo "===================================================================================================="
+tinyproxy -d
