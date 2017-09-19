@@ -51,9 +51,10 @@ fi
 
 
 echo "===================================================================================================="
-echo "run 'docker run -it --rm  --name yellowlab -p 8383:8383 jguyomard/yellowlabtools' in a new terminal"
-echo "to stop this container, you will need to run 'docker stop yellowlab' in new terminal"
-echo "Go to http://localhost:8383 and click advanced and enter $ALIAS_IP:8888"
-echo "hit control C to stop this script"
+echo "Run 'docker run -it --rm  --name yellowlab -p 8383:8383 jguyomard/yellowlabtools' in a new terminal"
+echo "Go to http://localhost:8383 and click advanced and enter $ALIAS_IP:8888 in the HTTP proxy field"
+echo "Then enter your local website url to run tests against"
+echo "Stop this container, run 'docker stop yellowlab' in new terminal"
+echo "Hit control C to stop this script in this window."
 echo "===================================================================================================="
 tinyproxy -d
