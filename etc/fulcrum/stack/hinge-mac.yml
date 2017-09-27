@@ -61,6 +61,7 @@ phpfpmxdebug:
   image: fulcrum/php:latest-alpine-xdebug
   volumes:
     - /mnt/fulcrum/etc/php5:/etc/php5
+    - /mnt/fulcrum/etc/php5xdebug/conf.d/zz-xdebug.ini:/etc/php5/conf.d/zz-xdebug.ini
     - /mnt/fulcrum/var/log/php:/var/log
     - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
     - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
