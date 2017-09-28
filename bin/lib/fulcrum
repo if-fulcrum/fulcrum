@@ -240,7 +240,7 @@ function forcehttps() {
   perl -p -i -e "s#(webroot.*?,)#\$1\\n  \"force_https\" : \"true\",#" $CONF_FILE.bak
 
   # add in base_url
-  perl -p -i -e "s#(cookie_domain.*?,)#\$1\\n      \"base_url\" : \"https://$DOMAIN\",#" $CONF_FILE.bak
+  perl -p -i -e "s#(replace.*?$)#\$1\\n      \"base_url\" : \"https://$DOMAIN\",#" $CONF_FILE.bak
 
   mv $CONF_FILE.bak $CONF_FILE
 
