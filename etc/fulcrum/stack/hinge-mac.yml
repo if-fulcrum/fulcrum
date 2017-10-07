@@ -110,7 +110,7 @@ nginxxdebug:
 
 varnish:
   container_name: varnish
-  image: fulcrum/varnish:latest-alpine
+  image: fulcrum/varnish:5.1
   volumes:
     - /mnt/fulcrum/etc/varnish:/etc/varnish
     - /mnt/fulcrum/etc/varnish/include/audience-public.vcl:/etc/varnish/include/audience.vcl
@@ -118,7 +118,6 @@ varnish:
     - /mnt/fulcrum/etc/varnish/include/beresp-ttl-dev.vcl:/etc/varnish/include/beresp-ttl.vcl
     - /mnt/fulcrum/etc/varnish/include/cache-tag-debug.vcl:/etc/varnish/include/cache-tag-remove.vcl
     - /mnt/fulcrum/var/log/varnish:/var/log
-  command: -F -P /var/run/varnish.pid -a :80,PROXY -f /etc/varnish/default.vcl -S /etc/varnish/secret -T 0.0.0.0:6082 -t 120 -s malloc,128M
   links:
     - nginx
   ports:
@@ -129,7 +128,7 @@ varnish:
 # 5433 is for testing running php with xdebug
 haproxy:
   container_name: haproxy
-  image: fulcrum/haproxy:latest-1.6-alpine
+  image: fulcrum/haproxy:1.7
   volumes:
     - /mnt/fulcrum/etc/haproxy:/etc/haproxy
     - /mnt/fulcrum/etc/haproxy/local-dev.cfg:/etc/haproxy/haproxy.cfg

@@ -15,6 +15,14 @@ sub vcl_recv {
 
   include "include/x-forward-for.vcl";
 
+  # If we are hit on http2, it has to be on https.
+  # Haproxy cannot do http2 so it has to be in tcp mode and
+  # cannot add this header on its own, so let varnish do it.
+  if (req.proto ~ "HTTP/2") {
+    set req.http.X-Forwarded-Proto = "https";
+    set req.http.X-Forwarded-Port = "443";
+  }
+
   # save the left most IP for whitelisting
   set req.http.X-Client-IP = regsub(req.http.X-Forwarded-For, "[, ].*$", "");
 
