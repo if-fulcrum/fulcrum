@@ -56,6 +56,31 @@ phpfpm:
     - "$FULCRUM_VARNISH_08:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_09:$FULCRUM_HOST_IP"
 
+php7fpm:
+  container_name: php7fpm
+  image: fulcrum/php:7-latest
+  volumes:
+    - /mnt/fulcrum/etc/php7:/etc/php7
+    - /mnt/fulcrum/var/log/php7:/var/log/php7
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
+    - /mnt/fulcrum/var/fulcrum/private_files:/private
+    - /mnt/fulcrum/sites:/var/www/html
+  links:
+    - redis
+    - mariadb
+  extra_hosts:
+    - "varnish:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_01:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_02:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_03:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_04:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_05:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_06:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_07:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_08:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_09:$FULCRUM_HOST_IP"
+
 phpfpmxdebug:
   container_name: phpfpmxdebug
   image: fulcrum/php:latest-alpine-xdebug
@@ -83,30 +108,65 @@ phpfpmxdebug:
     - "$FULCRUM_VARNISH_08:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_09:$FULCRUM_HOST_IP"
 
+#  TODO image: fulcrum/php:latest-alpine-xdebug
+php7fpmxdebug:
+  container_name: php7fpmxdebug
+  image: fulcrum/php:7-latest
+  volumes:
+    - /mnt/fulcrum/etc/php7:/etc/php7
+    - /mnt/fulcrum/etc/php5xdebug/conf.d/zz-xdebug.ini:/etc/php5/conf.d/zz-xdebug.ini
+    - /mnt/fulcrum/var/log/php7:/var/log/php7
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
+    - /mnt/fulcrum/var/fulcrum/private_files:/private
+    - /mnt/fulcrum/sites:/var/www/html
+  links:
+    - redis
+    - mariadb
+  extra_hosts:
+    - "mymac:172.16.222.111"
+    - "varnish:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_01:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_02:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_03:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_04:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_05:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_06:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_07:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_08:$FULCRUM_HOST_IP"
+    - "$FULCRUM_VARNISH_09:$FULCRUM_HOST_IP"
+
 nginx:
   container_name: nginx
   image: fulcrum/nginx:latest-alpine
   volumes:
+    - /mnt/fulcrum/etc/nginx/fulcrum/entrypoint.sh:/entrypoint.sh
     - /mnt/fulcrum/etc/nginx:/etc/nginx
     - /mnt/fulcrum/var/log/nginx:/var/log
     - /mnt/fulcrum/sites:/var/www/html:ro
   links:
     - phpfpm
+    - php7fpm
   ports:
     - "8080:80"
+  entrypoint: "sh /entrypoint.sh"
 
+# this requires its own seperate /etc/nginx folder else the over-writes conflict with the normal nginx
 nginxxdebug:
   container_name: nginxxdebug
   image: fulcrum/nginx:latest-alpine
   volumes:
+    - /mnt/fulcrum/etc/nginx/fulcrum/entrypoint.sh:/entrypoint.sh
     - /mnt/fulcrum/etc/nginx:/etc/nginx
-    - /mnt/fulcrum/etc/nginx/fulcrum/fulcrum_fastcgi-xdebug.conf:/etc/nginx/fulcrum/fulcrum_fastcgi.conf
+    - /mnt/fulcrum/etc/nginx-xdebug/fulcrum:/etc/nginx/fulcrum
     - /mnt/fulcrum/var/log/nginx:/var/log
     - /mnt/fulcrum/sites:/var/www/html:ro
   links:
     - phpfpmxdebug
+    - php7fpmxdebug
   ports:
     - "8081:80"
+  entrypoint: "sh /entrypoint.sh"
 
 varnish:
   container_name: varnish

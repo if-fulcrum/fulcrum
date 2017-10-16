@@ -1,0 +1,6 @@
+map $host $phpversion {
+     default "phpfpmxdebug";
+
+     shared8.ifdev    "php7fpmxdebug";
+}
+

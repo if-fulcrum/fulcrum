@@ -1,0 +1,6 @@
+map $host $phpversion {
+     default "phpfpm";
+
+     shared8.ifdev    "php7fpm";
+}
+
