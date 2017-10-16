@@ -3,4 +3,5 @@
 !fulcrum_fastcgi.conf
 !fulcrum_fastcgi-xdebug.conf
 !fulcrum_phpversion.template
+!entrypoint.sh
 !.gitignore
