@@ -153,8 +153,8 @@ function nginxConfAll() {
   cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf
 
   vout "send nginx container the reload signal"
-  $SUDO docker exec nginx kill -HUP 1
-  $SUDO docker exec nginxxdebug kill -HUP 1
+  $SUDO docker exec nginx nginx -s reload
+  $SUDO docker exec nginxxdebug nginx -s reload
 }
 
 function signCert() {
