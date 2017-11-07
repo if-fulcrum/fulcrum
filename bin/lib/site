@@ -64,28 +64,32 @@ function cloneCodebase() {
     fi
   fi
 
-  vout "Making $FULCRUM_DOCROOT/sites/default/files and .htaccess if it doesn't already exist"
-  chmod u+w $FULCRUM_DOCROOT/sites/default
-  mkdir -p $FULCRUM_DOCROOT/sites/default/files
-  chmod u+w $FULCRUM_DOCROOT/sites/default/files
-  chmod g+w $FULCRUM_DOCROOT/sites/default/files
-  chmod o+w $FULCRUM_DOCROOT/sites/default/files
+  if [ -z "$FULCRUM_SITEDIR" ]; then
+    vout "Making $FULCRUM_DOCROOT/sites/default/files and .htaccess if it doesn't already exist"
+    chmod u+w $FULCRUM_DOCROOT/sites/default
+    mkdir -p $FULCRUM_DOCROOT/sites/default/files
+    chmod u+w $FULCRUM_DOCROOT/sites/default/files
+    chmod g+w $FULCRUM_DOCROOT/sites/default/files
+    chmod o+w $FULCRUM_DOCROOT/sites/default/files
 
-  # remove if is it already exists
-  if [ -e $FULCRUM_DOCROOT/sites/default/files/.htaccess ]; then
-    rm -f $FULCRUM_DOCROOT/sites/default/files/.htaccess
+    # remove if is it already exists
+    if [ -e $FULCRUM_DOCROOT/sites/default/files/.htaccess ]; then
+      rm -f $FULCRUM_DOCROOT/sites/default/files/.htaccess
+    fi
+
+    cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_DOCROOT/sites/default/files/.htaccess
+    chmod u-w $FULCRUM_DOCROOT/sites/default $FULCRUM_DOCROOT/sites/default/files/.htaccess
   fi
-
-  cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_DOCROOT/sites/default/files/.htaccess
-  chmod u-w $FULCRUM_DOCROOT/sites/default $FULCRUM_DOCROOT/sites/default/files/.htaccess
 
   drupalVersion
 
-  if ! $(grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php > /dev/null 2>&1); then
-    SNIPPET_DIR=$FULCRUM_DIRNAME/etc/fulcrum/php
-    SNIPPET_EXP=$(cat $SNIPPET_DIR/fulcrum-d$DRUPAL_MAJOR_VERSION-settings-snippet.php)
+  if [ "$FULCRUM_MAGIC_CHECK" != "NO" ]; then
+    if ! $(grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php > /dev/null 2>&1); then
+      SNIPPET_DIR=$FULCRUM_DIRNAME/etc/fulcrum/php
+      SNIPPET_EXP=$(cat $SNIPPET_DIR/fulcrum-d$DRUPAL_MAJOR_VERSION-settings-snippet.php)
 
-    eout "ERROR: You have not made $FULCRUM_DOCROOT/sites/default/settings.php compatible with Fulcrum Drush.\n\nHere is a simple snippet to add:\n\n$SNIPPET_EXP\n\nYou can find more information here: $SNIPPET_DIR"
+      eout "ERROR: You have not made $FULCRUM_DOCROOT/sites/default/settings.php compatible with Fulcrum Drush.\n\nHere is a simple snippet to add:\n\n$SNIPPET_EXP\n\nYou can find more information here: $SNIPPET_DIR"
+    fi
   fi
 }
 
@@ -100,7 +104,7 @@ function nginxConfSite() {
   -eFULCRUM_ENVIRONMENT=dev
   -eFULCRUM_DBUSER=$FULCRUM_DBUSER
   -eFULCRUM_SITE=$FULCRUM_SITE
-  -eFULCRUM_WEBROOT=$FULCRUM_SITE$FULCRUM_WRD
+  -eFULCRUM_WEBROOT=$FULCRUM_WEBROOT
   -eFULCRUM_COOKIE=$FULCRUM_COOKIE
   -eFULCRUM_CONF_EXTRA=$FULCRUM_CONF_EXTRA
 SETVAR
@@ -264,8 +268,6 @@ function setupEnv() {
 
   FULCRUM_DBBAK=$FULCRUM_DIRNAME/var/fulcrum/bak/$FULCRUM_SITE.sql.gz
   FULCRUM_CONF=$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
-  FULCRUM_REPODIR=$FULCRUM_DIRNAME/sites/$FULCRUM_SITE
-  FULCRUM_DOCROOT=$FULCRUM_REPODIR
   FULCRUM_DBUSER=fulcrum_$FULCRUM_DBNAME
   FULCRUM_DBPASS=$(rndStr 32)
 
@@ -277,6 +279,14 @@ function setupEnv() {
     fi
   elif [[ ! "$FULCRUM_WRD" == "/"* ]]; then
     FULCRUM_WRD="/$FULCRUM_WRD"
+  fi
+
+  FULCRUM_REPODIR=$FULCRUM_DIRNAME/sites/$FULCRUM_SITE
+  FULCRUM_WEBROOT=$FULCRUM_SITE$FULCRUM_WRD
+
+  if [ -n "$FULCRUM_SITEDIR" ]; then
+    FULCRUM_REPODIR=$FULCRUM_DIRNAME/sites/$FULCRUM_SITEDIR
+    FULCRUM_WEBROOT=$FULCRUM_SITEDIR$FULCRUM_WRD
   fi
 
   FULCRUM_DOCROOT=$FULCRUM_REPODIR$FULCRUM_WRD
@@ -291,6 +301,7 @@ function setupEnv() {
   vout "FULCRUM_REPODIR:     $FULCRUM_REPODIR"
   vout "FULCRUM_WRD:         $FULCRUM_WRD"
   vout "FULCRUM_DOCROOT:     $FULCRUM_DOCROOT"
+  vout "FULCRUM_WEBROOT:     $FULCRUM_WEBROOT"
   vout "FULCRUM_DBBAK:       $FULCRUM_DBBAK"
   vout "FULCRUM_DBGZ:        $FULCRUM_DBGZ"
   vout "FULCRUM_DBUSER:      $FULCRUM_DBUSER"
