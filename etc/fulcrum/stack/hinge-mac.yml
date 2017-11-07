@@ -31,6 +31,12 @@ redis:
   ports:
     - "6379:6379"
 
+memcached:
+  container_name: memcached
+  image: memcached:alpine
+  ports:
+    - "11211:11211"
+
 phpfpm:
   container_name: phpfpm
   image: fulcrum/php:latest-alpine
@@ -43,6 +49,7 @@ phpfpm:
     - /mnt/fulcrum/sites:/var/www/html
   links:
     - redis
+    - memcached
     - mariadb
   extra_hosts:
     - "varnish:$FULCRUM_HOST_IP"
