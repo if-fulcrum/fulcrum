@@ -324,7 +324,7 @@ function drushCmd() {
 }
 
 function createSolr() {
-  if [ -n $FULCRUM_ABBR ]; then
+  if [ -n "$FULCRUM_ABBR" ]; then
     ABBR=${FULCRUM_ABBR}
   else
     ABBR=${FULCRUM_DBNAME/dev}
