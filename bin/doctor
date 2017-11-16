@@ -28,8 +28,8 @@ fi
 if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf ]; then
   echo -e 'map $host $fulcrum_env {default "unk";}\nmap $host $fulcrum_webroot {default "unk";}\nmap $host $fulcrum_conf {default "unk";}\nmap $host $fulcrum_doc_ttl {default 3d;} ' > $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 fi
-if [ ! -e $FULCRUM_DIRNAME/etc/nginxxdebug/fulcrum/fulcrum_config.conf ]; then
-  cp $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf $FULCRUM_DIRNAME/etc/nginxxdebug/fulcrum/fulcrum_config.conf
+if [ ! -e $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf ]; then
+  cp $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf
 fi
 
 # set an alias for localhost so xdebug can transmit back the IDE
