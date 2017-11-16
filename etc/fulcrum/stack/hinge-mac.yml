@@ -51,6 +51,7 @@ phpfpm:
     - redis
     - memcached
     - mariadb
+    - solr
   extra_hosts:
     - "varnish:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_01:$FULCRUM_HOST_IP"
@@ -232,15 +233,12 @@ drush:
     - mariadb
     - varnish
 
-# needed for rails, but only local dev
-# solr:
-#   container_name: solr
-#   image: solr:5.4.1-alpine
-#   links:
-#     - phpfpm
-#   ports:
-#     - "8983:8983"
-#   volumes:
-#     - /mnt/fulcrum/var/log/solr:/opt/solr/server/logs
-#     - /mnt/fulcrum/etc/solr:/opt/solr/server/etc
-#     - /mnt/fulcrum/var/lib/solr:/opt/solr/server/solr
+solr:
+  container_name: solr
+  image: solr:5.4.1-alpine
+  ports:
+    - "8983:8983"
+  volumes:
+    - /mnt/fulcrum/var/log/solr:/opt/solr/server/logs
+    - /mnt/fulcrum/var/lib/solr:/opt/solr/server/solr
+    - /mnt/fulcrum/etc/solr-copy-configs:/opt/solr-copy-configs

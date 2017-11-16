@@ -322,3 +322,27 @@ function drushCmd() {
   # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
   DRUSHCMDRESULT=$(docker exec -i drush //bin/sh -c "$DRUSHCMD")
 }
+
+function createSolr() {
+  if [ -n $FULCRUM_ABBR ]; then
+    ABBR=${FULCRUM_ABBR}
+  else
+    ABBR=${FULCRUM_DBNAME/dev}
+  fi
+
+  RESULT=$(docker exec --user=solr solr sh -c "if [ -d /opt/solr/server/solr/core_${ABBR}01 ]; then echo true ; else echo false ; fi")
+
+  if [ ${RESULT} == "false" ]; then
+    sudo chown -R root:101 ~/fulcrum/etc/solr-copy-configs
+    docker exec --user=solr solr sh -c "bin/solr create_core -c core_${ABBR}01"
+
+    if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+      docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+    else
+      docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults-d8/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+    fi
+
+    docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/lang /opt/solr/server/solr/core_${ABBR}01/conf/"
+    docker restart solr
+  fi
+}

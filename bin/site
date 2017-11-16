@@ -24,6 +24,8 @@ nginxConfSite
 
 fulcrumDBUser
 
+createSolr
+
 drushSysVars
 
 drushUserLogin
