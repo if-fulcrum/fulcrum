@@ -191,6 +191,7 @@ function signCert() {
     -subj "/C=US/ST=Anywhere/L=Nowwhere/O=Fulcrum Inc/OU=Fulcrum Hinge/CN=$CERT_DOMAIN" \
     -reqexts SAN \
     -extensions SAN \
+    -days 3652 \
     -config <(cat /usr/local/etc/openssl/openssl.cnf \
       <(echo -e "\n\n[SAN]\nsubjectAltName=DNS:$CERT_DOMAIN"))
 
