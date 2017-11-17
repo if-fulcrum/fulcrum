@@ -139,6 +139,17 @@ SETVAR
     ${FULCRUM_BINDIR}/fulcrum forcehttps $FULCRUM_SITE
   fi
 
+  # set the php versions for the given clients
+  if [ "$FULCRUM_PHPVERSION" == "7" ]; then
+    # if not exists, add to template
+    # this will need more to backout and change versions in the future
+    if [ -z "$(grep ${FULCRUM_SITE} $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template)" ]; then
+      sed -iBAK $"s/^}/     ${FULCRUM_SITE}  \"php7fpm\";/" $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
+      echo "}" >> $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
+      rm $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.templateBAK
+    fi
+  fi
+
   nginxConfAll
 }
 
