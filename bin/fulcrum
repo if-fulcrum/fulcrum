@@ -69,7 +69,7 @@ export FULCRUM_HOST_USER=$(whoami)
 export FULCRUM_HOST_UID=$(id -u $FULCRUM_HOST_USER)
 export FULCRUM_HOST_GID=$(id -g $FULCRUM_HOST_USER)
 if [ $FULCRUM_OS == "MAC" ]; then
-  export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2)
+  export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2 || ipconfig getifaddr en3 || ipconfig getifaddr en4 || ipconfig getifaddr en5 || ipconfig getifaddr en6 || ipconfig getifaddr en7)
 elif [ $FULCRUM_OS == "LIN" ]; then
   export FULCRUM_HOST_IP=$(ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1)
 fi
