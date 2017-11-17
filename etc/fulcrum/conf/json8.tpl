@@ -20,6 +20,15 @@
       }
     },
     "set" : {
+      "config" : {
+	"search_api.server.solr" : {
+	  "backend_config" : {
+	    "connector_config" : {
+	      "host" : "solr"
+	    }
+	  }
+	}
+      },
       "settings" : {
         "container_yamls" : [
           "sites/default/services.yml",
