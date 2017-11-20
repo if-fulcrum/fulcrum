@@ -89,6 +89,8 @@ function drestart() {
 
   stopAndRmAllContainers
 
+  stackExports
+
   if [ $DOPULL -eq 1 ]; then
     vout "doing docker pull"
     sendalert "doing docker pull, if you get an error about \"TLS handshake timeout\", then re-run this same command again"
@@ -98,8 +100,6 @@ function drestart() {
     vout "skipping docker pull"
     sendalert "skipping docker image pull, add -p flag if you wish to pull next time"
   fi
-
-  stackExports
 
   vout "starting containers"
   sendalert "Starting containers"
