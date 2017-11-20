@@ -2,6 +2,13 @@
 
 source ${FULCRUM_BINDIR}/lib/general
 
+# get the abbr name if set, else get from dbname
+if [ -n "$FULCRUM_ABBR" ]; then
+  ABBR=${FULCRUM_ABBR}
+else
+  ABBR=${FULCRUM_DBNAME/dev}
+fi
+
 function restoreDatabaseBackup() {
   DO_RESTORE=true
   DB_COUNT=$(docker exec mariadb mysql -h 127.0.0.1 -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
@@ -335,12 +342,6 @@ function drushCmd() {
 }
 
 function createSolr() {
-  if [ -n "$FULCRUM_ABBR" ]; then
-    ABBR=${FULCRUM_ABBR}
-  else
-    ABBR=${FULCRUM_DBNAME/dev}
-  fi
-
   RESULT=$(docker exec --user=solr solr sh -c "if [ -d /opt/solr/server/solr/core_${ABBR}01 ]; then echo true ; else echo false ; fi")
 
   if [ ${RESULT} == "false" ]; then
