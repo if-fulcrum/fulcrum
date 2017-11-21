@@ -21,7 +21,7 @@
     },
     "set" : {
       "config" : {
-	"search_api.server.solr" : {
+	"search_api.server.solr1" : {
 	  "backend_config" : {
 	    "connector_config" : {
 	      "host" : "solr"
