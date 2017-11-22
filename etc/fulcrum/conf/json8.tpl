@@ -2,6 +2,7 @@
   "site" : "${FULCRUM_SITE}",
   "env" : "${FULCRUM_ENVIRONMENT}",
   "webroot" : "${FULCRUM_WEBROOT}",
+  "timezone" : "UTC",
   ${FULCRUM_CONF_EXTRA}
   "pre" :  {
     "replace" : {
