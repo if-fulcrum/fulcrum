@@ -154,7 +154,9 @@ function nginxConfAll() {
 
   vout "send nginx container the reload signal"
   $SUDO docker exec nginx nginx -s reload
-  $SUDO docker exec nginxxdebug nginx -s reload
+  if [ -n "$( $SUDO docker ps -a | grep nginxxdebug )" ]; then
+    $SUDO docker exec nginxxdebug nginx -s reload
+  fi
 }
 
 function signCert() {
