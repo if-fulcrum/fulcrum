@@ -121,10 +121,10 @@ phpfpmxdebug:
 #  TODO image: fulcrum/php:latest-alpine-xdebug
 php7fpmxdebug:
   container_name: php7fpmxdebug
-  image: fulcrum/php:7-latest
+  image: fulcrum/php:7-xdebug-latest
   volumes:
     - /mnt/fulcrum/etc/php7:/etc/php7
-    - /mnt/fulcrum/etc/php5xdebug/conf.d/zz-xdebug.ini:/etc/php5/conf.d/zz-xdebug.ini
+    - /mnt/fulcrum/etc/php7xdebug/conf.d/zz-xdebug.ini:/etc/php7/conf.d/zz-xdebug.ini
     - /mnt/fulcrum/var/log/php7:/var/log/php7
     - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
     - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
