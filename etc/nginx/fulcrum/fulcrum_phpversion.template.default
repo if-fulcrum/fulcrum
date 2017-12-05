@@ -1,0 +1,6 @@
+map $host $phpversion {
+     default "phpfpm";
+
+     hello8.fulcrum.ifdev    "php7fpm";
+}
+

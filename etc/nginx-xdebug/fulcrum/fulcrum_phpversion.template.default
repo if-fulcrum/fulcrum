@@ -1,6 +1,6 @@
 map $host $phpversion {
      default "phpfpmxdebug";
 
-     shared8.ifdev    "php7fpmxdebug";
+     hello8.fulcrum.ifdev    "php7fpmxdebug";
 }
 
