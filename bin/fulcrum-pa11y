@@ -1,0 +1,36 @@
+#!/bin/bash
+# http://pa11y.org
+if ! [ -x "$(command -v node)" ]; then
+  echo "pa11y requires node, which may be installed by mac brew \"brew install node\""
+  while true; do
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) brew install node; break;;
+          [Nn]* ) echo "exiting out"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+
+if ! [ -x "$(command -v pa11y)" ]; then
+  echo "pa11y not found, install now with \"npm install -g pa11y\"?"
+  while true; do
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) npm install -g pa11y; break;;
+          [Nn]* ) echo "exiting out"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+
+if [ $# -ne 1 ]; then
+  echo "must pass the url to test to this script (https://hello8.fulcrum.ifdev)"
+  exit 1
+fi
+
+pa11y $1
+
+echo ""
+echo ""
+echo "You may run \"pa11y -h\" on its own to better configure pa11y for your needs"

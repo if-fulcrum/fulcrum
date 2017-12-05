@@ -1,0 +1,74 @@
+#!/bin/bash
+# http://bbc-news.github.io/wraith/
+if ! [ -x "$(command -v ruby)" ]; then
+  echo "wraith requires ruby, which may be installed by mac brew (brew install ruby)"
+  while true; do
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) brew install ruby; break;;
+          [Nn]* ) echo "exiting out"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+if ! [ -x "$(command -v convert)" ]; then
+  echo "wraith requires imagemagick, which may be installed by mac brew (brew install imagemagick)"
+  while true; do
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) brew install imagemagick; break;;
+          [Nn]* ) echo "exiting out"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+if ! [ -x "$(command -v phantomjs)" ]; then
+  echo "wraith requires phantomjs, which may be installed by mac brew (brew install phantomjs)"
+  while true; do
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) brew install phantomjs; break;;
+          [Nn]* ) echo "exiting out"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+
+if ! [ -x "$(command -v wraith)" ]; then
+  echo "wraith not found, install now with \"gem install wraith\"?"
+  while true; do
+    read -p "(y/n)" yn
+      case $yn in
+          [Yy]* ) gem install wraith; break;;
+          [Nn]* ) echo "exiting out"; exit;;
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+fi
+
+if [ $# -ne 2 ]; then
+  echo "must pass the 2 urls to compare to this script [wraith https://dev.CLIENT.org https://www.CLIENT.org]"
+  exit 1
+fi
+
+
+OLDPWD=$(pwd)
+MYDIR=/private/tmp/wraith$$
+mkdir -p $MYDIR
+cd $MYDIR
+wraith setup
+sed -iBAK "s;current:  \"http://www.example.com\";local: ${1};" $MYDIR/configs/capture.yaml
+sed -iBAK "s;new:      \"http://develop.example.com\";prd: ${2};" $MYDIR/configs/capture.yaml
+sed -iBAK "s;  about:    /about;;" $MYDIR/configs/capture.yaml
+sed -iBAK "s;  contact:  /get-in-touch;;" $MYDIR/configs/capture.yaml
+wraith capture configs/capture.yaml
+open $MYDIR/shots/gallery.html
+
+
+echo ""
+echo ""
+echo "You may run \"wraith -h\" on its own to better configure wraith for your needs"
+echo "http://bbc-news.github.io/wraith/"
+echo ""
+echo "THIS DOES NOT WORK CURRENTLY -- https://github.com/BBC-News/wraith/issues/549"
+echo ""

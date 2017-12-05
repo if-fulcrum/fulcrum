@@ -1,0 +1,3 @@
+#!/bin/bash
+# https://developers.google.com/web/tools/lighthouse/
+echo "Lighthouse is part of the chrome browser and can be run manually from it.  Check into npm install if you really need a CLI version."
