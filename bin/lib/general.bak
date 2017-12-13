@@ -34,15 +34,6 @@ function eout() {
   exit 1
 }
 
-function die() {
-  local frame=0
-  while caller $frame; do
-    ((frame++));
-  done
-  echo "$*"
-  exit 1
-}
-
 function now() {
   echo date +"%Y%m%d%H%M%S"
 }
@@ -56,19 +47,8 @@ function dialog() {
   end' "$1"
 }
 
-function sudoDockerNeeded() {
-  if $(docker ps > /dev/null 2>&1); then
-    SUDOCK=""
-  else
-    SUDOCK="sudo -E "
-  fi
-
-  export SUDOCK
-  # echo "SUDOCK = $SUDOCK"
-}
-
 function requireSudo() {
-  # TODO: !!! should check OS
+# !!! should check OS
 
   # see if sudo is needed
   if which sudo && ! $(sudo -n cat /dev/null > /dev/null 2>&1); then
@@ -80,8 +60,6 @@ function requireSudo() {
 
 # make a new varnish/secret
 function varnishSecret() {
-  sudoDockerNeeded
-
   if [ ! -e $FULCRUM_DIRNAME/etc/varnish/secret ]; then
     # file should have a newline
     FULCRUM_VARN_SECRET=$(rndStr 32)
@@ -97,7 +75,7 @@ function varnishSecret() {
 function waitForDocker() {
   (>&2 echo -n "Waiting until Docker is running.")
 
-  while ! $($SUDOCK docker run --rm hello-world > /dev/null 2>&1); do
+  while ! $(docker run --rm hello-world > /dev/null 2>&1); do
     (>&2 echo -n ".")
     sleep 0.25
   done
@@ -106,8 +84,8 @@ function waitForDocker() {
 }
 
 function rndStr() {
-  STR=$($SUDOCK docker run --rm fulcrum/util //fulcrum/bin/rndstr $1)
-  echo $STR
+  waitForDocker
+  docker run --rm fulcrum/util //fulcrum/bin/rndstr $1
 }
 
 function sendalert() {
@@ -172,30 +150,14 @@ function nginxConfAll() {
   fi
   echo "$CONF"|($SUDOCK docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 
-  # ensure we get the same settings in nginx xdebug
-  cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf
-
-  # ensure clients are on the same php version on xdebug
-  if [ ! -f $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template ]; then
-    cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template.default $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
-  fi
-  if [ ! -f $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template ]; then
-    cp -a $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template.default $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  fi
-  cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  sed -iBAK 's;php7fpm;php7fpmxdebug;g' $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  sed -iBAK 's;phpfpm;phpfpmxdebug;g' $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  rm $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.templateBAK
-
   vout "send nginx container the reload signal"
-  $SUDOCK docker exec nginx nginx -s reload
-  if [ -n "$( $SUDOCK docker ps -a | grep nginxxdebug )" ]; then
-    $SUDOCK docker exec nginxxdebug nginx -s reload
-  fi
+  $SUDOCK docker exec nginx kill -HUP 1
 }
 
 function signCert() {
   CERT_DOMAIN=$1
+  KEEP_CRT=${2:-"n"}
+
   if [ -z "$CERT_DOMAIN" ]; then
     read -p "Please enter domain name for the cert to sign: " CERT_DOMAIN
   fi
@@ -204,15 +166,6 @@ function signCert() {
 
   vout "Creating self signed certificate for '$CERT_DOMAIN'"
   TMP_DIR=/tmp/fulcrum-cert-$CERT_DOMAIN-$$
-
-  if [ -e /usr/local/etc/openssl/openssl.cnf ]; then
-    SSLCONF=/usr/local/etc/openssl/openssl.cnf
-  elif [ -e /etc/ssl/openssl.cnf ]; then
-    SSLCONF=/etc/ssl/openssl.cnf
-  else
-    eout "Cannot find SSL configuration file"
-    exit 1
-  fi
 
   vout "Making temp directory $TMP_DIR"
   mkdir $TMP_DIR
@@ -229,6 +182,7 @@ function signCert() {
 
   vout "Making private key and cert"
   openssl req \
+    -days 3653 \
     -newkey rsa:4096 \
     -x509 \
     -nodes \
@@ -237,14 +191,11 @@ function signCert() {
     -subj "/C=US/ST=Anywhere/L=Nowwhere/O=Fulcrum Inc/OU=Fulcrum Hinge/CN=$CERT_DOMAIN" \
     -reqexts SAN \
     -extensions SAN \
-    -days 3652 \
-    -config <(cat $SSLCONF \
+    -config <(cat /usr/local/etc/openssl/openssl.cnf \
       <(echo -e "\n\n[SAN]\nsubjectAltName=DNS:$CERT_DOMAIN"))
 
-  if [ "$FULCRUM_OS" = "MAC" ]; then
-    vout "Adding to the Mac keychain"
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $TMP_DIR/$CERT_DOMAIN.crt
-  fi
+  vout "Adding to the Mac keychain"
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $TMP_DIR/$CERT_DOMAIN.crt
 
   vout "Making combined PEM file for HAProxy"
   cat $TMP_DIR/$CERT_DOMAIN.key $TMP_DIR/$CERT_DOMAIN.crt > $FULCRUM_DIRNAME/etc/certs.d/$CERT_DOMAIN.pem
@@ -252,37 +203,41 @@ function signCert() {
   vout "Restarting HAProxy to read the new certs"
   haproxyrestart
 
-  vout "Removing directory $TMP_DIR"
-  rm -vrf $TMP_DIR
+  if [ "$KEEP_CRT" == "y" ]; then
+    vout "Keeping cert in $TMP_DIR"
+  else
+    vout "Removing directory $TMP_DIR"
+    rm -vrf $TMP_DIR
+  fi
 }
 
 function haproxyrestart() {
   # ensure we have no syntax errors
-  $SUDOCK docker exec haproxy /usr/local/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c 1>/dev/null 2>/dev/null
+  docker exec haproxy /usr/local/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c 1>/dev/null 2>/dev/null
   if [ $? -gt 0 ]; then
     eout "FATAL: syntax error in HAProxy config it seems, quitting without restart"
   fi
 
-  $SUDOCK docker kill -s HUP haproxy
+  docker kill -s HUP haproxy
   vout "HAProxy has been reloaded"
 }
 
 function varnishrestart() {
   # ensure we have no syntax errors
-  $SUDOCK docker exec varnish /usr/sbin/varnishd -C -f /etc/varnish/default.vcl 2>/dev/null
+  docker exec varnish /usr/sbin/varnishd -C -f /etc/varnish/default.vcl 2>/dev/null
   if [ $? -gt 0 ]; then
     eout "FATAL: syntax error in varnish config it seems, quitting without restart"
   fi
 
   CFGNAME=varnish-cfg-$(date +"%Y%m%d%H%M%S")
 
-  $SUDOCK docker exec varnish /usr/bin/varnishadm vcl.load $CFGNAME /etc/varnish/default.vcl
+  docker exec varnish /usr/bin/varnishadm vcl.load $CFGNAME /etc/varnish/default.vcl
   if [ $? -gt 0 ]; then
     echo "FATAL: unable to vcl.load $CFGNAME"
     exit 1
   fi
 
-  $SUDOCK docker exec varnish /usr/bin/varnishadm vcl.use $CFGNAME
+  docker exec varnish /usr/bin/varnishadm vcl.use $CFGNAME
   if [ $? -gt 0 ]; then
     echo "FATAL: unable to vcl.use $CFGNAME"
     exit 1

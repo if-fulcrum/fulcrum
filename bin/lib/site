@@ -11,14 +11,14 @@ fi
 
 function restoreDatabaseBackup() {
   DO_RESTORE=true
-  DB_COUNT=$(docker exec mariadb mysql -h 127.0.0.1 -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
+  DB_COUNT=$($SUDOCK docker exec mariadb mysql -h 127.0.0.1 -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
 
   if [ "$DB_COUNT" -gt 0 ]; then
     read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
 
     if [ "$DROPDB" == "y" ]; then
       vout "Dropping $FULCRUM_DBNAME"
-      docker exec mariadb mysql -h 127.0.0.1 -e "DROP DATABASE $FULCRUM_DBNAME;"
+      $SUDOCK docker exec mariadb mysql -h 127.0.0.1 -e "DROP DATABASE $FULCRUM_DBNAME;"
     else
       vout "Skipping DB replacement."
       DO_RESTORE=false
@@ -26,7 +26,7 @@ function restoreDatabaseBackup() {
   fi
 
   vout "Creating $FULCRUM_DBNAME"
-  docker exec mariadb mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME;"
+  $SUDOCK docker exec mariadb mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME;"
 
   if [ $DO_RESTORE == true ]; then
     if [[ "$FULCRUM_DBGZ" == "s3://"* ]]; then
@@ -40,10 +40,10 @@ function restoreDatabaseBackup() {
     fi
 
     vout "Copying $FULCRUM_DBGZ to mariadb:/tmp/tmp.sql.gz"
-    docker cp $FULCRUM_DBGZ mariadb:/tmp/tmp.sql.gz
+    $SUDOCK docker cp $FULCRUM_DBGZ mariadb:/tmp/tmp.sql.gz
 
     vout "Restoring $FULCRUM_DBGZ to $FULCRUM_DBNAME"
-    docker exec mariadb sh -c "gunzip -c /tmp/tmp.sql.gz | mysql $FULCRUM_DBNAME ; exit"
+    $SUDOCK docker exec mariadb sh -c "gunzip -c /tmp/tmp.sql.gz | mysql $FULCRUM_DBNAME ; exit"
   fi
 }
 
@@ -137,7 +137,7 @@ SETVAR
     FULCRUM_VARS="$FULCRUM_VARS -eFULCRUM_SALT=$FULCRUM_SALT -eFULCRUM_D8CONFIG=../config/sync "
   fi
 
-  DOCKER_CMD="docker run --rm -i $FULCRUM_VARS fulcrum/util //usr/bin/envsubst"
+  DOCKER_CMD="$SUDOCK docker run --rm -i $FULCRUM_VARS fulcrum/util //usr/bin/envsubst"
 
   cat $FULCRUM_DIRNAME/etc/fulcrum/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
 
@@ -164,7 +164,7 @@ function fulcrumDBUser() {
   SQL="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $FULCRUM_DBNAME.* TO '$FULCRUM_DBUSER'@'172.16.0.0/255.240.0.0' IDENTIFIED BY '$FULCRUM_DBPASS'; FLUSH PRIVILEGES"
   # ensure fulcrum user is in mysql
   vout "Ensuring fulcrum user exists in mysql: $SQL"
-  docker exec mariadb mysql -h 127.0.0.1 -e "$SQL"
+  $SUDOCK docker exec mariadb mysql -h 127.0.0.1 -e "$SQL"
 }
 
 function drushSysVars() {
@@ -224,6 +224,9 @@ function setupEnv() {
   FULCRUM_SITES_VARS_DIR=$FULCRUM_DIRNAME/etc/fulcrum/sites
   CLONING_SITE=false
 
+  sudoDockerNeeded
+  waitForDocker
+
   if [ -z "$1" ]; then
     if [ -d $FULCRUM_SITES_VARS_DIR ]; then
       # update if a git repo
@@ -232,7 +235,7 @@ function setupEnv() {
         git pull origin master
       fi
 
-      SITES=$(find $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} .site \;|awk '{print FNR " " $0}')
+      SITES=$(find $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} .site \;|sort|awk '{print FNR " " $0}')
 
       if [ -n "$SITES" ]; then
         echo "$SITES"
@@ -330,31 +333,31 @@ function setupEnv() {
 }
 
 function copyConf() {
-  vout "docker cp $FULCRUM_CONF drush:/config.json"
-  docker cp $FULCRUM_CONF drush:/config.json
+  vout "$SUDOCK docker cp $FULCRUM_CONF drush:/config.json"
+  $SUDOCK docker cp $FULCRUM_CONF drush:/config.json
 }
 
 function drushCmd() {
   DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
   vout "$DRUSHCMD"
   # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
-  DRUSHCMDRESULT=$(docker exec -i drush //bin/sh -c "$DRUSHCMD")
+  DRUSHCMDRESULT=$($SUDOCK docker exec -i drush //bin/sh -c "$DRUSHCMD")
 }
 
 function createSolr() {
-  RESULT=$(docker exec --user=solr solr sh -c "if [ -d /opt/solr/server/solr/core_${ABBR}01 ]; then echo true ; else echo false ; fi")
+  RESULT=$($SUDOCK docker exec --user=solr solr sh -c "if [ -d /opt/solr/server/solr/core_${ABBR}01 ]; then echo true ; else echo false ; fi")
 
   if [ ${RESULT} == "false" ]; then
     sudo chown -R root:101 ~/fulcrum/etc/solr-copy-configs
-    docker exec --user=solr solr sh -c "bin/solr create_core -c core_${ABBR}01"
+    $SUDOCK docker exec --user=solr solr sh -c "bin/solr create_core -c core_${ABBR}01"
 
     if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
-      docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+      $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
     else
-      docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults-d8/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+      $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults-d8/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
     fi
 
-    docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/lang /opt/solr/server/solr/core_${ABBR}01/conf/"
-    docker restart solr
+    $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/lang /opt/solr/server/solr/core_${ABBR}01/conf/"
+    $SUDOCK docker restart solr
   fi
 }

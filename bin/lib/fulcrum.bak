@@ -32,41 +32,36 @@ function usage() {
   echo "rc             - remake certs [remakecerts]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
-  echo ""
-  echo ""
-  echo "port :4433 bypasses the varnish layer"
-  echo "port :5433 bypasses the varnish layer and enables the xdebug php container"
-  echo ""
   exit 0
 }
 
 # show container status
 function dps() {
-  $SUDOCK docker-compose --file "${DCFILE}" ps
+  docker-compose --file "${DCFILE}" ps
   exit 0
 }
 
 # show container logs
 function dlogs() {
   sendalert "We are following the logs of the containers, Ctrl+C to stop"
-  $SUDOCK docker-compose --file "${DCFILE}" logs -f
+  docker-compose --file "${DCFILE}" logs -f
   exit 0
 }
 
 function stopAllContainers() {
   # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
-  RUNNING_CONTAINERS=$($SUDOCK docker ps -q | wc -l)
+  RUNNING_CONTAINERS=$(docker ps -q | wc -l)
   if [ $RUNNING_CONTAINERS -gt 0 ]; then
     sendalert "stopping any running containers"
-    $SUDOCK docker stop $($SUDOCK docker ps -q) 1>/dev/null
+    docker stop $(docker ps -q) 1>/dev/null
   fi
 }
 
 function rmAllContainers() {
-  STOPPED_CONTAINERS=$($SUDOCK docker ps -a -q | wc -l)
+  STOPPED_CONTAINERS=$(docker ps -a -q | wc -l)
   if [ $STOPPED_CONTAINERS -gt 0 ]; then
     sendalert "killing any stopped containers"
-    $SUDOCK docker rm -f $($SUDOCK docker ps -a -q) 1>/dev/null
+    docker rm -f $(docker ps -a -q) 1>/dev/null
   fi
 }
 
@@ -89,26 +84,26 @@ function drestart() {
 
   stopAndRmAllContainers
 
-  stackExports
-
   if [ $DOPULL -eq 1 ]; then
     vout "doing docker pull"
     sendalert "doing docker pull, if you get an error about \"TLS handshake timeout\", then re-run this same command again"
-    $SUDOCK docker-compose --file "${DCFILE}" pull
-    $SUDOCK docker pull fulcrum/util
+    docker-compose --file "${DCFILE}" pull
+    docker pull fulcrum/util
   else
     vout "skipping docker pull"
     sendalert "skipping docker image pull, add -p flag if you wish to pull next time"
   fi
 
+  stackExports
+
   vout "starting containers"
   sendalert "Starting containers"
   if [ $QUIET -eq 1 ]; then
     vout "quiet docker-compose up"
-    $SUDOCK docker-compose --file "${DCFILE}" up -d 1>/dev/null 2>/dev/null
+    docker-compose --file "${DCFILE}" up -d 1>/dev/null 2>/dev/null
   else
     vout "verbose docker-compose up"
-    $SUDOCK docker-compose --file "${DCFILE}" up -d
+    docker-compose --file "${DCFILE}" up -d
   fi
 
   waitForDB
@@ -126,7 +121,7 @@ function waitForDB() {
   echo -n "-1" > $ROOT_COUNT
 
   echo -n "Waiting until database is available."
-  while ! ($SUDOCK docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> /dev/null 1> $ROOT_COUNT) || [ "$(cat $ROOT_COUNT)" != "1" ] ; do
+  while ! (docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> /dev/null 1> $ROOT_COUNT) || [ "$(cat $ROOT_COUNT)" != "1" ] ; do
     echo -n "."
     sleep .25
   done
@@ -145,7 +140,7 @@ function helloSites() {
 
     $FULCRUM_BINDIR/site hello7.fulcrum.ifdev \
       $FULCRUM_DIRNAME/var/fulcrum/bak/hello7.sql.gz \
-      hello7dev https://github.com/if-fulcrum/hello7.git
+      hello7dev git@github.com:if-fulcrum/hello7.git
 
     echo "hello7_site = 7.52" >> $FULCRUM_INI
   fi
@@ -157,7 +152,7 @@ function helloSites() {
 
     $FULCRUM_BINDIR/site hello8.fulcrum.ifdev \
       $FULCRUM_DIRNAME/var/fulcrum/bak/hello8.sql.gz \
-      hello8dev https://github.com/if-fulcrum/hello8.git docroot
+      hello8dev git@github.com:if-fulcrum/hello8.git docroot
 
     echo "hello8_site = 8.2.3" >> $FULCRUM_INI
   fi
@@ -170,18 +165,18 @@ function dbash() {
     FULCRUM_OS_INT_PREFIX="winpty "
   fi
 
-  DOCKER_IMAGES=$($SUDOCK docker ps --format '{{.Names}}' | sort | awk '{ print FNR " " $0 }')
+  DOCKER_IMAGES=$(docker ps --format '{{.Names}}' | sort | awk '{ print FNR " " $0 }')
   echo "$DOCKER_IMAGES"
   read -p "Please enter container number to enter: " MYNUMBER
   ENTER_IMAGE=$(echo "$DOCKER_IMAGES" | awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER { print $2 }')
 
   echo "${ENTER_IMAGE}"
   # https://github.com/docker/docker/issues/9299
-  $SUDOCK $FULCRUM_OS_INT_PREFIX docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
+  $FULCRUM_OS_INT_PREFIX docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
 }
 
 function opcacheFlush() {
-  $SUDOCK docker exec phpfpm sh -c 'kill -USR2 1'
+  docker exec phpfpm sh -c 'kill -USR2 1'
   vout "Zend OPcache Flushed"
 }
 
@@ -240,7 +235,7 @@ function forcehttps() {
   perl -p -i -e "s#(webroot.*?,)#\$1\\n  \"force_https\" : \"true\",#" $CONF_FILE.bak
 
   # add in base_url
-  perl -p -i -e "s#(replace.*?$)#\$1\\n      \"base_url\" : \"https://$DOMAIN\",#" $CONF_FILE.bak
+  perl -p -i -e "s#(cookie_domain.*?,)#\$1\\n      \"base_url\" : \"https://$DOMAIN\",#" $CONF_FILE.bak
 
   mv $CONF_FILE.bak $CONF_FILE
 
@@ -372,6 +367,9 @@ function remakeCerts() {
   echo -n "Enter top level domain of certs to delete? (e.g. .local): "
   read TLD </dev/tty
 
+  echo -n "Keep cert temporary dir after making? (y/n): "
+  read KEEP_CRT </dev/tty
+
   CERTS=$(echo $(sudo security find-certificate -c $TLD -Z -a |egrep 'SHA-1 hash|alis')|tr ':' '\n'|grep alis|cut -d\" -f1,4|sed 's/ //g'|tr '"' ' '|sort -u)
 
   while read -r CERT; do
@@ -386,7 +384,7 @@ function remakeCerts() {
         echo "deleting $CERT_DOMAIN"
         sudo security delete-certificate -Z $SHA
 
-        signCert $CERT_DOMAIN
+        signCert $CERT_DOMAIN $KEEP_CRT
       fi
     else
       echo "No matching certs"
