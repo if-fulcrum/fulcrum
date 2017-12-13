@@ -244,6 +244,16 @@ function signCert() {
   if [ "$FULCRUM_OS" = "MAC" ]; then
     vout "Adding to the Mac keychain"
     sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $TMP_DIR/$CERT_DOMAIN.crt
+  elif [ "$FULCRUM_OS" = "LIN" ]; then
+    vout "Adding to the system trusted certs"
+    sudo mkdir -p /usr/local/share/ca-certificates/fulcrum
+
+    cp $TMP_DIR/$CERT_DOMAIN.crt /usr/local/share/ca-certificates/fulcrum/$CERT_DOMAIN.crt
+
+    sudo chmod 755 /usr/local/share/ca-certificates/fulcrum
+    sudo chmod 644 /usr/local/share/ca-certificates/fulcrum/*
+
+    sudo update-ca-certificates
   fi
 
   vout "Making combined PEM file for HAProxy"
