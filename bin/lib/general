@@ -248,7 +248,7 @@ function signCert() {
     vout "Adding to the system trusted certs"
     sudo mkdir -p /usr/local/share/ca-certificates/fulcrum
 
-    cp $TMP_DIR/$CERT_DOMAIN.crt /usr/local/share/ca-certificates/fulcrum/$CERT_DOMAIN.crt
+    sudo cp $TMP_DIR/$CERT_DOMAIN.crt /usr/local/share/ca-certificates/fulcrum/$CERT_DOMAIN.crt
 
     sudo chmod 755 /usr/local/share/ca-certificates/fulcrum
     sudo chmod 644 /usr/local/share/ca-certificates/fulcrum/*
