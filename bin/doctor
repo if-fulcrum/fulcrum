@@ -32,6 +32,15 @@ if [ ! -e $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf ]; then
   cp $FULCRUM_DIRNAME/etc/fulcrum/nginx-fulcrum_config-blank.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf
 fi
 
+# make a minimal fulcrum_phpversion.conf
+if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.conf ]; then
+  cp $FULCRUM_DIRNAME/etc/fulcrum/nginx-fulcrum_phpversion-blank.conf $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.conf
+fi
+if [ ! -e $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.conf ]; then
+  cp $FULCRUM_DIRNAME/etc/fulcrum/nginx-fulcrum_phpversion-blank.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.conf
+fi
+
+
 varnishSecret > /dev/null
 
 source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
