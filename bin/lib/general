@@ -254,6 +254,15 @@ function signCert() {
     sudo chmod 644 /usr/local/share/ca-certificates/fulcrum/*
 
     sudo update-ca-certificates
+
+    # add to chrome if exists
+    if [ -d $HOME/.pki/nssdb ]; then
+      echo "Adding to Chrome"
+      certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n $CERT_DOMAIN -i /usr/local/share/ca-certificates/fulcrum/$CERT_DOMAIN.crt
+
+      # this should work for FF but doesn't
+      # certutil -d ~/.mozilla/firefox/urzg1dtq.default -n $CERT_DOMAIN -A -t C -i /usr/local/share/ca-certificates/fulcrum/$CERT_DOMAIN.crt
+    fi
   fi
 
   vout "Making combined PEM file for HAProxy"
