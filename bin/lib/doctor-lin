@@ -4,3 +4,6 @@
 
 # fix solr permissions
 sudo chown -R 8983.8983 ~/fulcrum/var/lib/solr
+
+# allow for remote drush uli/site
+export DISPLAY=:0
