@@ -124,6 +124,9 @@ sub vcl_recv {
       return (pass);
     }
 
+    # for rules that should cause bypass outside of the logic below
+    include "include/bypass-rules.vcl";
+
     # 1. Append a semi-colon to the front of the cookie string.
     # 2. Remove all spaces that appear after semi-colons.
     # 3. Match the cookies we want to keep, adding the space we removed
