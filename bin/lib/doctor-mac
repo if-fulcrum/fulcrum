@@ -2,6 +2,13 @@
 
 # functions to make sure that fulcrum hinge is healthy on the Mac
 
+# set an alias for localhost so xdebug can transmit back the IDE
+# https://forums.docker.com/t/accessing-host-machine-from-within-docker-container/14248/14
+# sudo ifconfig lo0 remove 172.16.222.111  - to remove
+if [ -z "$(ifconfig lo0 | grep 172.16.222.111)" ]; then
+  sudo ifconfig lo0 alias 172.16.222.111
+fi
+
 # move old location or get d4m-nfs if it doesn't already exist
 if [ -e ~/repos/d4m-nfs ]; then
   mv ~/repos/d4m-nfs ~/fulcrum/var/fulcrum/d4m-nfs

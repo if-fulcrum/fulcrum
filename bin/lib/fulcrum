@@ -42,31 +42,31 @@ function usage() {
 
 # show container status
 function dps() {
-  docker-compose --file "${DCFILE}" ps
+  $SUDOCK docker-compose --file "${DCFILE}" ps
   exit 0
 }
 
 # show container logs
 function dlogs() {
   sendalert "We are following the logs of the containers, Ctrl+C to stop"
-  docker-compose --file "${DCFILE}" logs -f
+  $SUDOCK docker-compose --file "${DCFILE}" logs -f
   exit 0
 }
 
 function stopAllContainers() {
   # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
-  RUNNING_CONTAINERS=$(docker ps -q | wc -l)
+  RUNNING_CONTAINERS=$($SUDOCK docker ps -q | wc -l)
   if [ $RUNNING_CONTAINERS -gt 0 ]; then
     sendalert "stopping any running containers"
-    docker stop $(docker ps -q) 1>/dev/null
+    $SUDOCK docker stop $($SUDOCK docker ps -q) 1>/dev/null
   fi
 }
 
 function rmAllContainers() {
-  STOPPED_CONTAINERS=$(docker ps -a -q | wc -l)
+  STOPPED_CONTAINERS=$($SUDOCK docker ps -a -q | wc -l)
   if [ $STOPPED_CONTAINERS -gt 0 ]; then
     sendalert "killing any stopped containers"
-    docker rm -f $(docker ps -a -q) 1>/dev/null
+    $SUDOCK docker rm -f $($SUDOCK docker ps -a -q) 1>/dev/null
   fi
 }
 
@@ -94,8 +94,8 @@ function drestart() {
   if [ $DOPULL -eq 1 ]; then
     vout "doing docker pull"
     sendalert "doing docker pull, if you get an error about \"TLS handshake timeout\", then re-run this same command again"
-    docker-compose --file "${DCFILE}" pull
-    docker pull fulcrum/util
+    $SUDOCK docker-compose --file "${DCFILE}" pull
+    $SUDOCK docker pull fulcrum/util
   else
     vout "skipping docker pull"
     sendalert "skipping docker image pull, add -p flag if you wish to pull next time"
@@ -105,10 +105,10 @@ function drestart() {
   sendalert "Starting containers"
   if [ $QUIET -eq 1 ]; then
     vout "quiet docker-compose up"
-    docker-compose --file "${DCFILE}" up -d 1>/dev/null 2>/dev/null
+    $SUDOCK docker-compose --file "${DCFILE}" up -d 1>/dev/null 2>/dev/null
   else
     vout "verbose docker-compose up"
-    docker-compose --file "${DCFILE}" up -d
+    $SUDOCK docker-compose --file "${DCFILE}" up -d
   fi
 
   waitForDB
@@ -126,7 +126,7 @@ function waitForDB() {
   echo -n "-1" > $ROOT_COUNT
 
   echo -n "Waiting until database is available."
-  while ! (docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> /dev/null 1> $ROOT_COUNT) || [ "$(cat $ROOT_COUNT)" != "1" ] ; do
+  while ! ($SUDOCK docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> /dev/null 1> $ROOT_COUNT) || [ "$(cat $ROOT_COUNT)" != "1" ] ; do
     echo -n "."
     sleep .25
   done
@@ -170,18 +170,18 @@ function dbash() {
     FULCRUM_OS_INT_PREFIX="winpty "
   fi
 
-  DOCKER_IMAGES=$(docker ps --format '{{.Names}}' | sort | awk '{ print FNR " " $0 }')
+  DOCKER_IMAGES=$($SUDOCK docker ps --format '{{.Names}}' | sort | awk '{ print FNR " " $0 }')
   echo "$DOCKER_IMAGES"
   read -p "Please enter container number to enter: " MYNUMBER
   ENTER_IMAGE=$(echo "$DOCKER_IMAGES" | awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER { print $2 }')
 
   echo "${ENTER_IMAGE}"
   # https://github.com/docker/docker/issues/9299
-  $FULCRUM_OS_INT_PREFIX docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
+  $SUDOCK $FULCRUM_OS_INT_PREFIX docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
 }
 
 function opcacheFlush() {
-  docker exec phpfpm sh -c 'kill -USR2 1'
+  $SUDOCK docker exec phpfpm sh -c 'kill -USR2 1'
   vout "Zend OPcache Flushed"
 }
 
