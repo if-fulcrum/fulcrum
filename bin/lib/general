@@ -173,19 +173,19 @@ function nginxConfAll() {
   echo "$CONF"|($SUDOCK docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 
   # ensure we get the same settings in nginx xdebug
-  cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf
+  $SUDOCK cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf
 
   # ensure clients are on the same php version on xdebug
   if [ ! -f $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template ]; then
-    cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template.default $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
+    $SUDOCK cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template.default $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
   fi
   if [ ! -f $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template ]; then
-    cp -a $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template.default $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
+    $SUDOCK cp -a $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template.default $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
   fi
-  cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  sed -iBAK 's;php7fpm;php7fpmxdebug;g' $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  sed -iBAK 's;phpfpm;phpfpmxdebug;g' $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  rm $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.templateBAK
+  $SUDOCK cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
+  $SUDOCK sed -iBAK 's;php7fpm;php7fpmxdebug;g' $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
+  $SUDOCK sed -iBAK 's;phpfpm;phpfpmxdebug;g' $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
+  $SUDOCK rm $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.templateBAK
 
   vout "send nginx container the reload signal"
   $SUDOCK docker exec nginx nginx -s reload
