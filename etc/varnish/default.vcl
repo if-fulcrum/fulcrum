@@ -209,6 +209,14 @@ sub vcl_hash {
 # Code determining what to do when serving items from the web servers.
 # beresp == Back-end response from the web server.
 sub vcl_backend_response {
+
+  # Disable buffering only for BigPipe responses
+  # comment out until ready to implement
+  #if (beresp.http.Surrogate-Control ~ "BigPipe/1.0") {
+  #  set beresp.do_stream = true;
+  #  set beresp.ttl = 0s;
+  #}
+
   # Set ban-lurker friendly custom headers.
   set beresp.http.X-Url = bereq.url;
   set beresp.http.X-Host = bereq.http.host;
