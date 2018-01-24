@@ -31,6 +31,11 @@ sub vcl_recv {
          set req.http.X-Url = regsub(req.http.X-Url, "^https?://[^/]+/", "/");
          ban("req.http.host == " + req.http.X-Host + " && req.url == " + req.http.X-Url);
       }
+      # Logic for the ban, using the Cache-Tags header. For more info
+      # see https://github.com/geerlingguy/drupal-vm/issues/397.
+      elseif (req.http.Cache-Tags && req.http.X-Host) {
+	ban( "obj.http.X-Host == " + req.http.X-Host + " && obj.http.Cache-Tags ~ " + "#" + req.http.Cache-Tags + "#" );
+      }
       else {
          return (synth(403, "X-Url header or X-Host header missing."));
       }
