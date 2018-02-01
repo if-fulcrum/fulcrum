@@ -11,6 +11,16 @@ if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
 // see if we are run from the server or command line
 if (isset($_SERVER['FULCRUM_CONF'])) {
   $_FULCRUM['conf'] = json_decode($_SERVER['FULCRUM_CONF'], 1);
+
+  // extend execution time for long tasks
+  if (
+    isset($_SERVER['REQUEST_URI']) &&
+    in_array($_SERVER['REQUEST_URI'], array(
+      '/admin/config/development/configuration/full/export-download',
+    ))
+  ) {
+    set_time_limit(600);
+  }
 } else if (PHP_SAPI === 'cli') {
   if (file_exists('/config.json')) {
     $_FULCRUM['conf'] = json_decode(preg_replace('/\\\\\\\\/', '\\', file_get_contents('/config.json')), 1);
