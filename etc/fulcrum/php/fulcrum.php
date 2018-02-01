@@ -19,7 +19,7 @@ if (isset($_SERVER['FULCRUM_CONF'])) {
       '/admin/config/development/configuration/full/export-download',
     ))
   ) {
-    set_time_limit(600);
+    set_time_limit(300);
   }
 } else if (PHP_SAPI === 'cli') {
   if (file_exists('/config.json')) {
