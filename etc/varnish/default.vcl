@@ -59,6 +59,11 @@ sub vcl_recv {
     return (pipe);
   }
 
+  # these should get to the webserver and not block by guru
+  if (req.url ~ "^//fulcrum/whitelist/") {
+    return (pipe);
+  }
+
   # site wide ban, may need in future to do the right most, instead of left, most public ip
   if ( std.ip(req.http.X-Client-IP, client.ip) ~ blacklist ) {
     return (synth(403, "Access Denied."));
