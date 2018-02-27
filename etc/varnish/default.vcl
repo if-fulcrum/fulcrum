@@ -61,7 +61,7 @@ sub vcl_recv {
 
   # these should get to the webserver and not block by guru
   if (req.url ~ "^//fulcrum/whitelist/") {
-    return (pipe);
+    return (pass);
   }
 
   # site wide ban, may need in future to do the right most, instead of left, most public ip
