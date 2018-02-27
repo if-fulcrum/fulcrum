@@ -60,7 +60,7 @@ sub vcl_recv {
   }
 
   # these should get to the webserver and not block by guru
-  if (req.url ~ "^//fulcrum/whitelist/") {
+  if (req.url ~ "^/fulcrum/whitelist/") {
     return (pass);
   }
 
