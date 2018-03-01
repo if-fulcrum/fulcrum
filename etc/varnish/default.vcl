@@ -77,15 +77,37 @@ sub vcl_recv {
     return (synth(403, "Access Denied."));
   }
 
-  # Squash malicious bot requests
+  # Things with these in the url should just be blocked.
+  # Check logs often for what the bad guys are after.
+  # wp-admin
+  # wp-content
+  # wp-includes
+  # wp-login
+  # phpMyAdmin
+  # /pma20 sniffers put in a random year at the end
+  # /mysql
+  # /cgi-bin
+  if
+  (
+       req.url ~ "wp-(admin|content|includes|login)"
+    || req.url ~ "(?i)phpmyadmin"
+    || req.url ~ "/pma20"
+    || req.url ~ "/mysql"
+    || req.url ~ "cgi-bin"
+  )
+  { return (synth(404, "Not Found")); }
+
   # Do not allow outside access to certain php or txt files
   # Block user login and node add external
   # must be in whitelist.vcl to access /user
-  if (req.url ~ "^/((wordpress|wp|old)/wp-admin/?|wp-login.php)$" ||
-      ( !std.ip(req.http.X-Client-IP, client.ip) ~ whitelist &&
-        ( req.url ~ "^/((apc|authorize|cron|install|phptest|status|update)\.php|[A-Z]{6,11}[a-z\.]*\.txt)$" ||
-          req.url ~ "(?i)^/((index.php)?\?q=)?(admin.*|user.*|node/add|simplesaml*)" )
-  )) {
+  # Also consider index.php?q=user as these can be POST at and make the redirect uncachable
+  if ( !std.ip(req.http.X-Client-IP, client.ip) ~ whitelist &&
+       (
+            req.url ~ "^/((apc|authorize|cron|install|phptest|status|update)\.php|[A-Z]{6,11}[a-z\.]*\.txt)$"
+         || req.url ~ "(?i)^/index.php\?q=?(admin.*|user.*|node/add|simplesaml*)"
+         || req.url ~ "^/(admin|user|node/add|simplesaml)($|/.+)"
+       )
+  ) {
     return (synth(403, "Access Denied. " + std.ip(req.http.X-Client-IP, client.ip) ));
   }
 
