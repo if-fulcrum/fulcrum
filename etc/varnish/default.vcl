@@ -71,7 +71,7 @@ sub vcl_recv {
 
   # allow to check access via a ajax request
   if (req.url == "/fulcrumwhitelistcheck") {
-    set req.http.Content-Type = "application/json; charset=utf-8";
+    set req.http.X-Fulcrum-Save-Content-Type = "application/javascript";
 
     if ( !std.ip(req.http.X-Client-IP, client.ip) ~ whitelist) {
       return (synth(403, "denied"));
@@ -318,20 +318,13 @@ sub vcl_backend_error {
 # Called to deliver a synthetic object. A synthetic object is generated in VCL, not fetched from the backend. Its body may be contructed using the synthetic() function.
 # A vcl_synth defined object never enters the cache, contrary to a vcl_backend_error defined object, which may end up in cache.
 sub vcl_synth {
-  if (req.http.Content-Type == "application/json; charset=utf-8") {
-    set resp.http.Content-Type = "application/json; charset=utf-8";
+  if (req.http.X-Fulcrum-Save-Content-Type == "application/javascript") {
+    set resp.http.Content-Type = "application/javascript";
+    # save the content type since JSONP always needs a 200
+    set req.http.X-Fulcrum-Status = resp.status;
+    set resp.status = 200;
 
-    if (resp.status == 200) {
-      synthetic( {""ok""} );
-    } else if (resp.status == 403) {
-      synthetic( {""denied""} );
-    } else if (resp.status == 404) {
-      synthetic( {""file not found""} );
-    } else if (resp.status >= 500 && resp.status <= 599) {
-      synthetic( {""server error""} );
-    } else {
-      synthetic( {""error""} );
-    }
+    synthetic( {"fulcrumStatus("} + req.http.X-Fulcrum-Status + {");"} );
   } else {
     # HTML for all
     set resp.http.Content-Type = "text/html; charset=utf-8";
