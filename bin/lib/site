@@ -7,8 +7,6 @@ function restoreDatabaseBackup() {
   DB_COUNT=$($SUDOCK docker exec mariadb mysql -h 127.0.0.1 -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
 
   if [ "$DB_COUNT" -gt 0 ]; then
-    read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
-
     if [ "$DROPDB" == "y" ]; then
       vout "Dropping $FULCRUM_DBNAME"
       $SUDOCK docker exec mariadb mysql -h 127.0.0.1 -e "DROP DATABASE $FULCRUM_DBNAME;"
@@ -46,8 +44,6 @@ function cloneCodebase() {
     vout "You appear to already have the repo, skipping git clone."
     if [ -e $FULCRUM_REPODIR/.git ]; then
       echo -e "\n\nNOTE: If you have a branch checked out that is not tracked from an upstream branch or the upstream branch does not exist, updating to the latest commit might make this 'site' fail.\n\n"
-
-      read -e -p "Do you want to update to the latest git commit? (y/n) " GITPULL
 
       if [ "$GITPULL" == "y" ]; then
         chmod u+w $FULCRUM_DOCROOT/sites/default
@@ -136,7 +132,6 @@ SETVAR
 
   cat $FULCRUM_DIRNAME/etc/fulcrum/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
 
-  read -e -p "Is this site forcing all HTTPS? New sites likely should. (y/n)" FORCEHTTPS
   if [ "$FORCEHTTPS" == "y" ]; then
     ${FULCRUM_BINDIR}/fulcrum forcehttps $FULCRUM_SITE
   fi
