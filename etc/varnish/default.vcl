@@ -69,6 +69,17 @@ sub vcl_recv {
     return (synth(403, "Access Denied."));
   }
 
+  # allow to check access via a ajax request
+  if (req.url == "/fulcrumwhitelistcheck") {
+    set req.http.X-Fulcrum-Save-Content-Type = "application/javascript";
+
+    if ( !std.ip(req.http.X-Client-IP, client.ip) ~ whitelist) {
+      return (synth(403, "denied"));
+    }
+
+    return (synth(200, "ok"));
+  }
+
   # Determines if the "public" part (not /user) can be hit.
   # audience.vcl should either be empty (dev/test) or 0.0.0.0/0 for a public (hinge/prd) setup
   # if IP in whitelist, you get access to both the frontend and /user
@@ -280,7 +291,11 @@ sub vcl_backend_response {
   set beresp.grace = 6h;
 }
 
-# In the event of an error, show friendlier messages.
+# https://varnish-cache.org/docs/4.0/users-guide/vcl-built-in-subs.html#vcl-backend-error
+# This subroutine is called if we fail the backend fetch or if max_retries has been exceeded.
+# A synthetic object is generated in VCL, whose body may be contructed using the synthetic() function.
+#
+# Allows us to show friendlier messages.
 sub vcl_backend_error {
   # HTML for all
   set beresp.http.Content-Type = "text/html; charset=utf-8";
@@ -294,6 +309,36 @@ sub vcl_backend_error {
     synthetic(std.fileread("/etc/varnish/error-server.html"));
   } else {
     synthetic(std.fileread("/etc/varnish/error-default.html"));
+  }
+
+  return (deliver);
+}
+
+# https://varnish-cache.org/docs/4.0/users-guide/vcl-built-in-subs.html#vcl-synth
+# Called to deliver a synthetic object. A synthetic object is generated in VCL, not fetched from the backend. Its body may be contructed using the synthetic() function.
+# A vcl_synth defined object never enters the cache, contrary to a vcl_backend_error defined object, which may end up in cache.
+sub vcl_synth {
+  if (req.http.X-Fulcrum-Save-Content-Type == "application/javascript") {
+    set resp.http.Content-Type = "application/javascript";
+    # save the content type since JSONP always needs a 200
+    set req.http.X-Fulcrum-Status = resp.status;
+    set resp.status = 200;
+
+    synthetic( {"fulcrumStatus("} + req.http.X-Fulcrum-Status + {");"} );
+  } else {
+    # HTML for all
+    set resp.http.Content-Type = "text/html; charset=utf-8";
+
+    # more specific error for those who need to report it
+    if (resp.status == 403) {
+      synthetic(std.fileread("/etc/varnish/error-denied.html"));
+    } else if (resp.status == 404) {
+      synthetic(std.fileread("/etc/varnish/error-notfound.html"));
+    } else if (resp.status >= 500 && resp.status <= 599) {
+      synthetic(std.fileread("/etc/varnish/error-server.html"));
+    } else {
+      synthetic(std.fileread("/etc/varnish/error-default.html"));
+    }
   }
 
   return (deliver);
