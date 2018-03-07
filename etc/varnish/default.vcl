@@ -320,11 +320,13 @@ sub vcl_backend_error {
 sub vcl_synth {
   if (req.http.X-Fulcrum-Save-Content-Type == "application/javascript") {
     set resp.http.Content-Type = "application/javascript";
-    # save the content type since JSONP always needs a 200
-    set req.http.X-Fulcrum-Status = resp.status;
+    set resp.http.Cache-Control = "must-revalidate, no-cache, private";
     set resp.status = 200;
 
-    synthetic( {"fulcrumStatus("} + req.http.X-Fulcrum-Status + {");"} );
+    # kludge to save the content type since JSONP always needs a 200
+    set req.http.X-Fulcrum-Status = resp.status;
+
+    synthetic( {"fulcrumStatus("} + req.http.X-Fulcrum-Status + {", "} + req.http.X-Client-IP + {");"} );
   } else {
     # HTML for all
     set resp.http.Content-Type = "text/html; charset=utf-8";
