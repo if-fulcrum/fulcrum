@@ -333,6 +333,9 @@ sub vcl_synth {
 
     # more specific error for those who need to report it
     if (resp.status == 403) {
+      # don't let cloudflare cache
+      set resp.http.Cache-Control = "must-revalidate, no-cache, private";
+
       synthetic(std.fileread("/etc/varnish/error-denied.html"));
     } else if (resp.status == 404) {
       synthetic(std.fileread("/etc/varnish/error-notfound.html"));
