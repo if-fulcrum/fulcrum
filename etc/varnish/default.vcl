@@ -326,7 +326,7 @@ sub vcl_synth {
     # kludge to save the content type since JSONP always needs a 200
     set req.http.X-Fulcrum-Status = resp.status;
 
-    synthetic( {"fulcrumStatus("} + req.http.X-Fulcrum-Status + {", "} + req.http.X-Client-IP + {");"} );
+    synthetic( {"fulcrumStatus("} + req.http.X-Fulcrum-Status + {", '"} + req.http.X-Client-IP + {"');"} );
   } else {
     # HTML for all
     set resp.http.Content-Type = "text/html; charset=utf-8";
