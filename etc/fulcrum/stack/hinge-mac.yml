@@ -1,3 +1,10 @@
+behat:
+  container_name: behat
+  image: fulcrum/behat
+  tty: true
+  volumes:
+   - /mnt/fulcrum/sites:/sites:ro
+
 cron:
   container_name: cron
   image: fulcrum/util
