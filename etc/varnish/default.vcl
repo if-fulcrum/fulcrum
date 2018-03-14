@@ -40,7 +40,15 @@ sub vcl_recv {
          return (synth(403, "X-Url header or X-Host header missing."));
       }
       # Throw a synthetic page so the request won't go to the backend.
-      return (synth(200, "Purge added for " + req.http.X-Host + " - " + req.http.X-Url));
+      return (synth(200, "Ban added for " + req.http.X-Host + " - " + req.http.X-Url));
+  }
+
+  if (req.method == "PURGE") {
+      # Same ACL check as above:
+      if (!client.ip ~ internal) {
+          return (synth(403, "Not allowed."));
+      }
+      return (purge);
   }
 
   # Use anonymous, cached pages if all backends are down.
