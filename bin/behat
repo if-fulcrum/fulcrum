@@ -1,0 +1,22 @@
+#!/bin/bash
+
+FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2 || ipconfig getifaddr en3 || ipconfig getifaddr en4 || ipconfig getifaddr en5 || ipconfig getifaddr en6 || ipconfig getifaddr en7)
+SITE=$(pwd|perl -p -e 's/.*fulcrum\/sites\/([^\/]+).*/$1/')
+DIRPREFIX=""
+SCHEME=""
+PORT=""
+BEHAT_ARGS="--colors --format-settings={\"output_styles\":{\"comment\":[\"white\"]}}"
+
+while getopts ":s:i:d:c:p:b:" opt; do
+  case ${opt} in
+    s) SITE="${OPTARG}";;
+    i) FULCRUM_HOST_IP="${OPTARG}";;
+    d) DIRPREFIX="${OPTARG}";;
+    c) SCHEME="${OPTARG}";;
+    p) PORT="${OPTARG}";;
+    b) BEHAT_ARGS="${OPTARG}";;
+  esac
+done
+
+docker exec -it behat /fulcrum-behat \
+  $SITE $FULCRUM_HOST_IP "$DIRPREFIX" "$SCHEME" "$PORT" $BEHAT_ARGS
