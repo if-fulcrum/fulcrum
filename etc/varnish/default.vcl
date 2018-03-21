@@ -162,6 +162,12 @@ sub vcl_recv {
     unset req.http.Cookie;
   }
 
+  # blackfire must bypass varnish for profiling
+  # https://blackfire.io/login
+  if (req.http.X-Blackfire-Query) {
+    return (pass);
+  }
+
   # Remove all cookies that Drupal doesn't need to know about. ANY remaining
   # cookie will cause the request to pass-through to web server. For the most part
   # we always set the NO_CACHE cookie after any POST request, disabling the
