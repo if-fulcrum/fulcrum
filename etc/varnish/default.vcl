@@ -36,13 +36,20 @@ sub vcl_recv {
       elseif (req.http.Cache-Tags && req.http.X-Host) {
 	ban( "obj.http.X-Host == " + req.http.X-Host + " && obj.http.Cache-Tags ~ " + "#" + req.http.Cache-Tags + "#" );
       }
+      # wildcard path bans, typically manually done
+      # curl -X BAN -ksLI -H 'X-Url-Wildcard: /sites/default/files/css/*' -H 'host: example.com' -H 'X-Host: example.com' https://example.com
+      elseif (req.http.X-Url-Wildcard && req.http.X-Host) {
+	set req.http.X-Url-Wildcard = regsub(req.http.X-Url-Wildcard, "^https?://[^/]+/", "/");
+	ban("req.http.host == " + req.http.X-Host + " && req.url ~ " + req.http.X-Url-Wildcard);
+      }
       else {
-         return (synth(403, "X-Url header or X-Host header missing."));
+	 return (synth(403, "X-Url/X-Url-Wildcard/Cache-Tags header and/or X-Host header missing."));
       }
       # Throw a synthetic page so the request won't go to the backend.
-      return (synth(200, "Ban added for " + req.http.X-Host + " - " + req.http.X-Url));
+      return (synth(200, "Ban added for " + req.http.X-Host));
   }
 
+  # curl -X PURGE -ksLI -H 'host: example.com' -H 'X-Host: example.com' https://example.com/
   if (req.method == "PURGE") {
       # Same ACL check as above:
       if (!client.ip ~ internal) {
