@@ -172,7 +172,7 @@ nginx:
 # this requires its own seperate /etc/nginx folder else the over-writes conflict with the normal nginx
 nginxxdebug:
   container_name: nginxxdebug
-  image: fulcrum/nginx:latest-alpine
+  image: fulcrum/nginx:1.13
   volumes:
     - /mnt/fulcrum/etc/nginx/fulcrum/entrypoint.sh:/entrypoint.sh:ro
     - /mnt/fulcrum/etc/nginx:/etc/nginx
