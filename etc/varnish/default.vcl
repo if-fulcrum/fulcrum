@@ -158,7 +158,10 @@ sub vcl_recv {
   # a consistent format, we can reduce the size of the cache and get more hits.=
   # @see: http:// varnish.projects.linpro.no/wiki/FAQ/Compression
   if (req.http.Accept-Encoding) {
-    if (req.http.Accept-Encoding ~ "gzip") {
+    # https://www.getpagespeed.com/server-setup/varnish/varnish-brotli-done-right
+    if (req.http.Accept-Encoding ~ "br" && req.url !~ "\.(jpg|png|gif|gz|mp3|mov|avi|mpg|mp4|swf|wmf)$") {
+      set req.http.X-brotli = "true";
+    } else if (req.http.Accept-Encoding ~ "gzip") {
       # If the browser supports it, we'll use gzip.
       set req.http.Accept-Encoding = "gzip";
     } else if (req.http.Accept-Encoding ~ "deflate") {
@@ -259,6 +262,11 @@ sub vcl_hash {
   # https://bensmann.no/seperate-varnish-caching-http-https/
   if (req.http.host && req.http.X-Forwarded-Proto ~ "https") {
       hash_data(req.http.X-Forwarded-Proto);
+  }
+
+  # https://www.getpagespeed.com/server-setup/varnish/varnish-brotli-done-right
+  if(req.http.X-brotli == "true" && req.http.X-brotli-unhash != "true") {
+    hash_data("brotli");
   }
 
   # now use the host (domain) part
@@ -376,4 +384,13 @@ sub vcl_synth {
   }
 
   return (deliver);
+}
+
+
+sub vcl_backend_fetch {
+    # https://www.getpagespeed.com/server-setup/varnish/varnish-brotli-done-right
+    if(bereq.http.X-brotli == "true") {
+        set bereq.http.Accept-Encoding = "br";
+        unset bereq.http.X-brotli;
+    }
 }

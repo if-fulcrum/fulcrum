@@ -156,7 +156,7 @@ php7fpmxdebug:
 
 nginx:
   container_name: nginx
-  image: fulcrum/nginx:latest-alpine
+  image: fulcrum/nginx:1.13
   volumes:
     - /mnt/fulcrum/etc/nginx/fulcrum/entrypoint.sh:/entrypoint.sh:ro
     - /mnt/fulcrum/etc/nginx:/etc/nginx
