@@ -147,7 +147,7 @@ php7fpmxdebug:
 
 nginx:
   container_name: nginx
-  image: fulcrum/nginx:latest-alpine
+  image: fulcrum/nginx:1.13
   volumes:
     - $HOME/fulcrum/etc/nginx/fulcrum/entrypoint.sh:/entrypoint.sh
     - $HOME/fulcrum/etc/nginx:/etc/nginx
@@ -163,7 +163,7 @@ nginx:
 # this requires its own seperate /etc/nginx folder else the over-writes conflict with the normal nginx
 nginxxdebug:
   container_name: nginxxdebug
-  image: fulcrum/nginx:latest-alpine
+  image: fulcrum/nginx:1.13
   volumes:
     - $HOME/fulcrum/etc/nginx/fulcrum/entrypoint.sh:/entrypoint.sh
     - $HOME/fulcrum/etc/nginx:/etc/nginx
@@ -198,7 +198,7 @@ varnish:
 # 5433 is for testing running php with xdebug
 haproxy:
   container_name: haproxy
-  image: fulcrum/haproxy:latest-1.6-alpine
+  image: fulcrum/haproxy:1.8
   volumes:
     - $HOME/fulcrum/etc/haproxy:/etc/haproxy
     - $HOME/fulcrum/etc/haproxy/local-dev.cfg:/etc/haproxy/haproxy.cfg
