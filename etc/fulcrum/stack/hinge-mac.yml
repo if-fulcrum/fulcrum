@@ -226,12 +226,29 @@ haproxy:
     - "5433:5433"
     - "1936:1936"
 
-drush:
-  container_name: drush
-  image: fulcrum/drush:latest-alpine
+drush8-php5:
+  container_name: drush8-php5
+  image: fulcrum/drush8-php5
   tty: true
   volumes:
     - /mnt/fulcrum/etc/php5:/etc/php5:ro
+    - /mnt/fulcrum/var/log/drush:/var/log
+    - /mnt/fulcrum/var/fulcrum/private_files:/private
+    - /mnt/fulcrum/sites:/var/www/html
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
+  entrypoint: /bin/sh
+  links:
+    - redis
+    - mariadb
+    - varnish
+
+drush8-php7:
+  container_name: drush8-php7
+  image: fulcrum/drush8-php7
+  tty: true
+  volumes:
+    - /mnt/fulcrum/etc/php7:/etc/php7:ro
     - /mnt/fulcrum/var/log/drush:/var/log
     - /mnt/fulcrum/var/fulcrum/private_files:/private
     - /mnt/fulcrum/sites:/var/www/html

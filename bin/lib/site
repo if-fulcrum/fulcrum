@@ -322,16 +322,34 @@ function setupEnv() {
   vout "FULCRUM_VARN_SECRET: $FULCRUM_VARN_SECRET"
 }
 
+function usePHP() {
+  USEPHP=5
+
+  # use PHP 7 for Drupal 8
+  if [ -e $FULCRUM_DOCROOT/core/lib/Drupal.php ]; then
+    USEPHP=7
+  fi
+
+  echo $USEPHP
+}
+
 function copyConf() {
-  vout "$SUDOCK docker cp $FULCRUM_CONF drush:/config.json"
-  $SUDOCK docker cp $FULCRUM_CONF drush:/config.json
+  PHPVER=$(usePHP)
+
+  vout "$SUDOCK docker cp $FULCRUM_CONF drush8-php$PHPVER:/config.json"
+  $SUDOCK docker cp $FULCRUM_CONF drush8-php$PHPVER:/config.json
 }
 
 function drushCmd() {
   DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
   vout "$DRUSHCMD"
+
+  PHPVER=$(usePHP)
+
+  vout "Using PHP $PHPVER for $FULCRUM_WEBROOT"
+
   # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
-  DRUSHCMDRESULT=$($SUDOCK docker exec -i drush //bin/sh -c "$DRUSHCMD")
+  DRUSHCMDRESULT=$($SUDOCK docker exec -i drush8-php$PHPVER //bin/sh -c "$DRUSHCMD")
 }
 
 function createSolr() {
