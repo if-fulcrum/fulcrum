@@ -140,6 +140,7 @@ sub vcl_recv {
   # Do not cache these paths.
   if (req.url ~ "^/(status|update)\.php$" ||
       req.url ~ "^/(admin/build/features|info/|flag/)" ||
+      req.url ~ "^/system/files/.*$" ||
       req.url ~ "^.*/(ajax|ahah)/") {
        return (pass);
   }
