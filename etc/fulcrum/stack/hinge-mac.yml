@@ -70,6 +70,8 @@ phpfpm:
     - "$FULCRUM_VARNISH_07:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_08:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_09:$FULCRUM_HOST_IP"
+  cap_add:
+    - SYS_PTRACE
 
 php7fpm:
   container_name: php7fpm
@@ -96,6 +98,8 @@ php7fpm:
     - "$FULCRUM_VARNISH_07:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_08:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_09:$FULCRUM_HOST_IP"
+  cap_add:
+    - SYS_PTRACE
 
 phpfpmxdebug:
   container_name: phpfpmxdebug
