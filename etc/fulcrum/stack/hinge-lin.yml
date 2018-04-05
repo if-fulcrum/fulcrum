@@ -239,12 +239,12 @@ drush8-php5:
   image: fulcrum/drush8-php5
   tty: true
   volumes:
-    - /mnt/fulcrum/etc/php5:/etc/php5:ro
-    - /mnt/fulcrum/var/log/drush:/var/log
-    - /mnt/fulcrum/var/fulcrum/private_files:/private
-    - /mnt/fulcrum/sites:/var/www/html
-    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
-    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
+    - $HOME/fulcrum/etc/php5:/etc/php5:ro
+    - $HOME/fulcrum/var/log/drush:/var/log
+    - $HOME/fulcrum/var/fulcrum/private_files:/private
+    - $HOME/fulcrum/sites:/var/www/html
+    - $HOME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+    - $HOME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
   entrypoint: /bin/sh
   links:
     - redis
@@ -256,12 +256,12 @@ drush8-php7:
   image: fulcrum/drush8-php7
   tty: true
   volumes:
-    - /mnt/fulcrum/etc/php7:/etc/php7:ro
-    - /mnt/fulcrum/var/log/drush:/var/log
-    - /mnt/fulcrum/var/fulcrum/private_files:/private
-    - /mnt/fulcrum/sites:/var/www/html
-    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
-    - /mnt/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
+    - $HOME/fulcrum/etc/php7:/etc/php7:ro
+    - $HOME/fulcrum/var/log/drush:/var/log
+    - $HOME/fulcrum/var/fulcrum/private_files:/private
+    - $HOME/fulcrum/sites:/var/www/html
+    - $HOME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum.php:ro
+    - $HOME/fulcrum/etc/fulcrum/php/fulcrum.php:/fulcrum/fulcrum.php:ro
   entrypoint: /bin/sh
   links:
     - redis
