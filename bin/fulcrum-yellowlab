@@ -52,7 +52,7 @@ fi
 
 
 echo "===================================================================================================="
-echo "Run 'docker run -it --rm  --name yellowlab -p 8383:8383 jguyomard/yellowlabtools' in a new terminal"
+echo "Run 'docker run -it --rm  --name yellowlab -p 8383:8383 fulcrum/yellowlab' in a new terminal"
 echo "Go to http://localhost:8383 and click advanced and enter $ALIAS_IP:8888 in the HTTP proxy field"
 echo "Then enter your local website url to run tests against"
 echo "Stop this container, run 'docker stop yellowlab' in new terminal"
