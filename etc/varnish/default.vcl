@@ -113,6 +113,7 @@ sub vcl_recv {
   # /pma20 sniffers put in a random year at the end
   # /mysql
   # /cgi-bin
+  # /autodiscover/autodiscover.xml
   if
   (
        req.url ~ "wp-(admin|content|includes|login)"
@@ -120,6 +121,7 @@ sub vcl_recv {
     || req.url ~ "/pma20"
     || req.url ~ "/mysql"
     || req.url ~ "cgi-bin"
+    || req.url == "/autodiscover/autodiscover.xml"
   )
   { return (synth(404, "Not Found")); }
 
