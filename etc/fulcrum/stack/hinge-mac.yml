@@ -1,3 +1,8 @@
+blackfire:
+  container_name: blackfire
+  image: blackfire/blackfire
+  env_file: ~/fulcrum/etc/fulcrum/stack/env/blackfire.env
+
 behat:
   container_name: behat
   image: fulcrum/behat
@@ -75,7 +80,7 @@ phpfpm:
 
 php7fpm:
   container_name: php7fpm
-  image: fulcrum/php:7-latest
+  image: fulcrum/php:7-latest-blackfire
   volumes:
     - /mnt/fulcrum/etc/php7:/etc/php7:ro
     - /mnt/fulcrum/var/log/php7:/var/log/php7
@@ -84,6 +89,7 @@ php7fpm:
     - /mnt/fulcrum/var/fulcrum/private_files:/private
     - /mnt/fulcrum/sites:/var/www/html
   links:
+    - blackfire
     - redis
     - mariadb
     - solr
