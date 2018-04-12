@@ -1,3 +1,8 @@
+blackfire:
+  container_name: blackfire
+  image: blackfire/blackfire
+  env_file: ~/fulcrum/etc/fulcrum/stack/env/blackfire.env
+
 cron:
   container_name: cron
   image: fulcrum/util
@@ -66,7 +71,7 @@ phpfpm:
 
 php7fpm:
   container_name: php7fpm
-  image: fulcrum/php:7-latest
+  image: fulcrum/php:7-latest-blackfire
   volumes:
     - $HOME/fulcrum/etc/php7:/etc/php7
     - $HOME/fulcrum/var/log/php7:/var/log/php7
@@ -75,6 +80,7 @@ php7fpm:
     - $HOME/fulcrum/var/fulcrum/private_files:/private
     - $HOME/fulcrum/sites:/var/www/html
   links:
+    - blackfire
     - redis
     - mariadb
     - solr
