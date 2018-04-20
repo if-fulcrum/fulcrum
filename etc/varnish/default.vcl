@@ -175,9 +175,9 @@ sub vcl_recv {
     unset req.http.Cookie;
   }
 
-  # blackfire must bypass varnish for profiling
-  # https://blackfire.io/login
-  if (req.http.X-Blackfire-Query) {
+  # blackfire must bypass varnish for profiling - https://blackfire.io/login
+  # allow header to bypass varnish
+  if (req.http.X-Blackfire-Query || req.http.X-VARNISH-BYPASS) {
     return (pass);
   }
 
