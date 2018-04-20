@@ -69,31 +69,14 @@ sub vcl_recv {
   #
   # set req.grace = 6h;
 
-  # Pipe these paths directly to web server for streaming.
-  if (req.url ~ "^/admin/content/backup_migrate/export") {
-    return (pipe);
-  }
-
-  # these should get to the webserver and not block by guru
-  if (req.url ~ "^/fulcrum/whitelist/") {
-    return (pass);
-  }
-
   # site wide ban, may need in future to do the right most, instead of left, most public ip
   if ( std.ip(req.http.X-Client-IP, client.ip) ~ blacklist ) {
     return (synth(403, "Access Denied."));
   }
 
-  # allow to check access via a ajax request
-  if (req.url == "/fulcrumwhitelistcheck") {
-    set req.http.X-Fulcrum-Save-Content-Type = "application/javascript";
-
-    if ( !std.ip(req.http.X-Client-IP, client.ip) ~ whitelist) {
-      return (synth(403, "denied"));
-    }
-
-    return (synth(200, "ok"));
-  }
+  # after blacklist but before whitelist, for when you do not know the clients static IP
+  # see later rules for rules after the whitelist IP check
+  include "include/bypass-prewhitelist-rules.vcl";
 
   # Determines if the "public" part (not /user) can be hit.
   # audience.vcl should either be empty (dev/test) or 0.0.0.0/0 for a public (hinge/prd) setup
