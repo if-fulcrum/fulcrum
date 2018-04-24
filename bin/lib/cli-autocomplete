@@ -1,0 +1,2 @@
+#!/bin/bash
+complete -W "bash dps up stop sh ps log haproxyrestart varnishrestart conf ocfl ocof ocon ocst etch rnd sc fs ac rc" fulcrum
