@@ -1,0 +1,38 @@
+#!/bin/bash
+# This script is meant to update all local sites on fulcrum in order to prevent local drupalgeddon issues for old sites.  It does NOT patch the site.  This helps if you have a team of multiple people using fulcrum and not all actively pull code via git for all clients.
+
+for CLIENT in $(ls -1 ~/fulcrum/sites); do
+
+  echo "==============="
+  echo "attempting to git pull the master branch on $CLIENT"
+  echo "==============="
+
+  if [ ! -d ~/fulcrum/sites/${CLIENT} ]; then
+    echo "***************"
+    echo "ERROR - $CLIENT does not appear to be a directory"
+    echo "***************"
+    continue
+  fi
+
+  cd ~/fulcrum/sites/${CLIENT}
+  BRANCH=$(git symbolic-ref -q --short HEAD)
+
+  if [ "$BRANCH" != "master" ]; then
+    git checkout master
+    if [ $? -ne 0 ]; then
+      echo "***************"
+      echo "ERROR - unable to checkout master branch for $CLIENT"
+      echo "***************"
+      continue
+    fi
+  fi
+
+  git pull
+  if [ $? -ne 0 ]; then
+    echo "***************"
+    echo "ERROR - unable to pull master branch for $CLIENT"
+    echo "***************"
+    continue
+  fi
+
+done
