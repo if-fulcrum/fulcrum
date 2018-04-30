@@ -80,7 +80,7 @@ phpfpm:
 
 php7fpm:
   container_name: php7fpm
-  image: fulcrum/php:7-latest-blackfire
+  image: fulcrum/php:7-latest-secure
   volumes:
     - /mnt/fulcrum/etc/php7:/etc/php7:ro
     - /mnt/fulcrum/var/log/php7:/var/log/php7
