@@ -64,6 +64,7 @@ phpfpm:
     - memcached
     - mariadb
     - solr
+    - elasticsearch
   extra_hosts:
     - "varnish:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_01:$FULCRUM_HOST_IP"
@@ -93,6 +94,7 @@ php7fpm:
     - redis
     - mariadb
     - solr
+    - elasticsearch
   extra_hosts:
     - "varnish:$FULCRUM_HOST_IP"
     - "$FULCRUM_VARNISH_01:$FULCRUM_HOST_IP"
@@ -122,6 +124,7 @@ phpfpmxdebug:
     - redis
     - mariadb
     - solr
+    - elasticsearch
   extra_hosts:
     - "mymac:172.16.222.111"
     - "varnish:$FULCRUM_HOST_IP"
@@ -151,6 +154,7 @@ php7fpmxdebug:
     - redis
     - mariadb
     - solr
+    - elasticsearch
   extra_hosts:
     - "mymac:172.16.222.111"
     - "varnish:$FULCRUM_HOST_IP"
@@ -295,3 +299,11 @@ solr:
     - /mnt/fulcrum/var/log/solr:/opt/solr/server/logs
     - /mnt/fulcrum/var/lib/solr:/opt/solr/server/solr
     - /mnt/fulcrum/etc/solr-copy-configs:/opt/solr-copy-configs
+
+elasticsearch:
+  container_name: elasticsearch
+  image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
+  ports:
+    - "9200:9200"
+  volumes:
+     - /mnt/fulcrum/var/lib/elasticsearch:/usr/share/elasticsearch/data

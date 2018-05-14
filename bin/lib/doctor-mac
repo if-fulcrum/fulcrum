@@ -102,5 +102,11 @@ fi
 sudo chown -R 999:999 $FULCRUM_DIRNAME/var/lib/mysql
 sudo chmod -R u+w,u+r $FULCRUM_DIRNAME/var/lib/mysql
 
+if [ ! -d $FULCRUM_DIRNAME/var/lib/elasticsearch ]; then
+  sudo mkdir $FULCRUM_DIRNAME/var/lib/elasticsearch
+fi
+sudo chown -R 1000:0 $FULCRUM_DIRNAME/var/lib/elasticsearch
+sudo chmod -R 770 $FULCRUM_DIRNAME/var/lib/elasticsearch
+
 # cli autocomplete
 source $FULCRUM_DIRNAME/bin/lib/cli-autocomplete
