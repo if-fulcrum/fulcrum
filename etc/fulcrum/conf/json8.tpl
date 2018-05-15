@@ -28,6 +28,9 @@
 	      "host" : "solr"
 	    }
 	  }
+	},
+        "elasticsearch_connector.cluster.elasticsearch1" : {
+	  "url" : "http://elastcisearch:9200"
 	}
       },
       "settings" : {
