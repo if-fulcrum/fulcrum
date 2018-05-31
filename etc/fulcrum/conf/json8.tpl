@@ -30,7 +30,7 @@
 	  }
 	},
         "elasticsearch_connector.cluster.elasticsearch1" : {
-	  "url" : "http://elastcisearch:9200"
+	  "url" : "http://elasticsearch:9200"
 	}
       },
       "settings" : {
