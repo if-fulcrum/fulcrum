@@ -1,3 +1,4 @@
 blacklist.vcl
 whitelist.vcl
 secret
+include/cookie-sessions-custom*.vcl
