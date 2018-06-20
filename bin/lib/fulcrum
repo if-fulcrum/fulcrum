@@ -264,6 +264,8 @@ function stackExports() {
   FULCRUM_VARNISH_08=varnish08
   FULCRUM_VARNISH_09=varnish09
 
+  COOKIE_SESSION_VCL=cookie-sessions.vcl
+
   # if $FULCRUM_INI exists or varnish_host_01 exist in $FULCRUM_INI
   if [ -e "$FULCRUM_INI" ]; then
     if $(grep varnish_host_01 $FULCRUM_INI > /dev/null 2>&1); then
@@ -302,6 +304,10 @@ function stackExports() {
       FULCRUM_VARNISH_09=$(awk -F "=" '/varnish_host_09/ {print $2}' ~/fulcrum/etc/fulcrum/fulcrum.ini|tr -d ' ')
     fi
 
+    if $(grep cookie_session_vcl $FULCRUM_INI > /dev/null 2>&1); then
+      COOKIE_SESSION_VCL=$(awk -F "=" '/cookie_session_vcl/ {print $2}' ~/fulcrum/etc/fulcrum/fulcrum.ini|tr -d ' ')
+    fi
+
   fi
 
   export FULCRUM_VARNISH_01
@@ -313,6 +319,7 @@ function stackExports() {
   export FULCRUM_VARNISH_07
   export FULCRUM_VARNISH_08
   export FULCRUM_VARNISH_09
+  export COOKIE_SESSION_VCL
 }
 
 function addCron() {
