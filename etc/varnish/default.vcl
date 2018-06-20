@@ -164,47 +164,8 @@ sub vcl_recv {
     return (pass);
   }
 
-  # Remove all cookies that Drupal doesn't need to know about. ANY remaining
-  # cookie will cause the request to pass-through to web server. For the most part
-  # we always set the NO_CACHE cookie after any POST request, disabling the
-  # Varnish cache temporarily. The session cookie allows all authenticated users
-  # to pass through as long as they're logged in.
-  if (req.http.Cookie) {
-
-    # simple saml remove cookies else attempting to login goes into a loop
-    # https://www.drupal.org/node/2651192
-    if (req.http.Cookie ~ "NO_CACHE") {
-      return (pass);
-    }
-
-    # for rules that should cause bypass outside of the logic below
-    include "include/bypass-rules.vcl";
-
-    # 1. Append a semi-colon to the front of the cookie string.
-    # 2. Remove all spaces that appear after semi-colons.
-    # 3. Match the cookies we want to keep, adding the space we removed
-    #    previously back. (\1) is first matching group in the regsuball.
-    # 4. Remove all other cookies, identifying them by the fact that they have
-    #    no space after the preceding semi-colon.
-    # 5. Remove all spaces and semi-colons from the beginning and end of the
-    #    cookie string.
-    set req.http.Cookie = ";" + req.http.Cookie;
-    set req.http.Cookie = regsuball(req.http.Cookie, "; +", ";");
-    set req.http.Cookie = regsuball(req.http.Cookie, ";(SESS[a-z0-9]+|SSESS[a-z0-9]+|NO_CACHE)=", "; \1=");
-    set req.http.Cookie = regsuball(req.http.Cookie, ";[^ ][^;]*", "");
-    set req.http.Cookie = regsuball(req.http.Cookie, "^[; ]+|[; ]+$", "");
-
-    if (req.http.Cookie == "") {
-      # If there are no remaining cookies, remove the cookie header. If there
-      # aren't any cookie headers, Varnish's default behavior will be to cache
-      # the page.
-      unset req.http.Cookie;
-    } else {
-      # If there is any cookies left (a session or NO_CACHE cookie), do not
-      # cache the page. Pass it on to web server directly.
-      return (pass);
-    }
-  }
+  # deal with Drupal cookie sessions, external file so it can be mounted over for exceptions
+  include "include/cookie-sessions.vcl";
 }
 
 # Set a header to track a cache HIT/MISS.
@@ -270,10 +231,10 @@ sub vcl_backend_response {
 
   # Disable buffering only for BigPipe responses
   # comment out until ready to implement
-  #if (beresp.http.Surrogate-Control ~ "BigPipe/1.0") {
-  #  set beresp.do_stream = true;
-  #  set beresp.ttl = 0s;
-  #}
+  if (beresp.http.Surrogate-Control ~ "BigPipe/1.0") {
+    set beresp.do_stream = true;
+    set beresp.ttl = 0s;
+  }
 
   # Set ban-lurker friendly custom headers.
   set beresp.http.X-Url = bereq.url;
