@@ -77,8 +77,12 @@ elif [ $FULCRUM_OS == "LIN" ]; then
   export FULCRUM_HOST_IP=$(ip addr list $FULCRUM_INTERFACE |grep "inet " |cut -d' ' -f6|cut -d/ -f1)
 fi
 
-# must come after FULCRUM_HOST_USER
-DCFILE="$FULCRUM_DIRNAME/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
+# allow for override in a custom doctor file
+if [ "$DCFILE" == "" ]; then
+  # must come after FULCRUM_HOST_USER
+  DCFILE="$FULCRUM_DIRNAME/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
+  echo "Using $DCFILE for Docker Compose"
+fi
 
 # debug
 vout "FULCRUM_HOST_USER = $FULCRUM_HOST_USER"
