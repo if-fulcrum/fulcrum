@@ -49,17 +49,6 @@ memcached:
   ports:
     - "11211:11211"
 
-authscale:
-  container_name: authscale
-  image: fulcrum/nodejs
-  volumes:
-    - /mnt/repos/authscale:/authscale:ro
-  links:
-    - mariadb
-  ports:
-    - "21201:21201"
-  command: /authscale/src/authscale.js
-
 phpfpm:
   container_name: phpfpm
   image: fulcrum/php:latest-alpine
@@ -260,7 +249,6 @@ haproxy:
     - varnishstatic
     - nginx
     - nginxxdebug
-    - authscale
   ports:
     - "80:80"
     - "443:443"
