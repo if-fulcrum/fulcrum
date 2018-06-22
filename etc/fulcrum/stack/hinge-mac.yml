@@ -209,7 +209,7 @@ varnish:
     - /mnt/fulcrum/etc/varnish/include/x-forward-for-localdev.vcl:/etc/varnish/include/x-forward-for.vcl:ro
     - /mnt/fulcrum/etc/varnish/include/beresp-ttl-dev.vcl:/etc/varnish/include/beresp-ttl.vcl:ro
     - /mnt/fulcrum/etc/varnish/include/cache-tag-debug.vcl:/etc/varnish/include/cache-tag-remove.vcl:ro
-    - /mnt/fulcrum/etc/varnish/include/$COOKIE_SESSION_VCL:/etc/varnish/include/cookie-sessions.vcl:ro
+    - /mnt/fulcrum/etc/varnish/include/cookie-sessions.vcl:/etc/varnish/include/cookie-sessions.vcl:ro
     - /mnt/fulcrum/var/log/varnish:/var/log
   command: -F -P /var/run/varnish.pid -a :80,PROXY -f /etc/varnish/default.vcl -S /etc/varnish/secret -T 0.0.0.0:6082 -t 120 -s malloc,128M
   links:
@@ -227,7 +227,7 @@ varnishstatic:
     - /mnt/fulcrum/etc/varnish/include/x-forward-for-localdev.vcl:/etc/varnish/include/x-forward-for.vcl:ro
     - /mnt/fulcrum/etc/varnish/include/beresp-ttl-dev.vcl:/etc/varnish/include/beresp-ttl.vcl:ro
     - /mnt/fulcrum/etc/varnish/include/cache-tag-debug.vcl:/etc/varnish/include/cache-tag-remove.vcl:ro
-    - /mnt/fulcrum/etc/varnish/include/$COOKIE_SESSION_VCL:/etc/varnish/include/cookie-sessions.vcl:ro
+    - /mnt/fulcrum/etc/varnish/include/cookie-sessions.vcl:/etc/varnish/include/cookie-sessions.vcl:ro
     - /mnt/fulcrum/var/log/varnish:/var/log
   command: -F -P /var/run/varnish.pid -a :80,PROXY -f /etc/varnish/default.vcl -S /etc/varnish/secret -T 0.0.0.0:6082 -t 120 -s malloc,128M
   links:
