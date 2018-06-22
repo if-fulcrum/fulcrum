@@ -6,7 +6,7 @@ set -eu
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/fulcrum
 
-${FULCRUM_BINDIR}/doctor
+source ${FULCRUM_BINDIR}/doctor
 
 # defaults
 DOPULL=0
@@ -77,11 +77,14 @@ elif [ $FULCRUM_OS == "LIN" ]; then
   export FULCRUM_HOST_IP=$(ip addr list $FULCRUM_INTERFACE |grep "inet " |cut -d' ' -f6|cut -d/ -f1)
 fi
 
+DUMMYVAR="DUMMYVAL"
+echo "\${FULCRUM_COMPOSE_YML+DUMMYVAR}: ${FULCRUM_COMPOSE_YML+DUMMYVAR}"
+
 # allow for override in a custom doctor file
-if [ "$DCFILE" == "" ]; then
+if [ -z ${FULCRUM_COMPOSE_YML+DUMMYVAR} ]; then
   # must come after FULCRUM_HOST_USER
-  DCFILE="$FULCRUM_DIRNAME/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
-  echo "Using $DCFILE for Docker Compose"
+  FULCRUM_COMPOSE_YML="$FULCRUM_DIRNAME/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
+  echo "Using $FULCRUM_COMPOSE_YML for Docker Compose"
 fi
 
 # debug
@@ -90,7 +93,7 @@ vout "FULCRUM_HOST_UID = $FULCRUM_HOST_UID"
 vout "FULCRUM_HOST_GID = $FULCRUM_HOST_GID"
 # vout "FULCRUM_INTERFACE = $FULCRUM_INTERFACE"
 vout "FULCRUM_HOST_IP = $FULCRUM_HOST_IP"
-vout "DCFILE = ${DCFILE}"
+vout "FULCRUM_COMPOSE_YML = ${FULCRUM_COMPOSE_YML}"
 vout "DOPULL = $DOPULL"
 vout "VERBOSE = $VERBOSE"
 vout "QUIET = $QUIET"
