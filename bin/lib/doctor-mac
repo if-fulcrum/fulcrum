@@ -10,7 +10,7 @@ if [ -z "$(ifconfig lo0 | grep 172.16.222.111)" ]; then
 fi
 
 # move old location or get d4m-nfs if it doesn't already exist
-if [ -e ~/repos/d4m-nfs ]; then
+if [[ -e ~/repos/d4m-nfs  &&  ! -e ~/fulcrum/var/fulcrum/d4m-nfs ]]; then
   mv ~/repos/d4m-nfs ~/fulcrum/var/fulcrum/d4m-nfs
 elif [ ! -e ~/fulcrum/var/fulcrum/d4m-nfs ]; then
   vout "Cannot find Docker for Mac NFS (d4m-nfs) repo, cloning from github"

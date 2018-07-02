@@ -44,3 +44,8 @@ fi
 varnishSecret > /dev/null
 
 source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
+
+# run the custom doctor if it exists
+if [ -e ${FULCRUM_BINDIR}/lib/doctor-custom ]; then
+  source ${FULCRUM_BINDIR}/lib/doctor-custom
+fi
