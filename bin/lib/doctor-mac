@@ -46,13 +46,6 @@ else
   vout "Check: homebrew versions"
 fi
 
-if ! $(ls -d $TAPDIR/homebrew-php > /dev/null 2>&1); then
-  vout "Tapping: homebrew homebrew-php"
-  brew tap homebrew/homebrew-php
-else
-  vout "Check: homebrew homebrew-php"
-fi
-
 # kludge for Homebrew 0.9
 if [[ ! "$TAPDIR" == *"Homebrew"* ]]; then
   SEDDIR=/usr/local/Library/ENV/4.3
@@ -74,18 +67,25 @@ fi
 
 BREWLIST=$(brew list)
 
-if [[ ! "$BREWLIST" == *"php56"* ]]; then
-  vout "Installing: homebrew 'php56' package."
-  brew install php56
+if [[ ! "$BREWLIST" == *"php"* ]]; then
+  vout "Installing: homebrew 'php' package."
+  brew install php
 else
-  vout "Check: homebrew 'php56' package is installed."
+  vout "Check: homebrew 'php' package is installed."
 fi
 
-if [[ ! "$BREWLIST" == *"php56-redis"* ]]; then
-  vout "Installing: homebrew 'php56-redis' package."
-  brew install php56-redis
+if [[ ! "$BREWLIST" == *"php@5.6"* ]]; then
+  vout "Installing: homebrew 'php@5.6' package."
+  brew install php@5.6
 else
-  vout "Check: homebrew 'php56-redis' package is installed."
+  vout "Check: homebrew 'php@5.6' package is installed."
+fi
+
+if [[ ! "$BREWLIST" == *"brew-php-switcher"* ]]; then
+  vout "Installing: homebrew 'brew-php-switcher' package."
+  brew install brew-php-switcher
+else
+  vout "Check: homebrew 'brew-php-switcher' package is installed."
 fi
 
 if [[ ! "$BREWLIST" == *"drush"* ]]; then
@@ -93,6 +93,38 @@ if [[ ! "$BREWLIST" == *"drush"* ]]; then
   brew install drush
 else
   vout "Check: homebrew 'drush' package is installed."
+fi
+
+INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
+
+if [[ ! "$INITPHPVER" == "5.6" ]]; then
+  brew-php-switcher 5.6
+fi
+
+PECLLIST=$(pecl list)
+
+if [[ ! "$PECLLIST" == *"redis"* ]]; then
+  vout "Installing: pecl 'php 56 redis' package."
+  printf "\n" | pecl install redis
+else
+  vout "Check: pecl php 5.6 'redis' package is installed."
+fi
+
+# switch back to initial php version
+if [[ ! "$INITPHPVER" == "5.6" ]]; then
+  brew-php-switcher $INITPHPVER
+fi
+
+# stop apache in case previous installs had started it
+if (ps auxwww|grep /usr/sbin/httpd|grep -v grep); then
+  echo "Check: Stopping apache since it was started from some doctor action"
+  sudo apachectl stop
+
+  # stop auto start
+  if [ -e /System/Library/LaunchDaemons/org.apache.httpd.plist ]; then
+    echo "Check: Removing apache autostart since it was started from some doctor action"
+    sudo launchctl unload -w /System/Library/LaunchDaemons/org.apache.httpd.plist 2>/dev/null
+  fi
 fi
 
 if [ ! -d $FULCRUM_DIRNAME/var/lib/mysql ]; then
