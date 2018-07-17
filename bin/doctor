@@ -40,6 +40,10 @@ if [ ! -e $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.conf ]; t
   cp $FULCRUM_DIRNAME/etc/fulcrum/nginx-fulcrum_phpversion-blank.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.conf
 fi
 
+# copy blackfire template
+if [ ! -e $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env ]; then
+  cp $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env-template $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env
+fi
 
 varnishSecret > /dev/null
 
