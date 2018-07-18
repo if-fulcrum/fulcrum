@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+# set -x
 
 FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+# set -x
 
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/general
@@ -46,11 +46,12 @@ if [ ! -e $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env ]; then
   cp $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env-template $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env
 fi
 
-varnishSecret > /dev/null
-
 source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
 
 # run the custom doctor if it exists
 if [ -e ${FULCRUM_BINDIR}/lib/doctor-custom ]; then
   source ${FULCRUM_BINDIR}/lib/doctor-custom
 fi
+
+# secret needs to be made *after* docker has been installed
+varnishSecret > /dev/null
