@@ -1,0 +1,55 @@
+#!/bin/bash
+
+FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
+source ${FULCRUM_BINDIR}/lib/general
+
+vout "Running doctor"
+
+requireSudo
+
+etcHosts 127.0.0.1 mariadb
+etcHosts 127.0.0.1 redis
+etcHosts 127.0.0.1 varnish
+etcHosts 127.0.0.1 certbot
+
+if [ ! -e $FULCRUM_DIRNAME/etc/varnish/internal.vcl ]; then
+  echo 'acl internal  { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
+fi
+
+if [ ! -e $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl ]; then
+  echo 'acl whitelist { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/whitelist.vcl
+fi
+
+if [ ! -e $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl ]; then
+  echo 'acl blacklist { "0.0.0.0"/32; }' > $FULCRUM_DIRNAME/etc/varnish/blacklist.vcl
+fi
+
+# make a minimal fulcrum_config.conf
+if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf ]; then
+  cp $FULCRUM_DIRNAME/etc/fulcrum/nginx-fulcrum_config-blank.conf $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
+fi
+if [ ! -e $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf ]; then
+  cp $FULCRUM_DIRNAME/etc/fulcrum/nginx-fulcrum_config-blank.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf
+fi
+
+# make a minimal fulcrum_phpversion.conf
+if [ ! -e $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.conf ]; then
+  cp $FULCRUM_DIRNAME/etc/fulcrum/nginx-fulcrum_phpversion-blank.conf $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.conf
+fi
+if [ ! -e $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.conf ]; then
+  cp $FULCRUM_DIRNAME/etc/fulcrum/nginx-fulcrum_phpversion-blank.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.conf
+fi
+
+# copy blackfire template
+if [ ! -e $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env ]; then
+  cp $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env-template $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env
+fi
+
+varnishSecret > /dev/null
+
+source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
+
+# run the custom doctor if it exists
+if [ -e ${FULCRUM_BINDIR}/lib/doctor-custom ]; then
+  source ${FULCRUM_BINDIR}/lib/doctor-custom
+fi
