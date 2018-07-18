@@ -8,6 +8,17 @@ vout "Running doctor"
 
 requireSudo
 
+if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
+  # checkout sites repo
+  HINGECONFIGREPODEFAULT=https://github.com/if-fulcrum/hinge-sites.git
+
+  read -p "Please enter Fulcrum Hinge Config repo URL (default: $HINGECONFIGREPODEFAULT): " HINGECONFIGREPO
+
+  if [ "$HINGECONFIGREPO" = "" ]; then
+    HINGECONFIGREPO=$HINGECONFIGREPODEFAULT
+  fi
+fi
+
 etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
 etcHosts 127.0.0.1 varnish
@@ -62,10 +73,15 @@ else
   eout "No OS doctor file to run, Fulcrum Hinge probably needs to be extended for $FULCRUM_OS_LC"
 fi
 
+# secret needs to be made *after* docker has been installed
+varnishSecret > /dev/null
+
+# clonge out the fulcrum hinge config repo
+if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
+  git -C ${FULCRUM_DIRNAME}/var/fulcrum clone $HINGESITESURL hinge-config
+fi
+
 # run the custom doctor if it exists
 if [ -e ${FULCRUM_BINDIR}/lib/doctor-custom ]; then
   source ${FULCRUM_BINDIR}/lib/doctor-custom
 fi
-
-# secret needs to be made *after* docker has been installed
-varnishSecret > /dev/null
