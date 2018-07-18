@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # functions to make sure that fulcrum hinge is healthy on the Linux
 
 if [ -n ${HOSTNAME} ]; then
