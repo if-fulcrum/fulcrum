@@ -7,6 +7,7 @@ FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
 UNAMEA=$(uname -a)
 FULCRUM_OS=UNK
 FULCRUM_ETC_HOSTS=/etc/hosts
+FULCRUM_OS_DISTRO=""
 
 if [[ "$UNAMEA" == *"Darwin"* ]]; then
   FULCRUM_OS=MAC
@@ -15,6 +16,12 @@ elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
   FULCRUM_ETC_HOSTS=/c/windows/system32/drivers/etc/hosts
 elif [[ "$UNAMEA" == *"Linux"* ]]; then
   FULCRUM_OS=LIN
+
+  if [ -e /etc/os-release ]; then
+    source /etc/os-release
+
+    FULCRUM_OS_DISTRO=$(echo $ID_LIKE|tr '[:upper:]' '[:lower:]'|tr ' ' '-')
+  fi
 fi
 
 FULCRUM_OS_LC=$(echo $FULCRUM_OS|tr '[:upper:]' '[:lower:]')

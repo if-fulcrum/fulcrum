@@ -46,7 +46,21 @@ if [ ! -e $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env ]; then
   cp $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env-template $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env
 fi
 
-source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
+# run OS doctor
+if [ -e ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC ]; then
+  source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
+
+  # run distro doctor
+  if [ -n "$FULCRUM_OS_DISTRO" ]; then
+    if [ -e ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_DISTRO ]; then
+      source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_DISTRO
+    else
+      eout "No distro doctor file to run, Fulcrum Hinge probably needs to be extended for $FULCRUM_OS_DISTRO"
+    fi
+  fi
+else
+  eout "No OS doctor file to run, Fulcrum Hinge probably needs to be extended for $FULCRUM_OS_LC"
+fi
 
 # run the custom doctor if it exists
 if [ -e ${FULCRUM_BINDIR}/lib/doctor-custom ]; then

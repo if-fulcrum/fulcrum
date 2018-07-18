@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# set -x
+
+# functions to make sure that fulcrum hinge is healthy on the Linux
+
+if [ -n ${HOSTNAME} ]; then
+  etcHosts 127.0.0.1 ${HOSTNAME}
+fi
+
+# fix solr permissions
+sudo chown -R 8983.8983 ~/fulcrum/var/lib/solr
+
+# allow for remote drush uli/site
+export DISPLAY=:0
+
+# enable auto complete
+source ~/fulcrum/bin/lib/cli-autocomplete
