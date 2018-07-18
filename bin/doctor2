@@ -78,7 +78,7 @@ varnishSecret > /dev/null
 
 # clonge out the fulcrum hinge config repo
 if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
-  git -C ${FULCRUM_DIRNAME}/var/fulcrum clone $HINGESITESURL hinge-config
+  git -C ${FULCRUM_DIRNAME}/var/fulcrum clone $HINGECONFIGREPO hinge-config
 fi
 
 # run the custom doctor if it exists
