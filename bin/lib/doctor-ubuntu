@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# set -x
+
+# functions to make sure that fulcrum hinge is healthy on Debian variants
+
+# install docker if needed
+if (which docker > /dev/null); then
+  echo "docker exists"
+else
+  echo "installing docker"
+  sudo apt install -y apt-transport-https
+  wget -q -O - https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  sudo apt update
+  sudo apt install -y docker-ce
+fi
+
+# install docker-compose if needed
+if (which docker-compose > /dev/null); then
+  echo "docker-compose exists"
+else
+  echo "installing docker-compose"
+  sudo wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/1.17.0/docker-compose-`uname -s`-`uname -m`
+  sudo chmod +x /usr/local/bin/docker-compose
+fi
+
+# install aws cli if needed/wanted
+if (which aws > /dev/null); then
+  echo "aws exists"
+else
+  echo "installing aws"
+  sudo apt install -y awscli
+  aws configure
+fi
+
+# install certutil if needed
+if (which certutil > /dev/null); then
+  echo "certutil exists"
+else
+  echo "installing certutil"
+  sudo apt install -y libnss3-tools
+fi
+
+# install git if needed
+# TODO: move into fulcrum/install
+# if (which git > /dev/null); then
+#   echo "git exists"
+# else
+#   echo "installing git"
+#   sudo apt install -y git
+# fi

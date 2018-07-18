@@ -20,7 +20,7 @@ elif [[ "$UNAMEA" == *"Linux"* ]]; then
   if [ -e /etc/os-release ]; then
     source /etc/os-release
 
-    FULCRUM_OS_DISTRO=$(echo $ID_LIKE|tr '[:upper:]' '[:lower:]'|tr ' ' '-')
+    FULCRUM_OS_DISTRO=$(echo $ID|tr '[:upper:]' '[:lower:]'|tr ' ' '-')
   fi
 fi
 
