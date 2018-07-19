@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# exit script if anything returns an error
+set -e
+
+export FULCRUM_HOST_USER=$(whoami)
+
+FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
+source ${FULCRUM_BINDIR}/lib/site2
+
+setupEnv $@
+
+requireSudo
+
+read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
+read -e -p "Do you want to update to the latest git commit? (y/n) " GITPULL
+read -e -p "Is this site forcing all HTTPS? New sites likely should. (y/n)" FORCEHTTPS
+
+restoreDatabaseBackup
+
+cloneCodebase
+
+etcHosts 127.0.0.1 $FULCRUM_SITE
+
+signCert $FULCRUM_SITE
+
+nginxConfSite
+
+fulcrumDBUser
+
+createSolr
+
+drushSysVars
+
+drushUserLogin
