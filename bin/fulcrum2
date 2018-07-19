@@ -6,7 +6,7 @@ set -eu
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/fulcrum
 
-source ${FULCRUM_BINDIR}/doctor
+source ${FULCRUM_BINDIR}/doctor2
 
 # defaults
 DOPULL=0
