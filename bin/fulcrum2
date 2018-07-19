@@ -78,7 +78,7 @@ elif [ $FULCRUM_OS == "LIN" ]; then
 fi
 
 DUMMYVAR="DUMMYVAL"
-echo "\${FULCRUM_COMPOSE_YML+DUMMYVAR}: ${FULCRUM_COMPOSE_YML+DUMMYVAR}"
+# echo "\${FULCRUM_COMPOSE_YML+DUMMYVAR}: ${FULCRUM_COMPOSE_YML+DUMMYVAR}"
 
 # allow for override in a custom doctor file
 if [ -z ${FULCRUM_COMPOSE_YML+DUMMYVAR} ]; then
