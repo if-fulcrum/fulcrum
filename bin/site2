@@ -14,7 +14,7 @@ requireSudo
 
 read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
 read -e -p "Do you want to update to the latest git commit? (y/n) " GITPULL
-read -e -p "Is this site forcing all HTTPS? New sites likely should. (y/n)" FORCEHTTPS
+read -e -p "Is this site forcing all HTTPS? New sites likely should. (y/n) " FORCEHTTPS
 
 restoreDatabaseBackup
 
