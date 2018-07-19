@@ -12,9 +12,10 @@ if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
   # checkout sites repo
   HINGECONFIGREPODEFAULT=https://github.com/if-fulcrum/hinge-config.git
 
+  # TODO: this is breaking from running
   read -p "Please enter Fulcrum Hinge Config repo URL (default: $HINGECONFIGREPODEFAULT): " HINGECONFIGREPO
 
-  if [ "$HINGECONFIGREPO" = "" ]; then
+  if [ "$HINGECONFIGREPO" == "" ]; then
     HINGECONFIGREPO=$HINGECONFIGREPODEFAULT
   fi
 fi
