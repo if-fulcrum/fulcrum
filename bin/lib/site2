@@ -217,7 +217,7 @@ function setupEnv() {
   sudoDockerNeeded
   waitForDocker
 
-  if [ -z "$1" ]; then
+  if [[ -z "$1" || -z "$2" ]]; then
     if [ -d $FULCRUM_SITES_VARS_DIR ]; then
       # update if a git repo
       if [ -d $FULCRUM_SITES_VARS_DIR/.git ]; then
@@ -228,9 +228,18 @@ function setupEnv() {
       SITES=$(find $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} .site \;|sort|awk '{print FNR " " $0}')
 
       if [ -n "$SITES" ]; then
-        echo "$SITES"
-        read -p "Please enter site to spin up: " MYNUMBER
-        SITE=$(echo "$SITES"|awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER {print $2}')
+        # allow site to come from cli or list
+        if [ -n "$1" ]; then
+          if [ -e $FULCRUM_SITES_VARS_DIR/$1.site ]; then
+            SITE="$1"
+          else
+            eout "Cannot find $1.site definition in $FULCRUM_SITES_VARS_DIR"
+          fi
+        else
+          echo "$SITES"
+          read -p "Please enter site to spin up: " MYNUMBER
+          SITE=$(echo "$SITES"|awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER {print $2}')
+        fi
 
         vout "Spinning up $SITE"
         . $FULCRUM_SITES_VARS_DIR/$SITE.site
