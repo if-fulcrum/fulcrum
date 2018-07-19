@@ -112,6 +112,11 @@ function drestart() {
   fi
 
   waitForDB
+
+  # spin up config sites if it exists
+  if [ -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-sites ]; then
+    source ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-sites
+  fi
 }
 
 # mariadb has a ready for connections twice,
