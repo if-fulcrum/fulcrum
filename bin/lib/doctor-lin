@@ -14,5 +14,9 @@ sudo chown -R 8983.8983 ~/fulcrum/var/lib/solr
 # allow for remote drush uli/site
 export DISPLAY=:0
 
+############# START: REMOVE TO bin/doctor2 #############
+
 # enable auto complete
 source ~/fulcrum/bin/lib/cli-autocomplete
+
+############# END: REMOVE TO bin/doctor2 #############

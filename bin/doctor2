@@ -57,6 +57,26 @@ if [ ! -e $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env ]; then
   cp $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env-template $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env
 fi
 
+# make mysql directory
+if [ ! -d $FULCRUM_DIRNAME/var/lib/mysql ]; then
+  mkdir $FULCRUM_DIRNAME/var/lib/mysql
+fi
+
+# set mysql perms
+sudo chown -R 999:999 $FULCRUM_DIRNAME/var/lib/mysql
+sudo chmod -R u+w,u+r $FULCRUM_DIRNAME/var/lib/mysql
+
+# make elasticsearch directory
+if [ ! -d $FULCRUM_DIRNAME/var/lib/elasticsearch ]; then
+  sudo mkdir $FULCRUM_DIRNAME/var/lib/elasticsearch
+fi
+
+# set elasticsearch perms
+sudo chown -R 1000:0 $FULCRUM_DIRNAME/var/lib/elasticsearch
+sudo chmod -R 770 $FULCRUM_DIRNAME/var/lib/elasticsearch
+
+source $FULCRUM_DIRNAME/bin/lib/cli-autocomplete
+
 # run OS doctor
 if [ -e ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC ]; then
   source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
