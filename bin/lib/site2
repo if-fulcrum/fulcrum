@@ -28,6 +28,10 @@ function restoreDatabaseBackup() {
       vout "Downloading $FULCRUM_DBGZ"
       aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK || eout "it seems your aws login information to pull the database is not working"
       FULCRUM_DBGZ=$FULCRUM_DBBAK
+    elif [[ "$FULCRUM_DBGZ" == "https://"* || "$FULCRUM_DBGZ" == "http://"* ]]; then
+      vout "Downloading $FULCRUM_DBGZ"
+      (curl -fsSL $FULCRUM_DBGZ || wget -q -O - $FULCRUM_DBGZ) > $FULCRUM_DBBAK
+      FULCRUM_DBGZ=$FULCRUM_DBBAK
     fi
 
     vout "Copying $FULCRUM_DBGZ to mariadb:/tmp/tmp.sql.gz"
