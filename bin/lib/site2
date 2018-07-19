@@ -1,0 +1,378 @@
+#!/bin/bash
+
+source ${FULCRUM_BINDIR}/lib/general
+
+function restoreDatabaseBackup() {
+  DO_RESTORE=true
+  DB_COUNT=$($SUDOCK docker exec mariadb mysql -h 127.0.0.1 -s -e "SHOW DATABASES LIKE '$FULCRUM_DBNAME';"|wc -l)
+
+  if [ "$DB_COUNT" -gt 0 ]; then
+    if [ "$DROPDB" == "y" ]; then
+      vout "Dropping $FULCRUM_DBNAME"
+      $SUDOCK docker exec mariadb mysql -h 127.0.0.1 -e "DROP DATABASE $FULCRUM_DBNAME;"
+    else
+      vout "Skipping DB replacement."
+      DO_RESTORE=false
+    fi
+  fi
+
+  vout "Creating $FULCRUM_DBNAME"
+  $SUDOCK docker exec mariadb mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $FULCRUM_DBNAME;"
+
+  if [ $DO_RESTORE == true ]; then
+    if [[ "$FULCRUM_DBGZ" == "s3://"* ]]; then
+      if ! which aws; then
+        eout "Cannot find AWS on your path!"
+      fi
+
+      vout "Downloading $FULCRUM_DBGZ"
+      aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK || eout "it seems your aws login information to pull the database is not working"
+      FULCRUM_DBGZ=$FULCRUM_DBBAK
+    fi
+
+    vout "Copying $FULCRUM_DBGZ to mariadb:/tmp/tmp.sql.gz"
+    $SUDOCK docker cp $FULCRUM_DBGZ mariadb:/tmp/tmp.sql.gz
+
+    vout "Restoring $FULCRUM_DBGZ to $FULCRUM_DBNAME"
+    $SUDOCK docker exec mariadb sh -c "gunzip -c /tmp/tmp.sql.gz | mysql $FULCRUM_DBNAME ; exit"
+  fi
+}
+
+function cloneCodebase() {
+  # get the repo
+  if [ -d $FULCRUM_REPODIR ]; then
+    vout "You appear to already have the repo, skipping git clone."
+    if [ -e $FULCRUM_REPODIR/.git ]; then
+      echo -e "\n\nNOTE: If you have a branch checked out that is not tracked from an upstream branch or the upstream branch does not exist, updating to the latest commit might make this 'site' fail.\n\n"
+
+      if [ "$GITPULL" == "y" ]; then
+        chmod u+w $FULCRUM_DOCROOT/sites/default
+        cd $FULCRUM_REPODIR
+        git pull
+        chmod u-w $FULCRUM_DOCROOT/sites/default
+      fi
+    fi
+  else
+    vout "Cloning repo $FULCRUM_REPO to $FULCRUM_REPODIR"
+    git clone $FULCRUM_REPO $FULCRUM_REPODIR
+
+    if [ "$CLONING_SITE" = true ]; then
+      vout "Removing original $FULCRUM_REPO .git directory from $FULCRUM_REPODIR"
+      rm -rf $FULCRUM_REPODIR/.git
+    fi
+  fi
+
+  if [ -z "$FULCRUM_SITEDIR" ]; then
+    vout "Making $FULCRUM_DOCROOT/sites/default/files and .htaccess if it doesn't already exist"
+    chmod u+w $FULCRUM_DOCROOT/sites/default
+    mkdir -p $FULCRUM_DOCROOT/sites/default/files
+    chmod u+w $FULCRUM_DOCROOT/sites/default/files
+    chmod g+w $FULCRUM_DOCROOT/sites/default/files
+    chmod o+w $FULCRUM_DOCROOT/sites/default/files
+
+    # remove if is it already exists
+    if [ -e $FULCRUM_DOCROOT/sites/default/files/.htaccess ]; then
+      rm -f $FULCRUM_DOCROOT/sites/default/files/.htaccess
+    fi
+
+    cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_DOCROOT/sites/default/files/.htaccess
+    chmod u-w $FULCRUM_DOCROOT/sites/default $FULCRUM_DOCROOT/sites/default/files/.htaccess
+  fi
+
+  drupalVersion
+
+  if [ "$FULCRUM_MAGIC_CHECK" != "NO" ]; then
+    if ! $(grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php > /dev/null 2>&1); then
+      SNIPPET_DIR=$FULCRUM_DIRNAME/etc/fulcrum/php
+      SNIPPET_EXP=$(cat $SNIPPET_DIR/fulcrum-d$DRUPAL_MAJOR_VERSION-settings-snippet.php)
+
+      eout "ERROR: You have not made $FULCRUM_DOCROOT/sites/default/settings.php compatible with Fulcrum Drush.\n\nHere is a simple snippet to add:\n\n$SNIPPET_EXP\n\nYou can find more information here: $SNIPPET_DIR"
+    fi
+  fi
+}
+
+function nginxConfSite() {
+  FUCRUM_CNF_TPL=json.tpl
+
+  vout "Making $FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json"
+  FULCRUM_COOKIE=.$(echo $FULCRUM_SITE|sed 's;^www\.;;g')
+  FULCRUM_VARS=$(cat <<SETVAR
+  -eFULCRUM_DBPASS=$FULCRUM_DBPASS
+  -eFULCRUM_DBNAME=$FULCRUM_DBNAME
+  -eFULCRUM_ENVIRONMENT=dev
+  -eFULCRUM_DBUSER=$FULCRUM_DBUSER
+  -eFULCRUM_SITE=$FULCRUM_SITE
+  -eFULCRUM_WEBROOT=$FULCRUM_WEBROOT
+  -eFULCRUM_COOKIE=$FULCRUM_COOKIE
+  -eFULCRUM_CONF_EXTRA=$FULCRUM_CONF_EXTRA
+SETVAR
+)
+
+  if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+    REDIS=""
+    VARNISH=""
+
+    if [ -d $FULCRUM_DOCROOT/sites/all/modules/contrib/redis ]; then
+      REDIS="-redis"
+    fi
+
+    if [ -d $FULCRUM_DOCROOT/sites/all/modules/contrib/varnish ]; then
+      VARNISH="-varnish"
+      FULCRUM_VARS="$FULCRUM_VARS -eFULCRUM_VARN_SECRET=$FULCRUM_VARN_SECRET "
+    fi
+
+    FUCRUM_CNF_TPL=json${REDIS}${VARNISH}.tpl
+  else
+    FUCRUM_CNF_TPL=json8.tpl
+    FULCRUM_SALT=$(rndStr 74)
+    FULCRUM_VARS="$FULCRUM_VARS -eFULCRUM_SALT=$FULCRUM_SALT -eFULCRUM_D8CONFIG=../config/sync "
+  fi
+
+  DOCKER_CMD="$SUDOCK docker run --rm -i $FULCRUM_VARS fulcrum/util //usr/bin/envsubst"
+
+  cat $FULCRUM_DIRNAME/etc/fulcrum/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
+
+  if [ "$FORCEHTTPS" == "y" ]; then
+    ${FULCRUM_BINDIR}/fulcrum forcehttps $FULCRUM_SITE
+  fi
+
+  # set the php versions for the given clients
+  if [ "$FULCRUM_PHPVERSION" == "7" ]; then
+    # if not exists, add to template
+    # this will need more to backout and change versions in the future
+    if [ -z "$(grep ${FULCRUM_SITE} $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template)" ]; then
+      sed -iBAK $"s/^}/     ${FULCRUM_SITE}  \"php7fpm\";/" $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
+      echo "}" >> $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
+      rm $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.templateBAK
+    fi
+  fi
+
+  nginxConfAll
+}
+
+function fulcrumDBUser() {
+  SQL="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON $FULCRUM_DBNAME.* TO '$FULCRUM_DBUSER'@'172.16.0.0/255.240.0.0' IDENTIFIED BY '$FULCRUM_DBPASS'; FLUSH PRIVILEGES"
+  # ensure fulcrum user is in mysql
+  vout "Ensuring fulcrum user exists in mysql: $SQL"
+  $SUDOCK docker exec mariadb mysql -h 127.0.0.1 -e "$SQL"
+}
+
+function drushSysVars() {
+  copyConf
+
+  cd $FULCRUM_REPODIR
+
+  # set public directory
+  vout "Running drush to set public directory"
+  if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+    drushCmd vset file_public_path sites/default/files
+  else
+    # drushCmd config-set system.file path.public sites/default/files
+    echo
+  fi
+
+  # set temporary directory
+  vout "Running drush to set temporary"
+  if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+    drushCmd vset file_temporary_path /tmp
+  else
+    # drushCmd config-set system.file path.temporary /tmp
+    echo
+  fi
+
+  # set private directory
+  # vout "running drush to set public directory"
+  # if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+  #   drushCmd vset file_private_path /private
+  # else
+  #   drushCmd config-set system.file path.private /private
+  # fi
+
+  # vout "Running drush to run update.php"
+  # drushCmd updb
+
+  # clear all caches
+  vout "Running drush to clear caches"
+  if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+    drushCmd cc all
+  else
+    drushCmd cr
+  fi
+}
+
+function drushUserLogin() {
+  vout "Running drush to get UID 1 login"
+  drushCmd uli --uri=http://$FULCRUM_SITE
+
+  vout "$FULCRUM_SITE login: git web--browse \"$DRUSHCMDRESULT\""
+  git web--browse "$DRUSHCMDRESULT"
+}
+
+function setupEnv() {
+  ${FULCRUM_BINDIR}/doctor
+
+  FULCRUM_SITES_VARS_DIR=$FULCRUM_DIRNAME/var/fulcrum/hinge-config/etc/fulcrum/sites
+  CLONING_SITE=false
+
+  sudoDockerNeeded
+  waitForDocker
+
+  if [ -z "$1" ]; then
+    if [ -d $FULCRUM_SITES_VARS_DIR ]; then
+      # update if a git repo
+      if [ -d $FULCRUM_SITES_VARS_DIR/.git ]; then
+        cd $FULCRUM_SITES_VARS_DIR
+        git pull origin master
+      fi
+
+      SITES=$(find $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} .site \;|sort|awk '{print FNR " " $0}')
+
+      if [ -n "$SITES" ]; then
+        echo "$SITES"
+        read -p "Please enter site to spin up: " MYNUMBER
+        SITE=$(echo "$SITES"|awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER {print $2}')
+
+        vout "Spinning up $SITE"
+        . $FULCRUM_SITES_VARS_DIR/$SITE.site
+      else
+        eout "Cannot call \"site\" without arguments, you do not yet have any .site files defined in $FULCRUM_SITES_VARS_DIR"
+      fi
+    else
+      eout "Cannot call \"site\" without arguments, you do not yet have a $FULCRUM_SITES_VARS_DIR"
+    fi
+  elif [[ "$1" = "--clone" ]]; then
+    CLONING_SITE=true
+    FULCRUM_SITE=$2
+    FULCRUM_DBGZ=$3
+    FULCRUM_DBNAME=$4
+    FULCRUM_REPO=$5
+    FULCRUM_WRD=$6
+    FULCRUM_AWSPROFILE=$7
+  else
+    FULCRUM_SITE=$1
+    FULCRUM_DBGZ=$2
+    FULCRUM_DBNAME=$3
+    FULCRUM_REPO=$4
+    FULCRUM_WRD=$5
+    FULCRUM_AWSPROFILE=$6
+  fi
+
+  if [ ! -z $FULCRUM_AWSPROFILE ]; then
+      FULCRUM_AWSPROFILE="--profile $FULCRUM_AWSPROFILE"
+  fi
+
+  if [ -z $FULCRUM_SITE ]; then
+      eout "Error, FULCRUM_SITE not provided!"
+  fi
+
+  if [ -z $FULCRUM_DBGZ ]; then
+      eout "Error, FULCRUM_DBGZ not provided!"
+  fi
+
+  if [ -z $FULCRUM_DBNAME ]; then
+      eout "Error, FULCRUM_DBNAME not provided!"
+  fi
+
+  if [ -z $FULCRUM_REPO ]; then
+      eout "Error, FULCRUM_REPO not provided!"
+  fi
+
+  FULCRUM_DBBAK=$FULCRUM_DIRNAME/var/fulcrum/bak/$FULCRUM_SITE.sql.gz
+  FULCRUM_CONF=$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
+  FULCRUM_DBUSER=fulcrum_$FULCRUM_DBNAME
+  FULCRUM_DBPASS=$(rndStr 32)
+
+  if [[ -z $FULCRUM_WRD || $FULCRUM_WRD == "" || $FULCRUM_WRD == "/" ]]; then
+    if [ -d $FULCRUM_DOCROOT/docroot ]; then
+      FULCRUM_WRD=/docroot
+    else
+      FULCRUM_WRD=""
+    fi
+  elif [[ ! "$FULCRUM_WRD" == "/"* ]]; then
+    FULCRUM_WRD="/$FULCRUM_WRD"
+  fi
+
+  FULCRUM_REPODIR=$FULCRUM_DIRNAME/sites/$FULCRUM_SITE
+  FULCRUM_WEBROOT=$FULCRUM_SITE$FULCRUM_WRD
+
+  if [ -n "$FULCRUM_SITEDIR" ]; then
+    FULCRUM_REPODIR=$FULCRUM_DIRNAME/sites/$FULCRUM_SITEDIR
+    FULCRUM_WEBROOT=$FULCRUM_SITEDIR$FULCRUM_WRD
+  fi
+
+  FULCRUM_DOCROOT=$FULCRUM_REPODIR$FULCRUM_WRD
+
+  FULCRUM_VARN_SECRET=$(varnishSecret)
+
+  vout "FULCRUM_BINDIR:      $FULCRUM_BINDIR"
+  vout "FULCRUM_DIRNAME:     $FULCRUM_DIRNAME"
+  vout "FULCRUM_SITE:        $FULCRUM_SITE"
+  vout "FULCRUM_CONF:        $FULCRUM_CONF"
+  vout "FULCRUM_REPO:        $FULCRUM_REPO"
+  vout "FULCRUM_REPODIR:     $FULCRUM_REPODIR"
+  vout "FULCRUM_WRD:         $FULCRUM_WRD"
+  vout "FULCRUM_DOCROOT:     $FULCRUM_DOCROOT"
+  vout "FULCRUM_WEBROOT:     $FULCRUM_WEBROOT"
+  vout "FULCRUM_DBBAK:       $FULCRUM_DBBAK"
+  vout "FULCRUM_DBGZ:        $FULCRUM_DBGZ"
+  vout "FULCRUM_DBUSER:      $FULCRUM_DBUSER"
+  vout "FULCRUM_DBNAME:      $FULCRUM_DBNAME"
+  vout "FULCRUM_DBPASS:      $FULCRUM_DBPASS"
+  vout "FULCRUM_AWSPROFILE:  $FULCRUM_AWSPROFILE"
+  vout "FULCRUM_VARN_SECRET: $FULCRUM_VARN_SECRET"
+}
+
+function usePHP() {
+  USEPHP=5
+
+  # use PHP 7 for Drupal 8
+  if [ -e $FULCRUM_DOCROOT/core/lib/Drupal.php ]; then
+    USEPHP=7
+  fi
+
+  echo $USEPHP
+}
+
+function copyConf() {
+  PHPVER=$(usePHP)
+
+  vout "$SUDOCK docker cp $FULCRUM_CONF drush8-php$PHPVER:/config.json"
+  $SUDOCK docker cp $FULCRUM_CONF drush8-php$PHPVER:/config.json
+}
+
+function drushCmd() {
+  DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
+  vout "$DRUSHCMD"
+
+  PHPVER=$(usePHP)
+
+  vout "Using PHP $PHPVER for $FULCRUM_WEBROOT"
+
+  # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
+  DRUSHCMDRESULT=$($SUDOCK docker exec -i drush8-php$PHPVER //bin/sh -c "$DRUSHCMD")
+}
+
+function createSolr() {
+  # get the abbr name if set, else get from dbname
+  if [ -n "$FULCRUM_ABBR" ]; then
+    ABBR=${FULCRUM_ABBR}
+  else
+    ABBR=${FULCRUM_DBNAME/dev}
+  fi
+
+  RESULT=$($SUDOCK docker exec --user=solr solr sh -c "if [ -d /opt/solr/server/solr/core_${ABBR}01 ]; then echo true ; else echo false ; fi")
+
+  if [ ${RESULT} == "false" ]; then
+    sudo chown -R root:101 ~/fulcrum/etc/solr-copy-configs
+    $SUDOCK docker exec --user=solr solr sh -c "bin/solr create_core -c core_${ABBR}01"
+
+    if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+      $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+    else
+      $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults-d8/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+    fi
+
+    $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/lang /opt/solr/server/solr/core_${ABBR}01/conf/"
+    $SUDOCK docker restart solr
+  fi
+}
