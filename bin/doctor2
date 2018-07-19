@@ -10,7 +10,7 @@ requireSudo
 
 if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
   # checkout sites repo
-  HINGECONFIGREPODEFAULT=https://github.com/if-fulcrum/hinge-sites.git
+  HINGECONFIGREPODEFAULT=https://github.com/if-fulcrum/hinge-config.git
 
   read -p "Please enter Fulcrum Hinge Config repo URL (default: $HINGECONFIGREPODEFAULT): " HINGECONFIGREPO
 
@@ -82,6 +82,6 @@ if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
 fi
 
 # run the custom doctor if it exists
-if [ -e ${FULCRUM_BINDIR}/lib/doctor-custom ]; then
-  source ${FULCRUM_BINDIR}/lib/doctor-custom
+if [ -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom ]; then
+  source ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom
 fi
