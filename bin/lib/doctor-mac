@@ -32,20 +32,6 @@ if [ ! -e $TAPDIR ]; then
   fi
 fi
 
-if ! $(ls -d $TAPDIR/homebrew-dupes > /dev/null 2>&1); then
-  vout "Tapping: homebrew dupes"
-  brew tap homebrew/dupes
-else
-  vout "Check: homebrew dupes"
-fi
-
-if ! $(ls -d $TAPDIR/homebrew-versions > /dev/null 2>&1); then
-  vout "Tapping: homebrew versions"
-  brew tap homebrew/versions
-else
-  vout "Check: homebrew versions"
-fi
-
 # kludge for Homebrew 0.9
 if [[ ! "$TAPDIR" == *"Homebrew"* ]]; then
   SEDDIR=/usr/local/Library/ENV/4.3
@@ -88,11 +74,14 @@ else
   vout "Check: homebrew 'brew-php-switcher' package is installed."
 fi
 
-if [[ ! "$BREWLIST" == *"drush"* ]]; then
-  vout "Installing: homebrew 'drush' package."
-  brew install drush
-else
-  vout "Check: homebrew 'drush' package is installed."
+if ! (which drush > /dev/null); then
+  if ! (which drush > /dev/null); then
+    brew install composer
+  fi
+
+  composer global require drush/drush:7.*
+
+  ln -s ~/.composer/vendor/bin/drush /usr/local/bin/drush
 fi
 
 INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
