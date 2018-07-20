@@ -1,6 +1,7 @@
 #!/bin/bash
 # set -x
 
+DUMMYVAR="DUMMYVAL"
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/general
 
@@ -8,7 +9,8 @@ vout "Running doctor"
 
 requireSudo
 
-if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
+# allow for override in a custom doctor file
+if [[ -z ${HINGECONFIGREPO+DUMMYVAR} && ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]]; then
   # checkout sites repo
   HINGECONFIGREPODEFAULT=https://github.com/if-fulcrum/hinge-config.git
 
