@@ -116,6 +116,24 @@ if (ps auxwww|grep /usr/sbin/httpd|grep -v grep); then
   fi
 fi
 
+# until we can migrate to nfs mounts we need d4m-nfs which needs Docker 17.09.0-ce-mac35 or below
+if ! (system_profiler -detailLevel full SPApplicationsDataType|grep -i docker); then
+  # get proper Docker version
+  curl https://download.docker.com/mac/stable/21090/Docker.dmg > /tmp/docker.dmg
+
+  # mount DMG
+  sudo hdiutil attach /tmp/docker.dmg
+
+  # copy Docker to proper place
+  sudo cp -fa /Volumes/Docker/Docker.app /Applications/
+
+  # unmount DMG
+  sudo hdiutil detach /Volumes/Docker
+
+  # delete DMG
+  rm /tmp/docker.dmg
+fi
+
 ############# START: REMOVE TO bin/doctor2 #############
 if [ ! -d $FULCRUM_DIRNAME/var/lib/mysql ]; then
   mkdir $FULCRUM_DIRNAME/var/lib/mysql
