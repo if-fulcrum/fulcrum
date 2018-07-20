@@ -1,4 +1,4 @@
-drush#!/bin/bash
+#!/bin/bash
 
 # functions to make sure that fulcrum hinge is healthy on the Mac
 
