@@ -1,4 +1,4 @@
-#!/bin/bash
+drush#!/bin/bash
 
 # functions to make sure that fulcrum hinge is healthy on the Mac
 
@@ -79,7 +79,7 @@ if ! (which drush > /dev/null); then
     brew install composer
   fi
 
-  composer global require drush/drush:7.*
+  composer global require drush/drush:8.*
 
   ln -s ~/.composer/vendor/bin/drush /usr/local/bin/drush
 fi
