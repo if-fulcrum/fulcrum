@@ -91,24 +91,21 @@ if ! (which drush > /dev/null); then
   ln -s ~/.composer/vendor/bin/drush /usr/local/bin/drush
 fi
 
-INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
+# lighter weight redis check
+if [ ! -e /usr/local/lib/php/pecl/20131226/redis.so ]; then
+  INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
 
-if [[ ! "$INITPHPVER" == "5.6" ]]; then
-  brew-php-switcher 5.6
-fi
+  if [[ ! "$INITPHPVER" == "5.6" ]]; then
+    brew-php-switcher 5.6
+  fi
 
-PECLLIST=$(pecl list)
-
-if [[ ! "$PECLLIST" == *"redis"* ]]; then
   vout "Installing: pecl 'php 56 redis' package."
   printf "\n" | pecl install redis
-else
-  vout "Check: pecl php 5.6 'redis' package is installed."
-fi
 
-# switch back to initial php version
-if [[ ! "$INITPHPVER" == "5.6" ]]; then
-  brew-php-switcher $INITPHPVER
+  # switch back to initial php version
+  if [[ ! "$INITPHPVER" == "5.6" ]]; then
+    brew-php-switcher $INITPHPVER
+  fi
 fi
 
 # stop apache in case previous installs had started it
