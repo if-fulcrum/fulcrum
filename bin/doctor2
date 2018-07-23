@@ -11,6 +11,7 @@ requireSudo
 HINGECONFIGREPO=""
 if [ -e /tmp/HINGECONFIGREPO ]; then
   HINGECONFIGREPO=$(cat /tmp/HINGECONFIGREPO)
+  touch /tmp/HINGEUSEDEFAULTS
 fi
 
 # allow for override in a custom doctor file
@@ -112,3 +113,14 @@ fi
 if [ -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom ]; then
   source ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom
 fi
+
+# clean up config
+if [ -e /tmp/HINGECONFIGREPO ]; then
+  rm /tmp/HINGECONFIGREPO
+fi
+
+# clean up defaults
+if [ -e /tmp/HINGEUSEDEFAULTS ]; then
+  rm /tmp/HINGEUSEDEFAULTS
+fi
+
