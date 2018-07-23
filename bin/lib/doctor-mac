@@ -74,6 +74,13 @@ else
   vout "Check: homebrew 'brew-php-switcher' package is installed."
 fi
 
+# install aws cli if needed/wanted
+if ! (which aws > /dev/null); then
+  echo "Installing aws"
+  brew install awscli
+  aws configure
+fi
+
 if ! (which drush > /dev/null); then
   if ! (which drush > /dev/null); then
     brew install composer
