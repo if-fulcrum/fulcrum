@@ -55,10 +55,15 @@ function dlogs() {
 
 function stopAllContainers() {
   # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
-  RUNNING_CONTAINERS=$($SUDOCK docker ps -q | wc -l)
-  if [ $RUNNING_CONTAINERS -gt 0 ]; then
+  RUNNING_CONTAINERS=$($SUDOCK docker ps -q)
+
+  if [ $(echo -n "$RUNNING_CONTAINERS"|wc -l)  -gt 0 ]; then
     sendalert "stopping any running containers"
-    $SUDOCK docker stop $($SUDOCK docker ps -q) 1>/dev/null
+
+    for CONT in $RUNNING_CONTAINERS; do
+      echo "Stopping $CONT"
+      $SUDOCK docker stop $CONT
+    done
   fi
 }
 
