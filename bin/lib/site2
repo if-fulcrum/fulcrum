@@ -47,7 +47,8 @@ function cloneCodebase() {
   if [ -d $FULCRUM_REPODIR ]; then
     vout "You appear to already have the repo, skipping git clone."
     if [ -e $FULCRUM_REPODIR/.git ]; then
-      echo -e "\n\nNOTE: If you have a branch checked out that is not tracked from an upstream branch or the upstream branch does not exist, updating to the latest commit might make this 'site' fail.\n\n"
+      echo -e "\n\nNOTE: If branch checked out not tracked from upstream or "
+      echo -e "upstream doesn't exist, updating to latest commit might make 'site' fail.\n\n"
 
       if [ "$GITPULL" == "y" ]; then
         chmod u+w $FULCRUM_DOCROOT/sites/default
