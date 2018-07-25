@@ -1,3 +1,6 @@
-d4m-nfs
-d8libraries
-hinge-config
+*
+!.gitignore
+!bak
+!d8config
+!private_files
+!public_files
