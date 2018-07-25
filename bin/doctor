@@ -114,6 +114,11 @@ if [ -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom ]; the
   source ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom
 fi
 
+# make sure conf exists, not in code base since it needs to be dynamnically generated
+if [ ! -e ${FULCRUM_DIRNAME}/etc/nginx/fulcrum/fulcrum_s3.conf ]; then
+  touch ${FULCRUM_DIRNAME}/etc/nginx/fulcrum/fulcrum_s3.conf
+fi
+
 # clean up config
 if [ -e /tmp/HINGECONFIGREPO ]; then
   rm /tmp/HINGECONFIGREPO
