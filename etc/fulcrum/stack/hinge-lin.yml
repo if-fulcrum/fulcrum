@@ -173,7 +173,8 @@ nginxxdebug:
   volumes:
     - $HOME/fulcrum/etc/nginx/fulcrum/entrypoint.sh:/entrypoint.sh
     - $HOME/fulcrum/etc/nginx:/etc/nginx
-    - $HOME/fulcrum/etc/nginx-xdebug/fulcrum:/etc/nginx/fulcrum
+    - $HOME/fulcrum/etc/nginx-xdebug/fulcrum/fulcrum_fastcgi.conf:/etc/nginx/fulcrum/fulcrum_fastcgi.conf
+    - $HOME/fulcrum/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.conf:/etc/nginx/fulcrum/fulcrum_phpversion.conf
     - $HOME/fulcrum/var/log/nginx:/var/log
     - $HOME/fulcrum/sites:/var/www/html:ro
   links:
