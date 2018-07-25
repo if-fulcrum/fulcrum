@@ -6,7 +6,7 @@ set -eu
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/fulcrum
 
-source ${FULCRUM_BINDIR}/doctor2
+source ${FULCRUM_BINDIR}/doctor
 
 # defaults
 DOPULL=0
@@ -78,12 +78,12 @@ elif [ $FULCRUM_OS == "LIN" ]; then
 fi
 
 DUMMYVAR="DUMMYVAL"
-# echo "\${FULCRUM_COMPOSE_YML+DUMMYVAR}: ${FULCRUM_COMPOSE_YML+DUMMYVAR}"
+echo "\${FULCRUM_COMPOSE_YML+DUMMYVAR}: ${FULCRUM_COMPOSE_YML+DUMMYVAR}"
 
 # allow for override in a custom doctor file
 if [ -z ${FULCRUM_COMPOSE_YML+DUMMYVAR} ]; then
   # must come after FULCRUM_HOST_USER
-  FULCRUM_COMPOSE_YML="$FULCRUM_DIRNAME/var/fulcrum/hinge-config/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
+  FULCRUM_COMPOSE_YML="$FULCRUM_DIRNAME/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
   echo "Using $FULCRUM_COMPOSE_YML for Docker Compose"
 fi
 

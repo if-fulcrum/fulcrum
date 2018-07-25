@@ -17,9 +17,9 @@ export DISPLAY=:0
 # set max virtual memory for elasticsearch
 sudo sysctl -w vm.max_map_count=262144
 
-############# START: REMOVE TO bin/doctor2 #############
+############# START: REMOVE TO bin/doctor #############
 
 # enable auto complete
 source ~/fulcrum/bin/lib/cli-autocomplete
 
-############# END: REMOVE TO bin/doctor2 #############
+############# END: REMOVE TO bin/doctor #############

@@ -1,4 +1,5 @@
 #!/bin/bash
+# set -x
 
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/general
@@ -6,6 +7,25 @@ source ${FULCRUM_BINDIR}/lib/general
 vout "Running doctor"
 
 requireSudo
+
+HINGECONFIGREPO=""
+if [ -e /tmp/HINGECONFIGREPO ]; then
+  HINGECONFIGREPO=$(cat /tmp/HINGECONFIGREPO)
+  touch /tmp/HINGEUSEDEFAULTS
+fi
+
+# allow for override in a custom doctor file
+if [[ "$HINGECONFIGREPO" == "" && ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]]; then
+  # checkout sites repo
+  HINGECONFIGREPODEFAULT=https://github.com/if-fulcrum/hinge-config.git
+
+  # TODO: this is breaking from running
+  read -p "Please enter Fulcrum Hinge Config repo URL (default: $HINGECONFIGREPODEFAULT): " HINGECONFIGREPO
+
+  if [ "$HINGECONFIGREPO" == "" ]; then
+    HINGECONFIGREPO=$HINGECONFIGREPODEFAULT
+  fi
+fi
 
 etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
@@ -45,11 +65,62 @@ if [ ! -e $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env ]; then
   cp $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env-template $FULCRUM_DIRNAME/etc/fulcrum/stack/env/blackfire.env
 fi
 
+# make mysql directory
+if [ ! -d $FULCRUM_DIRNAME/var/lib/mysql ]; then
+  mkdir $FULCRUM_DIRNAME/var/lib/mysql
+fi
+
+# set mysql perms
+sudo chown -R 999:999 $FULCRUM_DIRNAME/var/lib/mysql
+sudo chmod -R u+w,u+r $FULCRUM_DIRNAME/var/lib/mysql
+
+# make elasticsearch directory
+if [ ! -d $FULCRUM_DIRNAME/var/lib/elasticsearch ]; then
+  sudo mkdir $FULCRUM_DIRNAME/var/lib/elasticsearch
+fi
+
+# set elasticsearch perms
+sudo chown -R 1000:0 $FULCRUM_DIRNAME/var/lib/elasticsearch
+sudo chmod -R 770 $FULCRUM_DIRNAME/var/lib/elasticsearch
+
+source $FULCRUM_DIRNAME/bin/lib/cli-autocomplete
+
+# run OS doctor
+if [ -e ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC ]; then
+  source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
+
+  # run distro doctor
+  if [ -n "$FULCRUM_OS_DISTRO" ]; then
+    if [ -e ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_DISTRO ]; then
+      source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_DISTRO
+    else
+      eout "No distro doctor file to run, Fulcrum Hinge probably needs to be extended for $FULCRUM_OS_DISTRO"
+    fi
+  fi
+else
+  eout "No OS doctor file to run, Fulcrum Hinge probably needs to be extended for $FULCRUM_OS_LC"
+fi
+
+# secret needs to be made *after* docker has been installed
 varnishSecret > /dev/null
 
-source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
+# clonge out the fulcrum hinge config repo
+if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
+  git -C ${FULCRUM_DIRNAME}/var/fulcrum clone $HINGECONFIGREPO hinge-config
+fi
 
 # run the custom doctor if it exists
-if [ -e ${FULCRUM_BINDIR}/lib/doctor-custom ]; then
-  source ${FULCRUM_BINDIR}/lib/doctor-custom
+if [ -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom ]; then
+  source ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom
 fi
+
+# clean up config
+if [ -e /tmp/HINGECONFIGREPO ]; then
+  rm /tmp/HINGECONFIGREPO
+fi
+
+# clean up defaults
+if [ -e /tmp/HINGEUSEDEFAULTS ]; then
+  rm /tmp/HINGEUSEDEFAULTS
+fi
+

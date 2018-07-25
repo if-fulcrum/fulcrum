@@ -145,7 +145,7 @@ if [ ! -d /Applications/Docker.app ]; then
   fi
 fi
 
-############# START: REMOVE TO bin/doctor2 #############
+############# START: REMOVE TO bin/doctor #############
 if [ ! -d $FULCRUM_DIRNAME/var/lib/mysql ]; then
   mkdir $FULCRUM_DIRNAME/var/lib/mysql
 fi
@@ -162,4 +162,4 @@ sudo chmod -R 770 $FULCRUM_DIRNAME/var/lib/elasticsearch
 # cli autocomplete
 source $FULCRUM_DIRNAME/bin/lib/cli-autocomplete
 
-############# END: REMOVE TO bin/doctor2 #############
+############# END: REMOVE TO bin/doctor #############

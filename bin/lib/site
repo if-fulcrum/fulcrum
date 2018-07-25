@@ -26,7 +26,11 @@ function restoreDatabaseBackup() {
       fi
 
       vout "Downloading $FULCRUM_DBGZ"
-      aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK || eout "it seems your aws login information to pull the database is not working"
+      aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK || eout "it seems your aws credentials to pull the database is not working, this can happen if you computer clock is off."
+      FULCRUM_DBGZ=$FULCRUM_DBBAK
+    elif [[ "$FULCRUM_DBGZ" == "https://"* || "$FULCRUM_DBGZ" == "http://"* ]]; then
+      vout "Downloading $FULCRUM_DBGZ"
+      (curl -fsSL $FULCRUM_DBGZ || wget -q -O - $FULCRUM_DBGZ) > $FULCRUM_DBBAK
       FULCRUM_DBGZ=$FULCRUM_DBBAK
     fi
 
@@ -43,7 +47,8 @@ function cloneCodebase() {
   if [ -d $FULCRUM_REPODIR ]; then
     vout "You appear to already have the repo, skipping git clone."
     if [ -e $FULCRUM_REPODIR/.git ]; then
-      echo -e "\n\nNOTE: If you have a branch checked out that is not tracked from an upstream branch or the upstream branch does not exist, updating to the latest commit might make this 'site' fail.\n\n"
+      echo -e "\n\nNOTE: If branch checked out not tracked from upstream or "
+      echo -e "upstream doesn't exist, updating to latest commit might make 'site' fail.\n\n"
 
       if [ "$GITPULL" == "y" ]; then
         chmod u+w $FULCRUM_DOCROOT/sites/default
@@ -211,13 +216,13 @@ function drushUserLogin() {
 function setupEnv() {
   ${FULCRUM_BINDIR}/doctor
 
-  FULCRUM_SITES_VARS_DIR=$FULCRUM_DIRNAME/etc/fulcrum/sites
+  FULCRUM_SITES_VARS_DIR=$FULCRUM_DIRNAME/var/fulcrum/hinge-config/etc/fulcrum/sites
   CLONING_SITE=false
 
   sudoDockerNeeded
   waitForDocker
 
-  if [ -z "$1" ]; then
+  if [[ -z "$1" || -z "$2" ]]; then
     if [ -d $FULCRUM_SITES_VARS_DIR ]; then
       # update if a git repo
       if [ -d $FULCRUM_SITES_VARS_DIR/.git ]; then
@@ -228,9 +233,18 @@ function setupEnv() {
       SITES=$(find $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} .site \;|sort|awk '{print FNR " " $0}')
 
       if [ -n "$SITES" ]; then
-        echo "$SITES"
-        read -p "Please enter site to spin up: " MYNUMBER
-        SITE=$(echo "$SITES"|awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER {print $2}')
+        # allow site to come from cli or list
+        if [ -n "$1" ]; then
+          if [ -e $FULCRUM_SITES_VARS_DIR/$1.site ]; then
+            SITE="$1"
+          else
+            eout "Cannot find $1.site definition in $FULCRUM_SITES_VARS_DIR"
+          fi
+        else
+          echo "$SITES"
+          read -p "Please enter site to spin up: " MYNUMBER
+          SITE=$(echo "$SITES"|awk -v MYNUMBER=${MYNUMBER} '$1 == MYNUMBER {print $2}')
+        fi
 
         vout "Spinning up $SITE"
         . $FULCRUM_SITES_VARS_DIR/$SITE.site

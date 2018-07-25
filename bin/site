@@ -12,9 +12,16 @@ setupEnv $@
 
 requireSudo
 
-read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
-read -e -p "Do you want to update to the latest git commit? (y/n) " GITPULL
-read -e -p "Is this site forcing all HTTPS? New sites likely should. (y/n)" FORCEHTTPS
+# if /tmp/HINGECONFIGREPO was changed in the last 10 minutes just do the defaults
+if [ -e /tmp/HINGEUSEDEFAULTS ]; then
+  DROPDB=y
+  GITPULL=y
+  FORCEHTTPS=y
+else
+  read -e -p "Drop existing database and restore from fresh backup? (y/n) " DROPDB
+  read -e -p "Do you want to update to the latest git commit? (y/n) " GITPULL
+  read -e -p "Is this site forcing all HTTPS? New sites likely should. (y/n) " FORCEHTTPS
+fi
 
 restoreDatabaseBackup
 
