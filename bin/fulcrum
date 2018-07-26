@@ -14,55 +14,30 @@ SUDO=""
 MYCOMMAND=""
 SKIP_DOCTOR=""
 
-sudoDockerNeeded
-
 # read in command line args
 while getopts ":dhnpqvsx" opt; do
   case ${opt} in
-    d)
-      SKIP_DOCTOR=1
-      shift 1
-      ;;
-    h)
-      usage
-      shift 1
-      ;;
-    n)
-      DOPULL=0
-      shift 1
-      ;;
-    p)
-      DOPULL=1
-      shift 1
-      ;;
-    q)
-      QUIET=1
-      shift 1
-      ;;
-    s)
-      SUDO="sudo -E "
-      shift 1
-      ;;
-    v)
-      VERBOSE=1
-      shift 1
-      ;;
-    x)
-      set -x
-      shift 1
-      ;;
+    d) SKIP_DOCTOR=1 ;;
+    h) usage ;;
+    n) DOPULL=0 ;;
+    p) DOPULL=1 ;;
+    q) QUIET=1 ;;
+    s) SUDO="sudo -E " ;;
+    v) VERBOSE=1 ;;
+    x) set -x ;;
     \?)
       echo "Invalid Option: -$OPTARG" >&2
       echo "Try -h for Help."
-      exit 1
-      ;;
+      exit 1 ;;
     :)
       echo "Option -$OPTARG Requires an Argument." >&2
       echo "Try -h for Help."
-      exit 1
-      ;;
+      exit 1 ;;
   esac
 done
+shift $(( OPTIND - 1 ))
+
+sudoDockerNeeded
 
 # only run doctor if we were not given -d switch
 if [ -z "$SKIP_DOCTOR" ]; then
