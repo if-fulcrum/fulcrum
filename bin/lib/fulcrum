@@ -4,6 +4,7 @@ source ${FULCRUM_BINDIR}/lib/general
 
 function usage() {
   echo "Example Usage: "
+  echo " -d  Don't run doctor"
   echo " -h  Help"
   echo " -n  No docker pull (default)"
   echo " -p  Do docker pull (update your images)"
