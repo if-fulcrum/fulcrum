@@ -6,20 +6,23 @@ set -eu
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source ${FULCRUM_BINDIR}/lib/fulcrum
 
-source ${FULCRUM_BINDIR}/doctor
-
 # defaults
 DOPULL=0
 VERBOSE=0
 QUIET=0
 SUDO=""
 MYCOMMAND=""
+SKIP_DOCTOR=""
 
 sudoDockerNeeded
 
 # read in command line args
-while getopts ":hnpqvsx" opt; do
+while getopts ":dhnpqvsx" opt; do
   case ${opt} in
+    d)
+      SKIP_DOCTOR=1
+      shift 1
+      ;;
     h)
       usage
       shift 1
@@ -60,6 +63,11 @@ while getopts ":hnpqvsx" opt; do
       ;;
   esac
 done
+
+# only run doctor if we were not given -d switch
+if [ -z "$SKIP_DOCTOR" ]; then
+  source ${FULCRUM_BINDIR}/doctor
+fi
 
 # so docker for mac needs to be running
 # docker ps 1> /dev/null 2>/dev/null || eout "docker for mac does not appear to be running, you should launch it from your applications folder. If it is running, you may need to wait a few more seconds for it to finish booting up.  If you do not have docker for mac, please download the stable version from https://docs.docker.com/docker-for-mac/"
