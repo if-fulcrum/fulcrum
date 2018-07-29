@@ -101,6 +101,11 @@ else
   eout "No OS doctor file to run, Fulcrum Hinge probably needs to be extended for $FULCRUM_OS_LC"
 fi
 
+# set the resolver IP for nginx
+NGINX_VAR_DIR=$FULCRUM_DIRNAME/var/fulcrum/nginx
+mkdir -p $NGINX_VAR_DIR
+echo "resolver $FULCRUM_HOST_IP valid=300s;" > $NGINX_VAR_DIR/resolver.conf
+
 # secret needs to be made *after* docker has been installed
 varnishSecret > /dev/null
 
@@ -112,12 +117,6 @@ fi
 # run the custom doctor if it exists
 if [ -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom ]; then
   source ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom
-fi
-
-# make sure conf exists, not in code base since it needs to be dynamnically generated
-if [ ! -e ${FULCRUM_DIRNAME}/etc/nginx/fulcrum/fulcrum_s3.conf ]; then
-  echo -e "map \$host \$fulcrum_s3 {\n  hostnames;\n\n  default    'https://s3-us-west-2.amazonaws.com/putyourbucketnamehere/';\n}" |
-    tee ${FULCRUM_DIRNAME}/etc/nginx/fulcrum/fulcrum_s3.conf
 fi
 
 # clean up config
