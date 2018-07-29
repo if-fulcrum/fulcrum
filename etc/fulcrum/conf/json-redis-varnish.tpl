@@ -2,6 +2,7 @@
   "site" : "${FULCRUM_SITE}",
   "env" : "${FULCRUM_ENVIRONMENT}",
   "webroot" : "${FULCRUM_WEBROOT}",
+  ${FULCRUM_S3_JSON}
   "pre" :  {
     "replace" : {
       "databases" : {

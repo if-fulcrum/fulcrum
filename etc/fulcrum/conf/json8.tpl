@@ -3,6 +3,7 @@
   "env" : "${FULCRUM_ENVIRONMENT}",
   "webroot" : "${FULCRUM_WEBROOT}",
   "timezone" : "UTC",
+  ${FULCRUM_S3_JSON}
   ${FULCRUM_CONF_EXTRA}
   "pre" :  {
     "replace" : {
