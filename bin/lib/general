@@ -8,9 +8,11 @@ UNAMEA=$(uname -a)
 FULCRUM_OS=UNK
 FULCRUM_ETC_HOSTS=/etc/hosts
 FULCRUM_OS_DISTRO=""
+FULCRUM_HOME_DC=""
 
 if [[ "$UNAMEA" == *"Darwin"* ]]; then
   FULCRUM_OS=MAC
+  export FULCRUM_HOME_DC=/mnt
 elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
   FULCRUM_OS=WIN
   FULCRUM_ETC_HOSTS=/c/windows/system32/drivers/etc/hosts
@@ -22,6 +24,7 @@ elif [[ "$UNAMEA" == *"Linux"* ]]; then
 
     FULCRUM_OS_DISTRO=$(echo $ID|tr '[:upper:]' '[:lower:]'|tr ' ' '-')
   fi
+  export FULCRUM_HOME_DC=$HOME
 fi
 
 FULCRUM_OS_LC=$(echo $FULCRUM_OS|tr '[:upper:]' '[:lower:]')
