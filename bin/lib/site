@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 source ${FULCRUM_BINDIR}/lib/general
 
 function restoreDatabaseBackup() {
@@ -100,16 +102,18 @@ function nginxConfSite() {
   FUCRUM_CNF_TPL=json.tpl
 
   vout "Making $FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json"
+  EXP="export"
   FULCRUM_COOKIE=.$(echo $FULCRUM_SITE|sed 's;^www\.;;g')
   FULCRUM_VARS=$(cat <<SETVAR
-  -eFULCRUM_DBPASS=$FULCRUM_DBPASS
-  -eFULCRUM_DBNAME=$FULCRUM_DBNAME
-  -eFULCRUM_ENVIRONMENT=dev
-  -eFULCRUM_DBUSER=$FULCRUM_DBUSER
-  -eFULCRUM_SITE=$FULCRUM_SITE
-  -eFULCRUM_WEBROOT=$FULCRUM_WEBROOT
-  -eFULCRUM_COOKIE=$FULCRUM_COOKIE
-  -eFULCRUM_CONF_EXTRA=$FULCRUM_CONF_EXTRA
+$EXP FULCRUM_DBPASS=$FULCRUM_DBPASS
+$EXP FULCRUM_DBNAME=$FULCRUM_DBNAME
+$EXP FULCRUM_ENVIRONMENT=dev
+$EXP FULCRUM_DBUSER=$FULCRUM_DBUSER
+$EXP FULCRUM_SITE=$FULCRUM_SITE
+$EXP FULCRUM_WEBROOT=$FULCRUM_WEBROOT
+$EXP FULCRUM_COOKIE=$FULCRUM_COOKIE
+$EXP FULCRUM_CONF_EXTRA=$FULCRUM_CONF_EXTRA
+$EXP FULCRUM_S3_JSON=$FULCRUM_S3_JSON
 SETVAR
 )
 
@@ -123,19 +127,33 @@ SETVAR
 
     if [ -d $FULCRUM_DOCROOT/sites/all/modules/contrib/varnish ]; then
       VARNISH="-varnish"
-      FULCRUM_VARS="$FULCRUM_VARS -eFULCRUM_VARN_SECRET=$FULCRUM_VARN_SECRET "
+      FULCRUM_VARS="$FULCRUM_VARS\n$EXP FULCRUM_VARN_SECRET=$FULCRUM_VARN_SECRET\n"
     fi
 
     FUCRUM_CNF_TPL=json${REDIS}${VARNISH}.tpl
   else
     FUCRUM_CNF_TPL=json8.tpl
     FULCRUM_SALT=$(rndStr 74)
-    FULCRUM_VARS="$FULCRUM_VARS -eFULCRUM_SALT=$FULCRUM_SALT -eFULCRUM_D8CONFIG=../config/sync "
+    FULCRUM_VARS="$FULCRUM_VARS\n$EXP FULCRUM_SALT=$FULCRUM_SALT\n$EXP FULCRUM_D8CONFIG=../config/sync\n"
   fi
 
-  DOCKER_CMD="$SUDOCK docker run --rm -i $FULCRUM_VARS fulcrum/util //usr/bin/envsubst"
+  FC_DIR=/fulcrum-site
+  FH_DIR=$FULCRUM_DIRNAME/tmp/$FC_DIR
 
-  cat $FULCRUM_DIRNAME/etc/fulcrum/conf/$FUCRUM_CNF_TPL|($DOCKER_CMD)>$FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
+  sudo chown $FULCRUM_HOST_USER $(dirname $FH_DIR)
+  mkdir -p $FH_DIR
+
+  echo -e "$FULCRUM_VARS" > $FH_DIR/vars
+
+  cp $FULCRUM_DIRNAME/etc/fulcrum/conf/$FUCRUM_CNF_TPL $FH_DIR/tpl
+
+  echo -e "#!/bin/sh\n\nsource $FC_DIR/vars\n/bin/cat $FC_DIR/tpl | /usr/bin/envsubst > $FC_DIR/conf.json" > $FH_DIR/run
+
+  chmod +x $FH_DIR/run
+
+  $SUDOCK docker run --rm -v $FH_DIR:$FC_DIR fulcrum/util $FC_DIR/run > /dev/null
+
+  cp $FH_DIR/conf.json $FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
 
   if [ "$FORCEHTTPS" == "y" ]; then
     ${FULCRUM_BINDIR}/fulcrum forcehttps $FULCRUM_SITE
@@ -248,6 +266,11 @@ function setupEnv() {
 
         vout "Spinning up $SITE"
         . $FULCRUM_SITES_VARS_DIR/$SITE.site
+
+        if [ -n "$FULCRUM_S3" ]; then
+          # escape properly for use
+          FULCRUM_S3_JSON=$(printf "%q" "\"fulcrum_s3\" : \"$FULCRUM_S3/$FULCRUM_HOST_USER\",")
+        fi
       else
         eout "Cannot call \"site\" without arguments, you do not yet have any .site files defined in $FULCRUM_SITES_VARS_DIR"
       fi
