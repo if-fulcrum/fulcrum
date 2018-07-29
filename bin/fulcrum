@@ -39,6 +39,9 @@ shift $(( OPTIND - 1 ))
 
 sudoDockerNeeded
 
+waitForDocker
+export FULCRUM_HOST_IP=$($SUDOCK docker run fulcrum/util /sbin/ip route|grep default|cut -f3 -d" ")
+
 # only run doctor if we were not given -d switch
 if [ -z "$SKIP_DOCTOR" ]; then
   source ${FULCRUM_BINDIR}/doctor
@@ -53,12 +56,13 @@ export FULCRUM_HOST_USER=$(whoami)
 # it does not appear docker-for-mac needs the fulcrum ID work around
 export FULCRUM_HOST_UID=$(id -u $FULCRUM_HOST_USER)
 export FULCRUM_HOST_GID=$(id -g $FULCRUM_HOST_USER)
-if [ $FULCRUM_OS == "MAC" ]; then
-  export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2 || ipconfig getifaddr en3 || ipconfig getifaddr en4 || ipconfig getifaddr en5 || ipconfig getifaddr en6 || ipconfig getifaddr en7)
-elif [ $FULCRUM_OS == "LIN" ]; then
-  FULCRUM_INTERFACE=$(cat /proc/net/dev|grep :|egrep -v '(docker|lo|veth|tun)([0-9a-f]+)?:'|cut -f1 -d:|head -n1)
-  export FULCRUM_HOST_IP=$(ip addr list $FULCRUM_INTERFACE |grep "inet " |cut -d' ' -f6|cut -d/ -f1)
-fi
+
+# if [ $FULCRUM_OS == "MAC" ]; then
+#   export FULCRUM_HOST_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || ipconfig getifaddr en2 || ipconfig getifaddr en3 || ipconfig getifaddr en4 || ipconfig getifaddr en5 || ipconfig getifaddr en6 || ipconfig getifaddr en7)
+# elif [ $FULCRUM_OS == "LIN" ]; then
+#   FULCRUM_INTERFACE=$(cat /proc/net/dev|grep :|egrep -v '(docker|lo|veth|tun)([0-9a-f]+)?:'|cut -f1 -d:|head -n1)
+#   export FULCRUM_HOST_IP=$(ip addr list $FULCRUM_INTERFACE |grep "inet " |cut -d' ' -f6|cut -d/ -f1)
+# fi
 
 DUMMYVAR="DUMMYVAL"
 # echo "\${FULCRUM_COMPOSE_YML+DUMMYVAR}: ${FULCRUM_COMPOSE_YML+DUMMYVAR}"
