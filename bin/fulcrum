@@ -40,7 +40,7 @@ shift $(( OPTIND - 1 ))
 sudoDockerNeeded
 
 waitForDocker
-export FULCRUM_HOST_IP=$($SUDOCK docker run fulcrum/util /sbin/ip route|grep default|cut -f3 -d" ")
+export FULCRUM_HOST_IP=$($SUDOCK docker run --rm fulcrum/util /sbin/ip route|grep default|cut -f3 -d" ")
 
 # only run doctor if we were not given -d switch
 if [ -z "$SKIP_DOCTOR" ]; then
