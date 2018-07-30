@@ -56,7 +56,15 @@
         },
         "hash_salt" : "${FULCRUM_SALT}",
         "install_profile" : "standard",
-        "file_public_path" : "sites/default/files"
+        "file_public_path" : "sites/default/files",
+        "s3fs.access_key" : "${FULCRUM_S3_ACCESS_KEY}",
+        "s3fs.secret_key" : "${FULCRUM_S3_SECRET_KEY}",
+        "s3fs.use_s3_for_public" : true,
+        "php_storage" : {
+          "twig" : {
+            "directory" : "../twig"
+          }
+        }
       },
       "config_directories" : {
         "sync" : "${FULCRUM_D8CONFIG}"
