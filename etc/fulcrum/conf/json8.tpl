@@ -23,16 +23,16 @@
     },
     "set" : {
       "config" : {
-	"search_api.server.solr1" : {
-	  "backend_config" : {
-	    "connector_config" : {
-	      "host" : "solr"
-	    }
-	  }
-	},
+        "search_api.server.solr1" : {
+          "backend_config" : {
+            "connector_config" : {
+              "host" : "solr"
+            }
+          }
+        },
         "elasticsearch_connector.cluster.elasticsearch1" : {
-	  "url" : "http://elasticsearch:9200"
-	}
+          "url" : "http://elasticsearch:9200"
+        }
       },
       "settings" : {
         "container_yamls" : [
