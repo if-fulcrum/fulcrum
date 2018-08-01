@@ -2,5 +2,6 @@
 !.gitignore
 !bak
 !d8config
+!nginx
 !private_files
 !public_files
