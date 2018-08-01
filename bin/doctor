@@ -102,9 +102,7 @@ else
 fi
 
 # set the resolver IP for nginx
-NGINX_VAR_DIR=$FULCRUM_DIRNAME/var/fulcrum/nginx
-mkdir -p $NGINX_VAR_DIR
-echo "resolver $FULCRUM_HOST_IP valid=300s;" > $NGINX_VAR_DIR/resolver.conf
+echo "resolver $FULCRUM_HOST_IP valid=300s;" > $FULCRUM_DIRNAME/var/fulcrum/nginx/resolver.conf
 
 # secret needs to be made *after* docker has been installed
 varnishSecret > /dev/null
