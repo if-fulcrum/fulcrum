@@ -31,7 +31,7 @@
           }
         },
         "s3fs.settings" : {
-          "public_folder" : "${FULCRUM_S3_PUBLIC_FOLDER}",
+          "root_folder" : "${FULCRUM_S3_ROOT}",
           "bucket" : "${FULCRUM_S3_BUCKET}",
           "region" : "${FULCRUM_S3_REGION}",
           "use_https" : true
@@ -68,7 +68,7 @@
         "s3fs.use_s3_for_public" : true,
         "php_storage" : {
           "twig" : {
-            "directory" : "../twig"
+            "directory" : "sites/default/twig"
           }
         }
       },
