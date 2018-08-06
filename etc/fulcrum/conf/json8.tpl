@@ -68,7 +68,7 @@
         "s3fs.use_s3_for_public" : true,
         "php_storage" : {
           "twig" : {
-            "directory" : "sites/default/twig"
+            "directory" : "${FULCRUM_TWIG_DIR}"
           }
         }
       },
