@@ -23,6 +23,11 @@
     },
     "set" : {
       "config" : {
+        "system.file" : {
+          "path" : {
+            "temporary" : "/tmp"
+          }
+        },
         "search_api.server.solr1" : {
           "backend_config" : {
             "connector_config" : {
@@ -63,6 +68,7 @@
         "hash_salt" : "${FULCRUM_SALT}",
         "install_profile" : "standard",
         "file_public_path" : "sites/default/files",
+        "file_private_path" : "${FULCRUM_PRIV_DIR}",
         "s3fs.access_key" : "${FULCRUM_S3_ACCESS_KEY}",
         "s3fs.secret_key" : "${FULCRUM_S3_SECRET_KEY}",
         "s3fs.use_s3_for_public" : true,
