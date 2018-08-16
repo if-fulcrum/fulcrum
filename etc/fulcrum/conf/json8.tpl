@@ -71,7 +71,7 @@
         "file_private_path" : "${FULCRUM_PRIV_DIR}",
         "s3fs.access_key" : "${FULCRUM_S3_ACCESS_KEY}",
         "s3fs.secret_key" : "${FULCRUM_S3_SECRET_KEY}",
-        "s3fs.use_s3_for_public" : true,
+        "s3fs.use_s3_for_public" : ${FULCRUM_S3_USE_FOR_PUBLIC},
         "php_storage" : {
           "twig" : {
             "directory" : "${FULCRUM_TWIG_DIR}"
