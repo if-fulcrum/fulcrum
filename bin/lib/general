@@ -184,26 +184,23 @@ function nginxConfAll() {
   fi
   echo "$CONF"|($SUDOCK docker run --rm -i fulcrum/util node //fulcrum/node/fulcrumConfs.js)>$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf
 
-  # ensure we get the same settings in nginx xdebug
-  $SUDOCK cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_config.conf $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_config.conf
-
-  # ensure clients are on the same php version on xdebug
+  # set php version
   if [ ! -f $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template ]; then
     $SUDOCK cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template.default $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
   fi
-  if [ ! -f $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template ]; then
-    $SUDOCK cp -a $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template.default $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
+
+  # ensure we have no syntax errors
+  $SUDOCK docker exec nginx /usr/sbin/nginx -t -c /etc/nginx/nginx.conf 1>/dev/null 2>/dev/null
+
+  if [ $? -gt 0 ]; then
+    echo "FATAL: syntax error in nginx config it seems, quitting without restart"
+    exit 1
   fi
-  $SUDOCK cp -a $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  $SUDOCK sed -iBAK 's;php7fpm;php7fpmxdebug;g' $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  $SUDOCK sed -iBAK 's;phpfpm;phpfpmxdebug;g' $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.template
-  $SUDOCK rm $FULCRUM_DIRNAME/etc/nginx-xdebug/fulcrum/fulcrum_phpversion.templateBAK
+
+  stackStatus "noexit"
 
   vout "send nginx container the reload signal"
   $SUDOCK docker exec nginx nginx -s reload
-  if [ -n "$( $SUDOCK docker ps -a | grep nginxxdebug )" ]; then
-    $SUDOCK docker exec nginxxdebug nginx -s reload
-  fi
 }
 
 function signCert() {
@@ -287,7 +284,60 @@ function signCert() {
   rm -vrf $TMP_DIR
 }
 
+function stackStatus() {
+  EXIT_ON_ISSUE=${1:-exit}
+  RUNNING_CONTAINERS=$($SUDOCK docker ps --format '{{.Names}}')
+  STACK_STATUS=""
+  SEVERITY="ERROR"
+
+  if [[ "$EXIT_ON_ISSUE" != "exit" ]]; then
+    SEVERITY="WARNING"
+  fi
+
+  if [[ "$RUNNING_CONTAINERS" != *"dnsmasq"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: dnsmasq not running\n"
+  fi
+
+  if [[ "$RUNNING_CONTAINERS" != *"haproxy"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: haproxy not running\n"
+  fi
+
+  if [[ "$RUNNING_CONTAINERS" != *"varnish"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: varnish not running\n"
+  fi
+
+  if [[ "$RUNNING_CONTAINERS" != *"varnishstatic"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: varnishstatic static not running\n"
+  fi
+
+  if [[ "$RUNNING_CONTAINERS" != *"nginx"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: nginx not running\n"
+  fi
+
+  if [[ "$RUNNING_CONTAINERS" != *"phpfpm"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: phpfpm not running\n"
+  fi
+
+  if [[ "$RUNNING_CONTAINERS" != *"php7fpm"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php7fpm not running\n"
+  fi
+
+  if [[ "$STACK_STATUS" != "" ]]; then
+    vout "$(echo -e "$STACK_STATUS")"
+
+    # some things should not exit, e.g. `fulcrum conf`
+    # otherwise you can get into a non-repairable situation
+    if [[ "$EXIT_ON_ISSUE" == "exit" ]]; then
+      exit 1
+    fi
+  else
+    vout "Primary containers are running"
+  fi
+}
+
 function haproxyrestart() {
+  stackStatus "exit"
+
   # ensure we have no syntax errors
   $SUDOCK docker exec haproxy /usr/local/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c 1>/dev/null 2>/dev/null
   if [ $? -gt 0 ]; then
@@ -299,6 +349,8 @@ function haproxyrestart() {
 }
 
 function varnishrestart() {
+  stackStatus "exit"
+
   # ensure we have no syntax errors
   $SUDOCK docker exec varnish /usr/sbin/varnishd -C -f /etc/varnish/default.vcl 2>/dev/null
   if [ $? -gt 0 ]; then
