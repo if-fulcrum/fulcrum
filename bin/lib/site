@@ -158,6 +158,7 @@ SETVAR
 
   FC_DIR=/fulcrum-site
   FH_DIR=$FULCRUM_DIRNAME/tmp/$FC_DIR
+  FV_DIR=$FULCRUM_HOME_DC/tmp/$FC_DIR
 
   sudo chown $FULCRUM_HOST_USER $(dirname $FH_DIR)
   mkdir -p $FH_DIR
@@ -170,7 +171,7 @@ SETVAR
 
   chmod +x $FH_DIR/run
 
-  $SUDOCK docker run --rm -v $FH_DIR:$FC_DIR fulcrum/util $FC_DIR/run > /dev/null
+  $SUDOCK docker run --rm -v $FV_DIR:$FC_DIR fulcrum/util $FC_DIR/run > /dev/null
 
   cp $FH_DIR/conf.json $FULCRUM_DIRNAME/etc/fulcrum/conf/$FULCRUM_SITE.json
 
