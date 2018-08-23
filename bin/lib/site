@@ -119,7 +119,6 @@ $EXP FULCRUM_S3_SECRET_KEY=$FULCRUM_S3_SECRET_KEY
 $EXP FULCRUM_S3_BUCKET=$FULCRUM_S3_BUCKET
 $EXP FULCRUM_S3_REGION=$FULCRUM_S3_REGION
 $EXP FULCRUM_S3_ROOT=$FULCRUM_S3_ROOT
-$EXP FULCRUM_S3_USE_FOR_PUBLIC=$FULCRUM_S3_USE_FOR_PUBLIC
 $EXP FULCRUM_PRIV_DIR=/var/www/html/$FULCRUM_WEBROOT/sites/default/files/private
 SETVAR
 )
@@ -142,12 +141,19 @@ SETVAR
     FUCRUM_CNF_TPL=json8.tpl
     FULCRUM_SALT=$(rndStr 74)
 
+    # default to false
+    if [ -z "$FULCRUM_S3_USE_FOR_PUBLIC" ]; then
+      FULCRUM_S3_USE_FOR_PUBLIC="false"
+    fi
+
     if [ -z "$FULCRUM_TWIG_DIR" ]; then
       # THIS SHOULD BE ADDED IF NOT RUN IN CLOUD
       FULCRUM_TWIG_DIR="sites/default/files/php/twig"
     fi
 
-    FULCRUM_VARS="$FULCRUM_VARS\n$EXP FULCRUM_SALT=$FULCRUM_SALT\n$EXP FULCRUM_D8CONFIG=../config/sync\n$EXP FULCRUM_TWIG_DIR=$FULCRUM_TWIG_DIR\n"
+    FULCRUM_VARS="$FULCRUM_VARS\n$EXP FULCRUM_SALT=$FULCRUM_SALT\n$EXP FULCRUM_D8CONFIG=../config/sync\n"
+    FULCRUM_VARS="$FULCRUM_VARS\n$EXP FULCRUM_TWIG_DIR=$FULCRUM_TWIG_DIR\n"
+    FULCRUM_VARS="$FULCRUM_VARS\n$EXP FULCRUM_S3_USE_FOR_PUBLIC=$FULCRUM_S3_USE_FOR_PUBLIC\n"
   fi
 
   FC_DIR=/fulcrum-site
@@ -376,34 +382,34 @@ function setupEnv() {
   vout "FULCRUM_VARN_SECRET: $FULCRUM_VARN_SECRET"
 }
 
-function usePHP() {
-  USEPHP=5
+function phpContainer() {
+  PHPCONTAINER=phpfpm
 
   # use PHP 7 for Drupal 8
   if [ -e $FULCRUM_DOCROOT/core/lib/Drupal.php ]; then
-    USEPHP=7
+    PHPCONTAINER=php7fpm
   fi
 
-  echo $USEPHP
+  echo $PHPCONTAINER
 }
 
 function copyConf() {
-  PHPVER=$(usePHP)
+  PHPCONTAINER=$(phpContainer)
 
-  vout "$SUDOCK docker cp $FULCRUM_CONF drush8-php$PHPVER:/config.json"
-  $SUDOCK docker cp $FULCRUM_CONF drush8-php$PHPVER:/config.json
+  vout "$SUDOCK docker cp $FULCRUM_CONF $PHPCONTAINER:/config.json"
+  $SUDOCK docker cp $FULCRUM_CONF $PHPCONTAINER:/config.json
 }
 
 function drushCmd() {
   DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
   vout "$DRUSHCMD"
 
-  PHPVER=$(usePHP)
+  PHPCONTAINER=$(phpContainer)
 
-  vout "Using PHP $PHPVER for $FULCRUM_WEBROOT"
+  vout "Using PHP $PHPCONTAINER for $FULCRUM_WEBROOT"
 
   # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
-  DRUSHCMDRESULT=$($SUDOCK docker exec -i drush8-php$PHPVER //bin/sh -c "$DRUSHCMD")
+  DRUSHCMDRESULT=$($SUDOCK docker exec -i $PHPCONTAINER //bin/sh -c "$DRUSHCMD")
 }
 
 function createSolr() {
