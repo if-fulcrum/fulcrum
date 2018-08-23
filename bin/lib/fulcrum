@@ -172,6 +172,7 @@ function _phpReloadConf() {
 function phpReloadConf() {
   vout "Reload phpfpm config"
   vout "Reload php7fpm config"
+  stackStatus "noexit"
   _phpReloadConf
 }
 
