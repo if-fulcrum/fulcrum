@@ -1,2 +1,4 @@
 certs.d/*
 !certs.d/wc.ifdev.pem
+dnsmasq/*
+!dnsmasq/0.base.conf
