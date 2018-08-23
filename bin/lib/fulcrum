@@ -31,6 +31,9 @@ function usage() {
   echo "fs             - force HTTPS via base_url [forcehttps]"
   echo "ac             - add drupal cron entry for a site [addcron]"
   echo "rc             - remake certs [remakecerts]"
+  echo "xof            - disable xdebug [xoff] [xdebugoff]"
+  echo "xon            - enable xdebug [xdebugon]"
+  echo "xst            - status of xdebug [xdebugstatus]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   echo ""
@@ -161,32 +164,91 @@ function dbash() {
   $SUDOCK $FULCRUM_OS_INT_PREFIX docker exec -it ${ENTER_IMAGE} sh -c "export TERM=xterm; exec sh"
 }
 
-function opcacheFlush() {
+function _phpReloadConf() {
   $SUDOCK docker exec phpfpm sh -c 'kill -USR2 1'
-  vout "Zend OPcache Flushed"
+  $SUDOCK docker exec php7fpm sh -c 'kill -USR2 1'
+}
+
+function phpReloadConf() {
+  vout "Reload phpfpm config"
+  vout "Reload php7fpm config"
+  _phpReloadConf
+}
+
+function opcacheFlush() {
+  vout "Flush Zend OPcache"
+  _phpReloadConf
 }
 
 function opcacheOff() {
+  vout "Disable Zend OPcache"
   echo "opcache.enable=0" > $FULCRUM_DIRNAME/etc/php5/conf.d/zz-opcache-overide.ini
-  vout "Zend OPcache Disabled"
-  opcacheFlush
+  echo "opcache.enable=0" > $FULCRUM_DIRNAME/etc/php7/conf.d/zz-opcache-overide.ini
+  phpReloadConf
+  opcacheStatus
 }
 
 function opcacheOn() {
+  vout "Enable Zend OPcache"
   echo "opcache.enable=1" > $FULCRUM_DIRNAME/etc/php5/conf.d/zz-opcache-overide.ini
-  vout "Zend OPcache Enabled"
-  opcacheFlush
+  echo "opcache.enable=1" > $FULCRUM_DIRNAME/etc/php7/conf.d/zz-opcache-overide.ini
+  phpReloadConf
+  opcacheStatus
 }
 
 function opcacheStatus() {
   OCMODE=$(cat $FULCRUM_DIRNAME/etc/php5/conf.d/zz-opcache-overide.ini)
 
   if [[ "$OCMODE" == *"opcache.enable=1"* ]]; then
-    vout "Zend OPcache status appears to be *enabled* ($OCMODE)"
+    vout "PHP5 Zend OPcache status appears to be *enabled* ($OCMODE)"
   elif [[ "$OCMODE" == *"opcache.enable=0"* ]]; then
-    vout "Zend OPcache status appears to be *disabled* ($OCMODE)"
+    vout "PHP5 Zend OPcache status appears to be *disabled* ($OCMODE)"
   else
-    vout "Zend OPcache status is unknown ($OCMODE)"
+    vout "PHP5 Zend OPcache status is unknown ($OCMODE)"
+  fi
+
+  OCMODE=$(cat $FULCRUM_DIRNAME/etc/php7/conf.d/zz-opcache-overide.ini)
+
+  if [[ "$OCMODE" == *"opcache.enable=1"* ]]; then
+    vout "PHP7 Zend OPcache status appears to be *enabled* ($OCMODE)"
+  elif [[ "$OCMODE" == *"opcache.enable=0"* ]]; then
+    vout "PHP7 Zend OPcache status appears to be *disabled* ($OCMODE)"
+  else
+    vout "PHP7 Zend OPcache status is unknown ($OCMODE)"
+  fi
+}
+
+function xdebugOff() {
+  vout "Disable Xdebug"
+  cp $FULCRUM_DIRNAME/etc/php5xdebug/conf.d/zz-xdebug-off.ini $FULCRUM_DIRNAME/etc/php5/conf.d/zz-xdebug-overide.ini
+  cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-off.ini $FULCRUM_DIRNAME/etc/php7/conf.d/zz-xdebug-overide.ini
+  phpReloadConf
+  xdebugStatus
+}
+
+function xdebugOn() {
+  vout "Enable Xdebug"
+  cp $FULCRUM_DIRNAME/etc/php5xdebug/conf.d/zz-xdebug-on.ini $FULCRUM_DIRNAME/etc/php5/conf.d/zz-xdebug-overide.ini
+  cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-on.ini $FULCRUM_DIRNAME/etc/php7/conf.d/zz-xdebug-overide.ini
+  phpReloadConf
+  xdebugStatus
+}
+
+function xdebugStatus() {
+  OCMODE=$(cat $FULCRUM_DIRNAME/etc/php5/conf.d/zz-xdebug-overide.ini)
+
+  if [[ "$OCMODE" == *"xdebug.so"* ]]; then
+    vout "PHP5 Xdebug status appears to be *enabled*"
+  else
+    vout "PHP5 Xdebug status appears to be *disabled*"
+  fi
+
+  OCMODE=$(cat $FULCRUM_DIRNAME/etc/php7/conf.d/zz-xdebug-overide.ini)
+
+  if [[ "$OCMODE" == *"xdebug.so"* ]]; then
+    vout "PHP7 Xdebug status appears to be *enabled*"
+  else
+    vout "PHP7 Xdebug status appears to be *disabled*"
   fi
 }
 
