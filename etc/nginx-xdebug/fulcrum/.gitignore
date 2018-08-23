@@ -1,8 +1,0 @@
-*
-!fulcrum_debug.conf
-!fulcrum_fastcgi.conf
-!fulcrum_fastcgi-xdebug.conf
-!fulcrum_phpversion.template.default
-!fulcrum_proxypass.conf
-!entrypoint.sh
-!.gitignore
