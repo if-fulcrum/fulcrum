@@ -171,6 +171,18 @@ case ${MYCOMMAND} in
     remakeCerts
     ;;
 
+  "xon"|"xdebugon")
+    xdebugOn
+    ;;
+
+  "xoff"|"xdebugoff")
+    xdebugOff
+    ;;
+
+  "xst"|"xdebugstatus")
+    xdebugStatus
+    ;;
+
   *)
     vout "command not found..."
     sendalert ""
