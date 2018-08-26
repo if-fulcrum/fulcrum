@@ -158,7 +158,7 @@ SETVAR
 
   FC_DIR=/fulcrum-site
   FH_DIR=$FULCRUM_DIRNAME/tmp/$FC_DIR
-  FV_DIR=$FULCRUM_HOME_DC/tmp/$FC_DIR
+  FV_DIR=$FULCRUM_HOME_DC/fulcrum/tmp/$FC_DIR
 
   sudo chown $FULCRUM_HOST_USER $(dirname $FH_DIR)
   mkdir -p $FH_DIR
