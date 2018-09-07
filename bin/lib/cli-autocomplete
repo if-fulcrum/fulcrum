@@ -3,4 +3,4 @@
 # set -x
 
 # https://iridakos.com/tutorials/2018/03/01/bash-programmable-completion-tutorial
-complete -W "bash dps up stop sh ps log haproxyrestart varnishrestart conf ocfl ocof ocon ocst etch rnd sc fs ac rc" fulcrum
+complete -W "bash dps up stop sh ps log haproxyrestart varnishrestart varnishcc conf ocfl ocof ocon ocst etch rnd sc fs ac rc" fulcrum

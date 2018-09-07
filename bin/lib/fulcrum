@@ -20,6 +20,7 @@ function usage() {
   echo "log            - show logs being put out from containers, ctrl+C to stop following [log] [logs] [dlog] [dlogs]"
   echo "haproxyrestart - restart haproxy, for when modifying the config [haproxy] [haproxy-restart]"
   echo "varnishrestart - restart varnish, for when modifying the config [varnish] [varnish-restart]"
+  echo "varnishcc      - varnish clear cache, for dumping the whole varnish cache [varnishclearcache] [varnish-clearcache]"
   echo "conf           - regenerate nginx .conf file from json [nginx] [nginx-restart]"
   echo "ocfl           - flush Zend OPcache [opcacheflush]"
   echo "ocof           - disable Zend OPcache [ocoff] [opcacheoff]"

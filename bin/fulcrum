@@ -126,6 +126,11 @@ case ${MYCOMMAND} in
     varnishrestart
     ;;
 
+  "varnishcc"|"varnishclearcache"|"varnish-clear-cache")
+    vout "running varnishcc command"
+    varnishcc
+    ;;
+
   "conf"|"nginx"|"nginx-restart")
     vout "regenerate nginx .conf file from json & restart nginx"
     nginxConfAll
