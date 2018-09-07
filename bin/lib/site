@@ -187,6 +187,10 @@ SETVAR
       sed -iBAK $"s/^}/     ${FULCRUM_SITE}  \"php7fpm\";/" $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
       echo "}" >> $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.template
       rm $FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.templateBAK
+
+      ### NOTE: the /entrypoint.sh in the nginx container does the cp of
+      ###       fulcrum_phpversion.template to fulcrum_phpversion.conf
+      ###       if we move to DNSMasq we could make this better
     fi
   fi
 
