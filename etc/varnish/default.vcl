@@ -114,7 +114,7 @@ sub vcl_recv {
   # Also consider index.php?q=user as these can be POST at and make the redirect uncachable
   if ( !std.ip(req.http.X-Client-IP, client.ip) ~ whitelist &&
        (
-            req.url ~ "^/((apc|authorize|cron|install|phptest|status|update)\.php|[A-Z]{6,11}[a-z\.]*\.(txt|md))$"
+            req.url ~ "^/((apc|authorize|cron|install|phptest|status|update)\.php|[A-Z]{6,11}[a-z\.]*\.txt)$"
          || req.url ~ "(?i)^/index.php\?q=?(admin.*|user.*|node/add|simplesaml*)"
          || req.url ~ "^/(admin|user|node/add|simplesaml)($|/.+)"
        )
