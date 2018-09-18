@@ -4,7 +4,6 @@
 !fulcrum_fastcgi.conf
 !fulcrum_fastcgi-xdebug.conf
 !fulcrum_gzip.conf
-!fulcrum_phpversion.template.default
 !fulcrum_proxypass.conf
 !entrypoint.sh
 !.gitignore
