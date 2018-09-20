@@ -185,7 +185,7 @@ SETVAR
     # if site does not exists then add it
     if [ -z "$(grep ${FULCRUM_SITE} $FULCRUM_PHPVERSION_CONF)" ]; then
       echo "$(
-        sed  $"s/^}/     ${FULCRUM_SITE}  \"php71fpm\";/" $FULCRUM_PHPVERSION_CONF &&
+        sed  $"s/^}/     ${FULCRUM_SITE}  \"71\";/" $FULCRUM_PHPVERSION_CONF &&
         echo "}"
       )" > $FULCRUM_PHPVERSION_CONF
     fi
