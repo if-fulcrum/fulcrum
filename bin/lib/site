@@ -185,7 +185,7 @@ SETVAR
     # if site does not exists then add it
     if [ -z "$(grep ${FULCRUM_SITE} $FULCRUM_PHPVERSION_CONF)" ]; then
       echo "$(
-        sed  $"s/^}/     ${FULCRUM_SITE}  \"php7fpm\";/" $FULCRUM_PHPVERSION_CONF &&
+        sed  $"s/^}/     ${FULCRUM_SITE}  \"php71fpm\";/" $FULCRUM_PHPVERSION_CONF &&
         echo "}"
       )" > $FULCRUM_PHPVERSION_CONF
     fi
@@ -385,11 +385,11 @@ function setupEnv() {
 }
 
 function phpContainer() {
-  PHPCONTAINER=phpfpm
+  PHPCONTAINER=php56fpm
 
   # use PHP 7 for Drupal 8
   if [ -e $FULCRUM_DOCROOT/core/lib/Drupal.php ]; then
-    PHPCONTAINER=php7fpm
+    PHPCONTAINER=php71fpm
   fi
 
   echo $PHPCONTAINER

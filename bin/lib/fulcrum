@@ -166,13 +166,13 @@ function dbash() {
 }
 
 function _phpReloadConf() {
-  $SUDOCK docker exec phpfpm sh -c 'kill -USR2 1'
-  $SUDOCK docker exec php7fpm sh -c 'kill -USR2 1'
+  $SUDOCK docker exec php56fpm sh -c 'kill -USR2 1'
+  $SUDOCK docker exec php71fpm sh -c 'kill -USR2 1'
 }
 
 function phpReloadConf() {
-  vout "Reload phpfpm config"
-  vout "Reload php7fpm config"
+  vout "Reload php56fpm config"
+  vout "Reload php71fpm config"
   stackStatus "noexit"
   _phpReloadConf
 }

@@ -314,12 +314,12 @@ function stackStatus() {
     STACK_STATUS="${STACK_STATUS}${SEVERITY}: nginx not running\n"
   fi
 
-  if [[ "$RUNNING_CONTAINERS" != *"phpfpm"* ]]; then
-    STACK_STATUS="${STACK_STATUS}${SEVERITY}: phpfpm not running\n"
+  if [[ "$RUNNING_CONTAINERS" != *"php56fpm"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php56fpm not running\n"
   fi
 
-  if [[ "$RUNNING_CONTAINERS" != *"php7fpm"* ]]; then
-    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php7fpm not running\n"
+  if [[ "$RUNNING_CONTAINERS" != *"php71fpm"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php71fpm not running\n"
   fi
 
   if [[ "$STACK_STATUS" != "" ]]; then

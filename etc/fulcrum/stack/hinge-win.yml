@@ -22,8 +22,8 @@ services:
     ports:
       - "6379:6379"
 
-  phpfpm:
-    container_name: phpfpm
+  php56fpm:
+    container_name: php56fpm
     image: fulcrum/php:latest-alpine
     volumes:
       - c:/Users/$USERNAME/fulcrum/etc/php5:/etc/php5
@@ -46,7 +46,7 @@ services:
       - c:/Users/$USERNAME/fulcrum/var/log/nginx:/var/log
       - c:/Users/$USERNAME/fulcrum/sites:/var/www/html:ro
     links:
-      - phpfpm
+      - php56fpm
     ports:
       - "8080:80"
 
@@ -103,7 +103,7 @@ services:
 #   container_name: solr
 #   image: solr:5.4.1-alpine
 #   links:
-#     - phpfpm
+#     - php56fpm
 #   ports:
 #     - "8983:8983"
 #   volumes:
