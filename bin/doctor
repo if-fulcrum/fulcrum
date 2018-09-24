@@ -27,10 +27,11 @@ if [[ "$HINGECONFIGREPO" == "" && ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-conf
   fi
 fi
 
-etcHosts 127.0.0.1 mariadb
-etcHosts 127.0.0.1 redis
-etcHosts 127.0.0.1 varnish
-etcHosts 127.0.0.1 certbot
+# not needed with dnsmasq
+# etcHosts 127.0.0.1 mariadb
+# etcHosts 127.0.0.1 redis
+# etcHosts 127.0.0.1 varnish
+# etcHosts 127.0.0.1 certbot
 
 if [ ! -e $FULCRUM_DIRNAME/etc/varnish/internal.vcl ]; then
   echo 'acl internal  { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
