@@ -306,9 +306,9 @@ function stackStatus() {
     STACK_STATUS="${STACK_STATUS}${SEVERITY}: varnish not running\n"
   fi
 
-  if [[ "$RUNNING_CONTAINERS" != *"varnishstatic"* ]]; then
-    STACK_STATUS="${STACK_STATUS}${SEVERITY}: varnishstatic static not running\n"
-  fi
+  # if [[ "$RUNNING_CONTAINERS" != *"varnishstatic"* ]]; then
+  #   STACK_STATUS="${STACK_STATUS}${SEVERITY}: varnishstatic static not running\n"
+  # fi
 
   if [[ "$RUNNING_CONTAINERS" != *"nginx"* ]]; then
     STACK_STATUS="${STACK_STATUS}${SEVERITY}: nginx not running\n"
