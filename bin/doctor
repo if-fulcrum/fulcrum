@@ -27,9 +27,9 @@ if [[ "$HINGECONFIGREPO" == "" && ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-conf
   fi
 fi
 
+etcHosts 127.0.0.1 mariadb
+etcHosts 127.0.0.1 redis
 # not needed with dnsmasq
-# etcHosts 127.0.0.1 mariadb
-# etcHosts 127.0.0.1 redis
 # etcHosts 127.0.0.1 varnish
 # etcHosts 127.0.0.1 certbot
 
