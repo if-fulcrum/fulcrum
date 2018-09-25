@@ -1,4 +1,4 @@
-# Fulcrum installer
+# Fulcrum installer.
 
 ## Install Fulcrum on Mac
 Run from terminal:
