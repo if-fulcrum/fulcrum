@@ -45,7 +45,7 @@ sub vcl_recv {
       else {
         return (synth(403, "X-Url/X-Url-Wildcard/Cache-Tags header and/or X-Host header missing."));
       }
-      # Throw a synthetic page so the request won't go to the backend.
+      # Throw a synthetic page so the request will not go to the backend.
       return (synth(200, "Ban added for " + req.http.X-Host));
   }
 
@@ -140,7 +140,7 @@ sub vcl_recv {
     if (req.http.Accept-Encoding ~ "br" && req.url !~ "\.(jpg|png|gif|gz|mp3|mov|avi|mpg|mp4|swf|wmf)$") {
       set req.http.X-brotli = "true";
     } else if (req.http.Accept-Encoding ~ "gzip") {
-      # If the browser supports it, we'll use gzip.
+      # If the browser supports it, we will use gzip.
       set req.http.Accept-Encoding = "gzip";
     } else if (req.http.Accept-Encoding ~ "deflate") {
       # Next, try deflate if it is supported.
@@ -171,7 +171,7 @@ sub vcl_recv {
 # Set a header to track a cache HIT/MISS.
 sub vcl_deliver {
 
-  # it seems varnish doesn't really run these durning the include for whatever reason
+  # it seems varnish does not really run these durning the include for whatever reason
   # include "include/cache-tag-remove.vcl";
 
   # Remove ban-lurker friendly custom headers when delivering to client.
@@ -249,7 +249,7 @@ sub vcl_backend_response {
     return (deliver);
   }
 
-  # Don't allow static files to set cookies.
+  # Do not allow static files to set cookies.
   # This list of extensions appears twice, once here and again in vcl_recv so
   # make sure you edit both and keep them equal.
   if (bereq.url ~ "(?i)\.(svg|woff|png|gif|jpe?g|ico|swf|css|js|html?|ttf)(\?[a-z0-9_=\?&\.-]+)?$") {
@@ -309,7 +309,7 @@ sub vcl_synth {
 
     # more specific error for those who need to report it
     if (resp.status == 403) {
-      # don't let cloudflare cache
+      # do not let cloudflare cache
       set resp.http.Cache-Control = "must-revalidate, no-cache, private";
 
       synthetic(std.fileread("/etc/varnish/error-denied.html"));
