@@ -165,7 +165,7 @@ sub vcl_recv {
   }
 
   # deal with Drupal cookie sessions, external file so it can be mounted over for exceptions
-  include "include/cookie-sessions.vcl";
+  include "include/vcl_recv_tail.vcl";
 }
 
 # Set a header to track a cache HIT/MISS.
@@ -192,6 +192,13 @@ sub vcl_deliver {
   } else {
     set resp.http.X-Varnish-Cache = "MISS";
   }
+
+  include "include/vcl_deliver_tail.vcl";
+}
+
+# Handle a cache hit.
+sub vcl_hit {
+  include "include/vcl_hit_tail.vcl";
 }
 
 # Routine used to determine the cache key if storing/retrieving a cached page.
@@ -222,13 +229,14 @@ sub vcl_hash {
     hash_data(req.url);
   }
 
+  include "include/vcl_hash_tail.vcl";
+
   return (lookup);
 }
 
 # Code determining what to do when serving items from the web servers.
 # beresp == Back-end response from the web server.
 sub vcl_backend_response {
-
   # Disable buffering only for BigPipe responses
   # comment out until ready to implement
   if (beresp.http.Surrogate-Control ~ "BigPipe/1.0") {
@@ -265,6 +273,8 @@ sub vcl_backend_response {
 
   # Allow items to be stale if needed.
   set beresp.grace = 6h;
+
+  include "include/vcl_backend_response_tail.vcl";
 }
 
 # https://varnish-cache.org/docs/4.0/users-guide/vcl-built-in-subs.html#vcl-backend-error
