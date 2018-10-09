@@ -8,9 +8,16 @@ if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
   $_SERVER['REMOTE_ADDR'] = trim(current($ips));
 }
 
+global $_FULCRUM;
+
 // see if we are run from the server or command line
-if (isset($_SERVER['FULCRUM_CONF'])) {
-  $_FULCRUM['conf'] = json_decode($_SERVER['FULCRUM_CONF'], 1);
+if (PHP_SAPI !== 'cli') {
+  // first check for
+  if (file_exists('/fulcrum/config/' . $_SERVER['SERVER_NAME'] . '.json')) {
+    $_FULCRUM['conf'] = json_decode(file_get_contents('/fulcrum/config/' . $_SERVER['SERVER_NAME'] . '.json'), 1);
+  } else if (isset($_SERVER['FULCRUM_CONF'])) {
+    $_FULCRUM['conf'] = json_decode($_SERVER['FULCRUM_CONF'], 1);
+  }
 
   // extend execution time for long tasks
   if (
@@ -21,7 +28,7 @@ if (isset($_SERVER['FULCRUM_CONF'])) {
   ) {
     set_time_limit(300);
   }
-} else if (PHP_SAPI === 'cli') {
+} else {
   if (file_exists('/config.json')) {
     $_FULCRUM['conf'] = json_decode(preg_replace('/\\\\\\\\/', '\\', file_get_contents('/config.json')), 1);
   } else if (isset($_SERVER['FULCRUM_CONF'])) {
@@ -89,5 +96,12 @@ if (!function_exists('fulcrum_cfg')) {
         date_default_timezone_set($fcfg['timezone']);
       }
     }
+  }
+}
+
+if (!function_exists('fulcrum_config')) {
+  function fulcrum_config($phase, &$settings = NULL, &$databases = NULL) {
+    global $_FULCRUM;
+    fulcrum_cfg($phase, $_FULCRUM['conf'], $settings, $databases);
   }
 }

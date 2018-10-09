@@ -141,3 +141,6 @@ fi
 if [ ! -e ${FULCRUM_DIRNAME}/etc/php7/conf.d/zz-xdebug-overide.ini ]; then
   cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-off.ini $FULCRUM_DIRNAME/etc/php7/conf.d/zz-xdebug-overide.ini
 fi
+
+# add 99_fulcrum.ini so drush can use it
+echo "auto_prepend_file=${FULCRUM_DIRNAME}/etc/fulcrum/php/fulcrum.php" | sudo tee $(php --ini|grep Scan|cut -d: -f2)/99_fulcrum.ini > /dev/null
