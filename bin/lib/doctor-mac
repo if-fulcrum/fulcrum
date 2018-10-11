@@ -82,7 +82,7 @@ if ! (which aws > /dev/null); then
 fi
 
 if ! (which drush > /dev/null); then
-  if ! (which drush > /dev/null); then
+  if ! (which composer > /dev/null); then
     brew install composer
   fi
 
@@ -125,7 +125,7 @@ fi
 if [ ! -d /Applications/Docker.app ]; then
   echo "Can't find Docker under /Applications, checking system_profiler if installed"
 
-  DOCKER_INSTALLED=$(system_profiler -detailLevel full SPApplicationsDataType|grep -i docker)
+  DOCKER_INSTALLED=$(system_profiler -detailLevel full SPApplicationsDataType|grep Docker.app)
 
   if [ -z "$DOCKER_INSTALLED" ]; then
     # get proper Docker version
