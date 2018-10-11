@@ -83,7 +83,7 @@ fi
 
 if ! (which drush > /dev/null); then
   if ! (which composer > /dev/null); then
-    brew install composer
+    brew install composer@1.6.3
   fi
 
   composer global require drush/drush:8.*
