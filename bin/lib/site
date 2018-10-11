@@ -89,7 +89,7 @@ function cloneCodebase() {
   drupalVersion
 
   if [ "$FULCRUM_MAGIC_CHECK" != "NO" ]; then
-    if ! $(grep /fulcrum/php/fulcrum.php $FULCRUM_DOCROOT/sites/default/settings.php > /dev/null 2>&1); then
+    if ! $(egrep 'fulcrum_c(on)?f(i)?g' $FULCRUM_DOCROOT/sites/default/settings.php > /dev/null 2>&1); then
       SNIPPET_DIR=$FULCRUM_DIRNAME/etc/fulcrum/php
       SNIPPET_EXP=$(cat $SNIPPET_DIR/fulcrum-d$DRUPAL_MAJOR_VERSION-settings-snippet.php)
 
