@@ -35,6 +35,7 @@ function usage() {
   echo "xof            - disable xdebug [xoff] [xdebugoff]"
   echo "xon            - enable xdebug [xdebugon]"
   echo "xst            - status of xdebug [xdebugstatus]"
+  echo "lt             - update fulcrum and hinge-config to latest [latest]"
   echo ""
   echo "This requires Docker for Mac or Windows, please get the stable version from https://docs.docker.com/"
   echo ""
@@ -448,4 +449,12 @@ function remakeCerts() {
       echo "No matching certs"
     fi
   done <<< "$CERTS"
+}
+
+function fulcrumLastest() {
+  vout "Updating Fulcrum and Hinge-Config to latest commit"
+  cd $FULCRUM_DIRNAME
+  git pull
+  cd $FULCRUM_DIRNAME/var/fulcrum/hinge-config
+  git pull
 }
