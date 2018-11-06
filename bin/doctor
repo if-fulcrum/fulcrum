@@ -111,7 +111,7 @@ if [ -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom ]; the
   source ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom
 fi
 
-if [ ! -e /tmp/HINGEINSTALLING ] then
+if [ ! -e /tmp/HINGEINSTALLING ]; then
   # clean up config
   if [ -e /tmp/HINGECONFIGREPO ]; then
     rm /tmp/HINGECONFIGREPO
