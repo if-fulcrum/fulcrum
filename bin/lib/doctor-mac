@@ -76,7 +76,7 @@ fi
 
 # install aws cli if needed/wanted
 if ! (which aws > /dev/null); then
-  echo "Installing aws"
+  vout "Installing aws"
   brew install awscli
   aws configure
 fi
@@ -110,12 +110,12 @@ fi
 
 # stop apache in case previous installs had started it
 if (ps auxwww|grep /usr/sbin/httpd|grep -v grep); then
-  echo "Check: Stopping apache since it was started from some doctor action"
+  vout "Check: Stopping apache since it was started from some doctor action"
   sudo apachectl stop
 
   # stop auto start
   if [ -e /System/Library/LaunchDaemons/org.apache.httpd.plist ]; then
-    echo "Check: Removing apache autostart since it was started from some doctor action"
+    vout "Check: Removing apache autostart since it was started from some doctor action"
     sudo launchctl unload -w /System/Library/LaunchDaemons/org.apache.httpd.plist 2>/dev/null
   fi
 fi
@@ -123,11 +123,13 @@ fi
 # until we can migrate to nfs mounts we need d4m-nfs which needs Docker 17.09.0-ce-mac35 or below
 # start with a quick check
 if [ ! -d /Applications/Docker.app ]; then
-  echo "Can't find Docker under /Applications, checking system_profiler if installed"
+  vout "Can't find Docker under /Applications, checking system_profiler if installed"
 
   DOCKER_INSTALLED=$(system_profiler -detailLevel full SPApplicationsDataType|grep Docker.app)
 
   if [ -z "$DOCKER_INSTALLED" ]; then
+    vout "Downloading Docker"
+
     # get proper Docker version
     curl https://download.docker.com/mac/stable/21090/Docker.dmg > /tmp/docker.dmg
 
