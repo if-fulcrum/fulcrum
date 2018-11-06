@@ -13,13 +13,13 @@ if [ -e /tmp/HINGECONFIGREPO ]; then
   HINGECONFIGREPO=$(cat /tmp/HINGECONFIGREPO)
 fi
 
-vout "Your available public keys:"
-find ~/.ssh/*.pub -print -exec cat {} \;
-
 # allow for override in a custom doctor file
 if [[ "$HINGECONFIGREPO" == "" && ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]]; then
   # checkout sites repo
   HINGECONFIGREPODEFAULT=https://github.com/if-fulcrum/hinge-config.git
+
+  vout "Your available public keys if custom repo needs them:"
+  find ~/.ssh/*.pub -print -exec cat {} \;
 
   # TODO: this is breaking from running
   read -p "Please enter Fulcrum Hinge Config repo URL (default: $HINGECONFIGREPODEFAULT): " HINGECONFIGREPO
