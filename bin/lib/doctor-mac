@@ -147,12 +147,15 @@ if [ ! -d /Applications/Docker.app ]; then
 
     # show docker in finder
     open -R /Applications/Docker.app
-
-    # now open it
-    open -a /Applications/Docker.app
   else
     vout "Docker installed: $DOCKER_INSTALLED"
   fi
+fi
+
+# open Docker if it is not already running
+DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
+if [ -z "$DOCKER_INSTALLED" ]; then
+  open -a /Applications/Docker.app
 fi
 
 ############# START: REMOVE TO bin/doctor #############
