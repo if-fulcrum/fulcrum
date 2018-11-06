@@ -142,6 +142,9 @@ if [ ! -d /Applications/Docker.app ]; then
 
     # delete DMG
     rm /tmp/docker.dmg
+
+    # open it now
+    open -a Docker
   fi
 fi
 
