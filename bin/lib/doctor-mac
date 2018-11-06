@@ -147,6 +147,8 @@ if [ ! -d /Applications/Docker.app ]; then
 
     # open it now
     open -a Docker
+  else
+    vout "Docker installed: $DOCKER_INSTALLED"
   fi
 fi
 
