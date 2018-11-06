@@ -145,8 +145,11 @@ if [ ! -d /Applications/Docker.app ]; then
     # delete DMG
     rm /tmp/docker.dmg
 
-    # open it now
-    open -a Docker
+    # show docker in finder
+    open -R /Applications/Docker.app
+
+    # now open it
+    open -a /Applications/Docker.app
   else
     vout "Docker installed: $DOCKER_INSTALLED"
   fi
