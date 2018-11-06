@@ -154,7 +154,7 @@ fi
 
 # open Docker if it is not already running
 DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
-if [ -z "$DOCKER_INSTALLED" ]; then
+if [ -z "$DOCKER_RUNNING" ]; then
   open -a /Applications/Docker.app
 fi
 
