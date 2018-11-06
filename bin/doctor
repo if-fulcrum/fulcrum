@@ -11,8 +11,10 @@ requireSudo
 HINGECONFIGREPO=""
 if [ -e /tmp/HINGECONFIGREPO ]; then
   HINGECONFIGREPO=$(cat /tmp/HINGECONFIGREPO)
-  touch /tmp/HINGEUSEDEFAULTS
 fi
+
+vout "Your available public keys:"
+find ~/.ssh/*.pub -print -exec cat {} \;
 
 # allow for override in a custom doctor file
 if [[ "$HINGECONFIGREPO" == "" && ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]]; then
@@ -29,9 +31,6 @@ fi
 
 etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
-# not needed with dnsmasq
-# etcHosts 127.0.0.1 varnish
-# etcHosts 127.0.0.1 certbot
 
 if [ ! -e $FULCRUM_DIRNAME/etc/varnish/internal.vcl ]; then
   echo 'acl internal  { "0.0.0.0"/0;  }' > $FULCRUM_DIRNAME/etc/varnish/internal.vcl
@@ -112,14 +111,11 @@ if [ -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom ]; the
   source ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config/bin/lib/doctor-custom
 fi
 
-# clean up config
-if [ -e /tmp/HINGECONFIGREPO ]; then
-  rm /tmp/HINGECONFIGREPO
-fi
-
-# clean up defaults
-if [ -e /tmp/HINGEUSEDEFAULTS ]; then
-  rm /tmp/HINGEUSEDEFAULTS
+if [ ! -e /tmp/HINGEINSTALLING ] then
+  # clean up config
+  if [ -e /tmp/HINGECONFIGREPO ]; then
+    rm /tmp/HINGECONFIGREPO
+  fi
 fi
 
 # php 5 opcache default to on
