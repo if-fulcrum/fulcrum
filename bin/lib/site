@@ -28,7 +28,7 @@ function restoreDatabaseBackup() {
       fi
 
       vout "Downloading $FULCRUM_DBGZ"
-      aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK || eout "your aws credentials are not working to get the database, this can happen if your computer clock is note correct."
+      aws $FULCRUM_AWSPROFILE s3 cp $FULCRUM_DBGZ $FULCRUM_DBBAK || eout "Your aws credentials are not working to get the database, this can happen if your computer clock is not correct."
       FULCRUM_DBGZ=$FULCRUM_DBBAK
     elif [[ "$FULCRUM_DBGZ" == "https://"* || "$FULCRUM_DBGZ" == "http://"* ]]; then
       vout "Downloading $FULCRUM_DBGZ"
