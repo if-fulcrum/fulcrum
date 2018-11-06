@@ -12,8 +12,8 @@ setupEnv $@
 
 requireSudo
 
-# if /tmp/HINGECONFIGREPO was changed in the last 10 minutes just do the defaults
-if [ -e /tmp/HINGEUSEDEFAULTS ]; then
+# if /tmp/HINGEINSTALLING exists just do the defaults
+if [ -e /tmp/HINGEINSTALLING ]; then
   DROPDB=y
   GITPULL=y
   FORCEHTTPS=y
