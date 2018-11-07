@@ -77,6 +77,7 @@ fi
 if [[ ! "$BREWLIST" == *"mysql-client"* ]]; then
   vout "Installing: homebrew 'mysql-client' package."
   brew install mysql-client
+  brew link --force mysql-client
 else
   vout "Check: homebrew 'mysql-client' package is installed."
 fi
