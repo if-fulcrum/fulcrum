@@ -74,6 +74,13 @@ else
   vout "Check: homebrew 'brew-php-switcher' package is installed."
 fi
 
+if [[ ! "$BREWLIST" == *"mysql-client"* ]]; then
+  vout "Installing: homebrew 'mysql-client' package."
+  brew install mysql-client
+else
+  vout "Check: homebrew 'mysql-client' package is installed."
+fi
+
 # install aws cli if needed/wanted
 if ! (which aws > /dev/null); then
   vout "Installing aws"
@@ -91,21 +98,33 @@ if ! (which drush > /dev/null); then
   ln -s ~/.composer/vendor/bin/drush /usr/local/bin/drush
 fi
 
+INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
+
 # lighter weight redis check
 if [ ! -e /usr/local/lib/php/pecl/20131226/redis.so ]; then
-  INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
-
   if [[ ! "$INITPHPVER" == "5.6" ]]; then
     brew-php-switcher 5.6
   fi
 
-  vout "Installing: pecl 'php 56 redis' package."
+  vout "Installing: pecl 'php 5.6 redis' package."
   printf "\n" | pecl install redis
+fi
 
-  # switch back to initial php version
-  if [[ ! "$INITPHPVER" == "5.6" ]]; then
-    brew-php-switcher $INITPHPVER
+CURRPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
+
+# lighter weight redis check
+if [ ! -e /usr/local/lib/php/pecl/20170718/redis.so ]; then
+  if [[ ! "$CURRPHPVER" == "7.2" ]]; then
+    brew-php-switcher 7.2
   fi
+
+  vout "Installing: pecl 'php 7.2 redis' package."
+  printf "\n" | pecl install redis
+fi
+
+# switch back to initial php version
+if [[ ! "$CURRPHPVER" == "$INITPHPVER" ]]; then
+  brew-php-switcher $INITPHPVER
 fi
 
 # stop apache in case previous installs had started it
