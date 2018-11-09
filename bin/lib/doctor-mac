@@ -220,6 +220,14 @@ fi
 DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
 if [ -z "$DOCKER_RUNNING" ]; then
   open -a /Applications/Docker.app
+
+  echo -ne "\n[hinge] Wait until Docker is running."
+  while ! $(docker run --rm hello-world > /dev/null 2>&1); do
+    echo -n "."
+    sleep .25
+  done
+  echo ""
+
 fi
 
 ############# START: REMOVE TO bin/doctor #############
