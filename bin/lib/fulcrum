@@ -105,11 +105,6 @@ function dStop() {
 
 # start/restart all our containers
 function drestart() {
-  # run d4m-nfs in order to allow using NFS volume mounts
-  if [[ "$FULCRUM_OS" == "MAC" ]]; then
-    ~/fulcrum/var/fulcrum/d4m-nfs/d4m-nfs.sh -q
-  fi
-
   stopAndRmAllContainers
 
   stackExports
