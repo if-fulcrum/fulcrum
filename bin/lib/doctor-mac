@@ -9,17 +9,15 @@ if [ -z "$(ifconfig lo0 | grep 172.16.222.111)" ]; then
   sudo ifconfig lo0 alias 172.16.222.111
 fi
 
-# move old location or get d4m-nfs if it doesn't already exist
-if [[ -e ~/repos/d4m-nfs  &&  ! -e ~/fulcrum/var/fulcrum/d4m-nfs ]]; then
-  mv ~/repos/d4m-nfs ~/fulcrum/var/fulcrum/d4m-nfs
-elif [ ! -e ~/fulcrum/var/fulcrum/d4m-nfs ]; then
-  vout "Cannot find Docker for Mac NFS (d4m-nfs) repo, cloning from github"
-  mkdir -p ~/fulcrum/var/fulcrum
-  cd ~/fulcrum/var/fulcrum
-  git clone https://github.com/IFSight/d4m-nfs.git
-  cp d4m-nfs/examples/d4m-nfs-mounts.txt d4m-nfs/etc/
-  echo -e "/Users/$USER:/mnt:0:0" >> d4m-nfs/etc/d4m-nfs-mounts.txt
-  cd -
+# clean up old d4m-nfs
+if [[ -e ~/repos/d4m-nfs ]]; then
+  vout "Removing deprecated ~/repos/d4m-nfs"
+  rm -rfv ~/repos/d4m-nfs
+fi
+
+if [[ -e ~/fulcrum/var/fulcrum/d4m-nfs ]]; then
+  vout "Removing deprecated ~/fulcrum/var/fulcrum/d4m-nfs"
+  rm -rfv ~/fulcrum/var/fulcrum/d4m-nfs
 fi
 
 TAPDIR=$(brew --prefix)/Library/Taps/homebrew
@@ -140,36 +138,82 @@ if (ps auxwww|grep /usr/sbin/httpd|grep -v grep); then
   fi
 fi
 
-# until we can migrate to nfs mounts we need d4m-nfs which needs Docker 17.09.0-ce-mac35 or below
-# start with a quick check
-if [ ! -d /Applications/Docker.app ]; then
-  vout "Can't find Docker under /Applications, checking system_profiler if installed"
+# make sure exports exists
+if [ ! -e /etc/exports ]; then
+  vout "Creating /etc/exports"
+  sudo touch /etc/exports
+fi
 
-  DOCKER_INSTALLED=$(system_profiler -detailLevel full SPApplicationsDataType|grep Docker.app)
+NFSRESTART=0
 
-  if [ -z "$DOCKER_INSTALLED" ]; then
-    vout "Downloading Docker"
+# check if nfs conf line needs to be added
+NFSCNF="nfs.server.mount.require_resv_port = 0"
+if ! $(grep "$NFSCNF" /etc/nfs.conf > /dev/null 2>&1); then
+  vout "Configuring $NFSCNF in /etc/nfs.conf"
+  echo -e "\n$NFSCNF\n" | sudo tee -a /etc/nfs.conf
 
-    # get proper Docker version
-    curl https://download.docker.com/mac/stable/21090/Docker.dmg > /tmp/docker.dmg
+  NFSRESTART=1
+fi
 
-    # mount DMG
-    sudo hdiutil attach /tmp/docker.dmg
+# if we don't see proper nfs export then remake it
+if ! $(egrep "^\"/Users/$USER\" -alldirs -mapall=0:0 localhost" /etc/exports > /dev/null 2>&1); then
+  vout "Configuring /etc/exports"
+  grep -v "\"/Users/$USER\"" /etc/exports ; echo "\"/Users/$USER\" -alldirs -mapall=0:0 localhost" | sudo tee /etc/exports
 
-    # copy Docker to proper place
-    sudo cp -fa /Volumes/Docker/Docker.app /Applications/
+  NFSRESTART=1
+fi
 
-    # unmount DMG
-    sudo hdiutil detach /Volumes/Docker
+# restart if we had to change any config
+if [ "1" == "$NFSRESTART" ]; then
+  vout "Restarting NFSd"
+  # for some reason restart is not as kind
+  sudo killall -9 nfsd ; sudo nfsd start
+fi
 
-    # delete DMG
-    rm /tmp/docker.dmg
+if ! $(ps ax|grep nfsd|grep -v grep > /dev/null 2>&1); then
+  vout "Starting NFSd"
+  sudo nfsd start
+fi
 
-    # show docker in finder
-    open -R /Applications/Docker.app
-  else
-    vout "Docker installed: $DOCKER_INSTALLED"
+echo -n "[hinge] Wait until NFS is ready."
+while ! rpcinfo -u localhost nfs > /dev/null 2>&1; do
+  echo -n "."
+  sleep .10
+done
+echo
+
+if (which docker > /dev/null); then
+  DOCKERVER=$(docker -v |cut -d" " -f3|cut -d. -f1)
+
+  if [ "$DOCKERVER" -lt "18" ]; then
+    vout "Removing Docker, needs upgrading"
+    osascript -e 'quit app "Docker"'
+
+    sudo rm -rf /Applications/Docker.app
   fi
+fi
+
+# see if we need to download docker
+if ! (which docker > /dev/null); then
+  vout "Can't find Docker downloading and installing"
+
+  # get latest Docker version
+  curl https://download.docker.com/mac/stable/Docker.dmg > /tmp/docker.dmg
+
+  # mount DMG
+  sudo hdiutil attach /tmp/docker.dmg
+
+  # copy Docker to proper place
+  sudo cp -fa /Volumes/Docker/Docker.app /Applications/
+
+  # unmount DMG
+  sudo hdiutil detach /Volumes/Docker
+
+  # delete DMG
+  rm /tmp/docker.dmg
+
+  # show docker in finder
+  open -R /Applications/Docker.app
 fi
 
 # open Docker if it is not already running
