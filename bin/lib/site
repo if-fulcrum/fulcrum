@@ -169,7 +169,10 @@ SETVAR
 
   echo -e "#!/bin/sh\n\nsource $FC_DIR/vars\n/bin/cat $FC_DIR/tpl | /usr/bin/envsubst > $FC_DIR/conf.json" > $FH_DIR/run
 
-  chmod +x $FH_DIR/run
+  # make sure perms are ok for the docker side of things
+  sudo touch $FH_DIR/conf.json
+  sudo chown $USER $FH_DIR/conf.json
+  sudo chmod +x $FH_DIR/run
 
   $SUDOCK docker run --rm -v $FV_DIR:$FC_DIR fulcrum/util $FC_DIR/run > /dev/null
 
