@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker ps --format 'table {{.ID}}\t{{printf "%.25s" .Image}}\t{{.RunningFor}}\t{{.Status}}\t{{printf "%.25s" .Ports}}\t{{.Names}}'
