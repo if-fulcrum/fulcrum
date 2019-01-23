@@ -176,7 +176,7 @@ if ! $(ps ax|grep nfsd|grep -v grep > /dev/null 2>&1); then
 fi
 
 echo -n "[hinge] Wait until NFS is ready."
-while ! rpcinfo -u localhost nfs > /dev/null 2>&1; do
+while ! rpcinfo -u 127.0.0.1 nfs > /dev/null 2>&1; do
   echo -n "."
   sleep .10
 done
