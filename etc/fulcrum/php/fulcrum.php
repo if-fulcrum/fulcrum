@@ -56,13 +56,16 @@ if (!function_exists('fulcrum_force_https')) {
 }
 
 if (!function_exists('fulcrum_set_proxy')) {
-  function fulcrum_set_proxy(&$proxy_config) {
+  function fulcrum_set_proxy(&$settings) {
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
       // use the correct var for D7/D8 to set proxy settings
-      $proxy_config = isset($settings) ? $settings : $GLOBALS['conf'];
-
-      $proxy_config['reverse_proxy'] = TRUE;
-      $proxy_config['reverse_proxy_addresses'] = [$_SERVER['REMOTE_ADDR']];
+      if (isset($settings)) {
+        $settings['reverse_proxy'] = TRUE;
+        $settings['reverse_proxy_addresses'] = [$_SERVER['REMOTE_ADDR']];
+      } else {
+        $GLOBAL['conf']['reverse_proxy'] = TRUE;
+        $GLOBAL['conf']['reverse_proxy_addresses'] = [$_SERVER['REMOTE_ADDR']];
+      }
     }
   }
 }
@@ -102,7 +105,7 @@ if (!function_exists('fulcrum_cfg')) {
       }
 
       // set proxy settings for D7/D8
-      fulcrum_set_proxy($proxy_config);
+      fulcrum_set_proxy($settings);
 
       if (isset($fcfg['force_https']) && $fcfg['force_https'] == 'true') {
         fulcrum_force_https();
