@@ -201,6 +201,18 @@ sub vcl_hit {
   include "include/vcl_hit_tail.vcl";
 }
 
+# Handle a cache miss.
+sub vcl_miss {
+  include "include/vcl_miss_tail.vcl";
+  return (fetch);
+}
+
+# Handle a cache hit-for-pass.
+sub vcl_pass {
+  include "include/vcl_pass_tail.vcl";
+  return (fetch);
+}
+
 # Routine used to determine the cache key if storing/retrieving a cached page.
 sub vcl_hash {
   # hash data based on the domain (host) as to not have conflicts on foo.com/contact & bar.com/contact
