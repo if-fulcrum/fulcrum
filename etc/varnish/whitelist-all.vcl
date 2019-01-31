@@ -1,1 +1,4 @@
-acl whitelist { "0.0.0.0"/0;  }
+acl whitelist {
+  "0.0.0.0"/0;
+  "::"/0;
+}
