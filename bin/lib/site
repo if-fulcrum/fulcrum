@@ -182,17 +182,30 @@ SETVAR
     ${FULCRUM_BINDIR}/fulcrum forcehttps $FULCRUM_SITE
   fi
 
-  # set the php versions for the given clients
-  if [ "$FULCRUM_PHPVERSION" == "7" ]; then
-    FULCRUM_PHPVERSION_CONF=$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.conf
-    # if site does not exists then add it
-    if [ -z "$(grep ${FULCRUM_SITE} $FULCRUM_PHPVERSION_CONF)" ]; then
-      echo "$(
-        sed  $"s/^}/     ${FULCRUM_SITE}  \"71\";/" $FULCRUM_PHPVERSION_CONF &&
-        echo "}"
-      )" > $FULCRUM_PHPVERSION_CONF
-    fi
+  # default to PHP 5.6
+  if [ -z "$FULCRUM_PHPVERSION" ]; then
+    USE_PHP_VERSION="56"
+    # change PHP 7 to be 7.1
+  elif [ "$FULCRUM_PHPVERSION" == "7" ]; then
+    USE_PHP_VERSION="71"
+  else
+    USE_PHP_VERSION=$FULCRUM_PHPVERSION
   fi
+
+  FULCRUM_PHPVERSION_CONF=$FULCRUM_DIRNAME/etc/nginx/fulcrum/fulcrum_phpversion.conf
+
+  vout "Writing $FULCRUM_PHPVERSION_CONF with $FULCRUM_SITE using $USE_PHP_VERSION"
+
+  # grab everything from $FULCRUM_PHPVERSION_CONF besides current site
+  # remove ending }
+  # add in new php line
+  NEWCONF="$(
+    grep -v ${FULCRUM_SITE} $FULCRUM_PHPVERSION_CONF |
+    sed  $"s/^}/     ${FULCRUM_SITE}  \"$USE_PHP_VERSION\";/" ;
+    echo "}"
+  )"
+
+  echo -e "$NEWCONF" | tee $FULCRUM_PHPVERSION_CONF
 
   nginxConfAll
 }
