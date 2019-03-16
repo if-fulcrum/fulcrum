@@ -272,6 +272,7 @@ function setupEnv() {
   ${FULCRUM_BINDIR}/doctor
 
   FULCRUM_SITES_VARS_DIR=$FULCRUM_DIRNAME/var/fulcrum/hinge-config/etc/fulcrum/sites
+  FULCRUM_SITES_ETC_DIR=$FULCRUM_DIRNAME/etc/fulcrum/sites
   CLONING_SITE=false
 
   sudoDockerNeeded
@@ -285,7 +286,7 @@ function setupEnv() {
         git pull origin master
       fi
 
-      SITES=$(find $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} .site \;|sort|awk '{print FNR " " $0}')
+      SITES=$(find $FULCRUM_SITES_ETC_DIR $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} .site \;|sort|awk '{print FNR " " $0}')
 
       if [ -n "$SITES" ]; then
         # allow site to come from cli or list
