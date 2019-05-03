@@ -293,8 +293,10 @@ function setupEnv() {
         if [ -n "$1" ]; then
           if [ -e $FULCRUM_SITES_VARS_DIR/$1.site ]; then
             SITE="$1"
+          elif [ -e $FULCRUM_SITES_ETC_DIR/$1.site ]; then
+            SITE="$1"
           else
-            eout "Cannot find $1.site definition in $FULCRUM_SITES_VARS_DIR"
+            eout "Cannot find $1.site definition in $FULCRUM_SITES_VARS_DIR or $FULCRUM_SITES_ETC_DIR"
           fi
         else
           echo "$SITES"
@@ -303,7 +305,13 @@ function setupEnv() {
         fi
 
         vout "Spinning up $SITE"
-        . $FULCRUM_SITES_VARS_DIR/$SITE.site
+        if [ -e $FULCRUM_SITES_VARS_DIR/$SITE.site ]; then
+          . $FULCRUM_SITES_VARS_DIR/$SITE.site
+        elif [ -e $FULCRUM_SITES_ETC_DIR/$SITE.site ]; then
+          . $FULCRUM_SITES_ETC_DIR/$SITE.site
+        else
+          eout "Cannot find $SITE.site definition in $FULCRUM_SITES_VARS_DIR or $FULCRUM_SITES_ETC_DIR"
+        fi
 
         if [ -n "$FULCRUM_S3" ]; then
           # escape properly for use
