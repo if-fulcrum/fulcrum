@@ -66,6 +66,11 @@ function cloneCodebase() {
     if [ "$CLONING_SITE" = true ]; then
       vout "Removing original $FULCRUM_REPO .git directory from $FULCRUM_REPODIR"
       rm -rf $FULCRUM_REPODIR/.git
+    elif [ -n "$FULCRUM_REPO_SYNC" ]; then
+      # setup multi remotes for pushes
+      cd $FULCRUM_REPODIR
+      git remote set-url --add --push origin $FULCRUM_REPO
+      git remote set-url --add --push origin $FULCRUM_REPO_SYNC
     fi
   fi
 
@@ -335,6 +340,7 @@ function setupEnv() {
     FULCRUM_REPO=$5
     FULCRUM_WRD=$6
     FULCRUM_AWSPROFILE=$7
+    FULCRUM_REPO_SYNC=$8
   else
     FULCRUM_SITE=$1
     FULCRUM_DBGZ=$2
@@ -342,6 +348,7 @@ function setupEnv() {
     FULCRUM_REPO=$4
     FULCRUM_WRD=$5
     FULCRUM_AWSPROFILE=$6
+    FULCRUM_REPO_SYNC=$7
   fi
 
   if [ ! -z $FULCRUM_AWSPROFILE ]; then
@@ -396,6 +403,7 @@ function setupEnv() {
   vout "FULCRUM_SITE:        $FULCRUM_SITE"
   vout "FULCRUM_CONF:        $FULCRUM_CONF"
   vout "FULCRUM_REPO:        $FULCRUM_REPO"
+  vout "FULCRUM_REPO_SYNC:   $FULCRUM_REPO_SYNC"
   vout "FULCRUM_REPODIR:     $FULCRUM_REPODIR"
   vout "FULCRUM_WRD:         $FULCRUM_WRD"
   vout "FULCRUM_DOCROOT:     $FULCRUM_DOCROOT"
