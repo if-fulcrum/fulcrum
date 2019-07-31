@@ -113,11 +113,11 @@ CURRPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
 
 # lighter weight redis check
 if [ ! -e /usr/local/lib/php/pecl/20170718/redis.so ]; then
-  if [[ ! "$CURRPHPVER" == "7.2" ]]; then
-    brew-php-switcher 7.2
+  if [[ ! "$CURRPHPVER" == "7.3" ]]; then
+    brew-php-switcher 7.3
   fi
 
-  vout "Installing: pecl 'php 7.2 redis' package."
+  vout "Installing: pecl 'php 7.3 redis' package."
   printf "\n" | pecl install redis
 fi
 
