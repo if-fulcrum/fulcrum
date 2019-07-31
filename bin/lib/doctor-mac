@@ -112,7 +112,7 @@ INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
 CURRPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
 
 # lighter weight redis check
-if [ ! -e /usr/local/lib/php/pecl/20170718/redis.so ]; then
+if [ ! -e /usr/local/lib/php/pecl/20180731/redis.so ]; then
   if [[ ! "$CURRPHPVER" == "7.3" ]]; then
     brew-php-switcher 7.3
   fi
