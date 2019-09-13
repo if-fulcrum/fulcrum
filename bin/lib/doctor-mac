@@ -127,7 +127,7 @@ if [[ ! "$CURRPHPVER" == "$INITPHPVER" ]]; then
 fi
 
 # stop apache in case previous installs had started it
-if (ps auxwww|egrep '/usr/.*/bin/httpd'|grep -v grep); then
+if (ps auxwww|egrep '/usr/.*/*bin/httpd'|grep -v grep); then
   vout "Check: Stopping apache since it was started from some doctor action"
   sudo apachectl stop
 
