@@ -3,6 +3,7 @@
 !fulcrum_debug.conf
 !fulcrum_fastcgi.conf
 !fulcrum_fastcgi-xdebug.conf
+!fulcrum_fastcgi-isol.conf
 !fulcrum_gzip.conf
 !fulcrum_php_ports.conf
 !fulcrum_proxypass.conf
