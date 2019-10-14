@@ -1,5 +1,6 @@
 # Fulcrum installer.
 
+## Note: Latest confirmed version for macOS Fulcrum is [Docker for Mac: 2.0.0.3 (31259) 2019-02-15](https://download.docker.com/mac/stable/31259/Docker.dmg)
 ## Install Fulcrum Hinge on Mac or Ubuntu
 Run from terminal:
 ```bash
