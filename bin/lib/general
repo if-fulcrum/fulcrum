@@ -12,7 +12,13 @@ FULCRUM_HOME_DC=""
 
 if [[ "$UNAMEA" == *"Darwin"* ]]; then
   FULCRUM_OS=MAC
-  export FULCRUM_HOME_DC=$HOME
+
+  # make macOS 10.15 compatible
+  if [[ -d /System/Volumes/Data/$HOME ]]; then
+    export FULCRUM_HOME_DC=/System/Volumes/Data/$HOME
+  else
+    export FULCRUM_HOME_DC=$HOME
+  fi
 elif [[ "$UNAMEA" == *"MINGW64"* ]]; then
   FULCRUM_OS=WIN
   FULCRUM_ETC_HOSTS=/c/windows/system32/drivers/etc/hosts

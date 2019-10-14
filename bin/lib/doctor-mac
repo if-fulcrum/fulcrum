@@ -155,10 +155,18 @@ if ! $(grep "$NFSCNF" /etc/nfs.conf > /dev/null 2>&1); then
   NFSRESTART=1
 fi
 
+USER_DIR=/Users/$USER
+
+# make macOS 10.15 compatible
+if [[ -d /System/Volumes/Data/$USER_DIR ]]; then
+  USER_DIR=/System/Volumes/Data/$USER_DIR
+fi
+
 # if we don't see proper nfs export then remake it
-if ! $(egrep "^\"/Users/$USER\" -alldirs -mapall=0:0 localhost" /etc/exports > /dev/null 2>&1); then
+if ! $(egrep "^\"$USER_DIR\" -alldirs -mapall=0:0 localhost" /etc/exports > /dev/null 2>&1); then
   vout "Configuring /etc/exports"
-  grep -v "\"/Users/$USER\"" /etc/exports ; echo "\"/Users/$USER\" -alldirs -mapall=0:0 localhost" | sudo tee /etc/exports
+  # grep out both < 10.15 and 10.15+ style to be safe
+  grep -v "\"/Users/$USER\"" /etc/exports ; echo "\"$USER_DIR\" -alldirs -mapall=0:0 localhost" | sudo tee /etc/exports
 
   NFSRESTART=1
 fi
