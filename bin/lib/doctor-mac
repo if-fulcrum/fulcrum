@@ -158,8 +158,8 @@ fi
 USER_DIR=/Users/$USER
 
 # make macOS 10.15 compatible
-if [[ -d /System/Volumes/Data/$USER_DIR ]]; then
-  USER_DIR=/System/Volumes/Data/$USER_DIR
+if [[ -d /System/Volumes/Data$USER_DIR ]]; then
+  USER_DIR=/System/Volumes/Data$USER_DIR
 fi
 
 # if we don't see proper nfs export then remake it

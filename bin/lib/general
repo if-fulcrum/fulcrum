@@ -14,8 +14,8 @@ if [[ "$UNAMEA" == *"Darwin"* ]]; then
   FULCRUM_OS=MAC
 
   # make macOS 10.15 compatible
-  if [[ -d /System/Volumes/Data/$HOME ]]; then
-    export FULCRUM_HOME_DC=/System/Volumes/Data/$HOME
+  if [[ -d /System/Volumes/Data$HOME ]]; then
+    export FULCRUM_HOME_DC=/System/Volumes/Data$HOME
   else
     export FULCRUM_HOME_DC=$HOME
   fi
