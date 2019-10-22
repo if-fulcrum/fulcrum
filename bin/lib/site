@@ -422,7 +422,7 @@ function phpContainer() {
 
   # use PHP 7 for Drupal 8
   if [ -e $FULCRUM_DOCROOT/core/lib/Drupal.php ]; then
-    PHPCONTAINER=php71fpm
+    PHPCONTAINER=php7.1
   fi
 
   echo $PHPCONTAINER

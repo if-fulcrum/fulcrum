@@ -324,8 +324,12 @@ function stackStatus() {
     STACK_STATUS="${STACK_STATUS}${SEVERITY}: php56fpm not running\n"
   fi
 
-  if [[ "$RUNNING_CONTAINERS" != *"php71fpm"* ]]; then
-    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php71fpm not running\n"
+  if [[ "$RUNNING_CONTAINERS" != *"php7.1"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php7.1 not running\n"
+  fi
+
+  if [[ "$RUNNING_CONTAINERS" != *"php7.3"* ]]; then
+    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php7.3 not running\n"
   fi
 
   if [[ "$STACK_STATUS" != "" ]]; then
