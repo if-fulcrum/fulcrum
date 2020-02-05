@@ -42,6 +42,32 @@ else
   sudo apt install -y libnss3-tools
 fi
 
+# install ifconfig if needed, needed for multiple IP on loopback
+if (which ifconfig > /dev/null); then
+  echo "ifconfig exists"
+else
+  echo "installing ifconfig"
+  sudo apt install -y net-tools
+fi
+
+# install php if needed
+if (which php > /dev/null); then
+  echo "php exists"
+else
+  echo "installing php"
+  sudo apt install -y php7.2-cli
+fi
+
+# install composer if needed
+if (which composer > /dev/null); then
+  echo "composer exists"
+else
+  echo "installing composer"
+  curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+  sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  rm /tmp/composer-setup.php
+fi
+
 # install git if needed
 # TODO: move into fulcrum/install
 # if (which git > /dev/null); then
