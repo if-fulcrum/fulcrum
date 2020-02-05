@@ -7,6 +7,7 @@
 # set an alias for localhost so xdebug can transmit back the IDE
 # https://forums.docker.com/t/accessing-host-machine-from-within-docker-container/14248/14
 # sudo ifconfig lo:0 down  - to remove
+# TODO: ifconfig has been deprecated in Ubuntu
 if [ -z "$(ifconfig lo:0 | grep 172.16.222.111)" ]; then
   sudo ifconfig lo:0 172.16.222.111 up
 fi
