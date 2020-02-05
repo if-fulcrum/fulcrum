@@ -58,6 +58,22 @@ else
   sudo apt install -y php7.2-cli
 fi
 
+# stop apache in case previous installs had started it
+if (php -m|grep dom); then
+  echo "php dom exists"
+else
+  echo "installing curl"
+  sudo apt install -y php7.2-xml
+fi
+
+# install curl if needed
+if (which curl > /dev/null); then
+  echo "curl exists"
+else
+  echo "installing curl"
+  sudo apt install -y curl
+fi
+
 # install composer if needed
 if (which composer > /dev/null); then
   echo "composer exists"
