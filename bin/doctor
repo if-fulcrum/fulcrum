@@ -79,11 +79,11 @@ sudo chmod -R 770 $FULCRUM_DIRNAME/var/lib/elasticsearch
 
 source $FULCRUM_DIRNAME/bin/lib/cli-autocomplete
 
-# run OS doctor
+# run OS (e.g, doctor-mac or doctor-lin)
 if [ -e ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC ]; then
   source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC
 
-  # run distro doctor
+  # run distro doctor (e.g., doctor-ubuntu)
   if [ -n "$FULCRUM_OS_DISTRO" ]; then
     if [ -e ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_DISTRO ]; then
       source ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_DISTRO
@@ -93,6 +93,24 @@ if [ -e ${FULCRUM_BINDIR}/lib/doctor-$FULCRUM_OS_LC ]; then
   fi
 else
   eout "No OS doctor file to run, Fulcrum Hinge probably needs to be extended for $FULCRUM_OS_LC"
+fi
+
+DRUSH8_DIR=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8
+if [ ! -d $DRUSH8_DIR ]; then
+  mkdir -p $DRUSH8_DIR
+
+  cd $DRUSH8_DIR
+
+  composer require drush/drush:8.\*
+fi
+
+DRUSH10_DIR=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10
+if [ ! -d $DRUSH10_DIR ]; then
+  mkdir -p $DRUSH10_DIR
+
+  cd $DRUSH10_DIR
+
+  composer require drush/drush:10.\*
 fi
 
 # set the resolver IP for nginx
