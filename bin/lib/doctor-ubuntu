@@ -5,7 +5,7 @@
 # functions to make sure that fulcrum hinge is healthy on Debian variants
 
 # Stop using Ubuntu DNSMasq
-if (sudo netstat -tulnp|egrep 'tcp.*53:53.*systemd-resolve'); then
+if (sudo netstat -tulnp|egrep 'tcp.*53:53.*systemd-re'); then
   echo "Ubuntu by default runs DNSMasq."
   echo "Fulcrum Hinge requires it's own DNSMasq to run."
   read -p "Enter \"y\" to remove default Ubuntu DNSMasq to continue: " REMOVE_DNSMASQ
