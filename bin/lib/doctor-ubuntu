@@ -11,13 +11,15 @@ if (sudo netstat -tulnp|egrep 'tcp.*53:53.*systemd-resolve'); then
   read -p "Enter \"y\" to remove default Ubuntu DNSMasq to continue: " REMOVE_DNSMASQ
 
   if [ "y" == "$REMOVE_DNSMASQ" ]; then
+    # install while we have networking
+    sudo apt install -y crudini
+
     # get systemd-resolved out of the way
     sudo systemctl disable systemd-resolved
     sudo systemctl stop systemd-resolved
     sudo rm /etc/resolv.conf
 
     # have NetworkManager use default dns
-    sudo apt install -y crudini
     sudo crudini --set /etc/NetworkManager/NetworkManager.conf main dns default
     sudo systemctl restart NetworkManager
   else
