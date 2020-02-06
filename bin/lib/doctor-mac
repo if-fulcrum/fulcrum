@@ -87,14 +87,8 @@ if ! (which aws > /dev/null); then
   aws configure
 fi
 
-if ! (which drush > /dev/null); then
-  if ! (which composer > /dev/null); then
-    brew install composer
-  fi
-
-  composer global require drush/drush:8.\*
-
-  ln -s ~/.composer/vendor/bin/drush /usr/local/bin/drush
+if ! (which composer > /dev/null); then
+  brew install composer
 fi
 
 INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
