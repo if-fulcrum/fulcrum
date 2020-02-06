@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# This is a Drush wrapper to run the correct version depending on the version of Drupal
+
+# figure out fulcrum pathing
+FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
+FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
+SITE=$(echo $PWD | sed 's#^.*/fulcrum/sites/##')
+CONF=$FULCRUM_DIRNAME/etc/fulcrum/conf/${SITE}.json
+
+# make sure the conf exists before going on
+if [ ! -f $CONF ]; then
+  echo "Make sure you are in a Drupal directory!"
+  echo "  ERROR: $CONF does not exist!"
+  exit 1
+fi
+
+# get the webroot from config as some site are a level down
+DOCROOT=$(egrep '^ +"webroot"' $CONF|cut -d\" -f4)
+
+# default to Drush 8
+DRUSH=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8/vendor/bin/drush
+
+# if we are Drupal 8+ use Drush 10
+if [ -e $FULCRUM_DIRNAME/sites/${DOCROOT}/core/lib/Drupal.php ]; then
+  DRUSH=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10/vendor/bin/drush
+fi
+
+# change into the docroot
+cd $FULCRUM_DIRNAME/sites/${DOCROOT}
+
+# run the drush command
+$DRUSH $@
