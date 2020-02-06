@@ -4,6 +4,31 @@
 
 # functions to make sure that fulcrum hinge is healthy on Debian variants
 
+# Stop using Ubuntu DNSMasq
+if (sudo netstat -tulnp|egrep 'tcp.*53:53.*systemd-resolve'); then
+  echo "Ubuntu by default runs DNSMasq."
+  echo "Fulcrum Hinge requires it's own DNSMasq to run."
+  read -p "Enter \"y\" to remove default Ubuntu DNSMasq to continue: " REMOVE_DNSMASQ
+
+  if [ "y" == "$REMOVE_DNSMASQ" ]; then
+    # get systemd-resolved out of the way
+    sudo systemctl disable systemd-resolved
+    sudo systemctl stop systemd-resolved
+    sudo rm /etc/resolv.conf
+
+    # have NetworkManager use default dns
+    sudo apt install -y crudini
+    sudo crudini --set /etc/NetworkManager/NetworkManager.conf main dns default
+    sudo systemctl restart NetworkManager
+  else
+    echo "Exiting install, Fulcrum Hinge cannot work without removing DNSMasq"
+    exit 1
+  fi
+
+else
+  echo "Port 53 available"
+fi
+
 # install docker if needed
 if (which docker > /dev/null); then
   echo "docker exists"
@@ -58,11 +83,11 @@ else
   sudo apt install -y php7.2-cli
 fi
 
-# stop apache in case previous installs had started it
+# install php7.2-xml if needed
 if (php -m|grep dom); then
-  echo "php dom exists"
+  echo "php7.2-xml exists"
 else
-  echo "installing curl"
+  echo "installing php7.2-xml"
   sudo apt install -y php7.2-xml
 fi
 
