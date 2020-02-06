@@ -97,7 +97,15 @@ if (php -m|grep dom); then
   echo "php7.2-xml exists"
 else
   echo "installing php7.2-xml"
-  sudo apt install -y php7.2-xml
+    sudo apt install -y php7.2-xml
+fi
+
+# install php7.2-mysql if needed
+if (php -m|grep mysql); then
+  echo "php7.2-mysql exists"
+else
+  echo "installing php7.2-mysql"
+    sudo apt install -y php7.2-mysql
 fi
 
 # install curl if needed
