@@ -101,7 +101,8 @@ if [ ! -d $DRUSH8_DIR ]; then
 
   cd $DRUSH8_DIR
 
-  composer require drush/drush:8.\*
+  # PHP 7.3 has a known bug with pcre.jit
+  php -d pcre.jit=0 $(which composer) require drush/drush:8.\*
 fi
 
 DRUSH10_DIR=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10
@@ -110,7 +111,8 @@ if [ ! -d $DRUSH10_DIR ]; then
 
   cd $DRUSH10_DIR
 
-  composer require drush/drush:10.\*
+  # PHP 7.3 has a known bug with pcre.jit
+  php -d pcre.jit=0 $(which composer) require drush/drush:10.\*
 fi
 
 # set the resolver IP for nginx
