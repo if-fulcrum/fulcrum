@@ -418,12 +418,7 @@ function setupEnv() {
 }
 
 function phpContainer() {
-  PHPCONTAINER=php56fpm
-
-  # use PHP 7 for Drupal 8
-  if [ -e $FULCRUM_DOCROOT/core/lib/Drupal.php ]; then
-    PHPCONTAINER=php7.1
-  fi
+  PHPCONTAINER=php7.2
 
   echo $PHPCONTAINER
 }
