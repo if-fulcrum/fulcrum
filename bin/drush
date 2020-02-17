@@ -5,7 +5,7 @@
 # figure out fulcrum pathing
 FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 FULCRUM_DIRNAME=$(dirname $FULCRUM_BINDIR)
-SITE=$(echo $PWD | sed 's#^.*/fulcrum/sites/##')
+SITE=$(echo $PWD | sed 's#^.*/fulcrum/sites/##'|cut -d/ -f1)
 CONF=$FULCRUM_DIRNAME/etc/fulcrum/conf/${SITE}.json
 
 # make sure the conf exists before going on
