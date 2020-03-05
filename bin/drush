@@ -33,7 +33,7 @@ cd $FULCRUM_DIRNAME/sites/${DOCROOT}
 PHP_CONFIG_PATH=$(php -i|grep php.ini|grep Path|cut -d\> -f2|cut -d' ' -f2)
 
 # work around for PHP 7.3 pcre.jit bug
-echo -e "[Pcre]\npcre.jit=0" > $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
+echo -e "[Pcre]\npcre.jit=0" | sudo tee $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
 
 # run the drush command
 $DRUSH $URI_PARAM $@
