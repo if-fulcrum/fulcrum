@@ -95,9 +95,8 @@ else
   eout "No OS doctor file to run, Fulcrum Hinge probably needs to be extended for $FULCRUM_OS_LC"
 fi
 
-# TODO: check for bin not dir
 DRUSH8_DIR=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8
-if [ ! -d $DRUSH8_DIR ]; then
+if [ ! -f $DRUSH8_DIR/vendor/drush/drush/drush ]; then
   echo "Installing Drush 8"
 
   mkdir -p $DRUSH8_DIR
@@ -108,9 +107,8 @@ if [ ! -d $DRUSH8_DIR ]; then
   php -d pcre.jit=0 $(which composer) require drush/drush:8.\*
 fi
 
-# TODO: check for bin not dir
 DRUSH10_DIR=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10
-if [ ! -d $DRUSH10_DIR ]; then
+if [ ! -f $DRUSH10_DIR/vendor/drush/drush/drush ]; then
   echo "Installing Drush 10"
   mkdir -p $DRUSH10_DIR
 
