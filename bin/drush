@@ -38,4 +38,4 @@ echo -e "[Pcre]\npcre.jit=0" | sudo tee $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
 # run the drush command
 $DRUSH $URI_PARAM $@
 
-rm $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
+sudo rm $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
