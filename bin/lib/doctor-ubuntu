@@ -101,7 +101,7 @@ else
 fi
 
 # install php7.2-redis if needed
-if (php -m|grep dom); then
+if (php -m|grep redis); then
   echo "php7.2-redis exists"
 else
   echo "installing php7.2-redis"
