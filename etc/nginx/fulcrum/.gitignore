@@ -1,4 +1,6 @@
 *
+!fulcrum_allow_hosts.conf
+!fulcrum_allow_hosts_example.conf
 !fulcrum_brotli.conf
 !fulcrum_debug.conf
 !fulcrum_fastcgi.conf
