@@ -122,6 +122,11 @@ sub vcl_recv {
     return (synth(403, "Access Denied. " + std.ip(req.http.X-Client-IP, client.ip) ));
   }
 
+  # drop out and start hashing so /ajax/site_alert can be cached
+  if (req.url == "/ajax/site_alert") {
+    return(hash);
+  }
+
   # Do not cache these paths.
   if (req.url ~ "^/(status|update)\.php$" ||
       req.url ~ "^/(admin/build/features|info/|flag/)" ||
@@ -271,6 +276,15 @@ sub vcl_backend_response {
     set beresp.http.Cache-Control = "public, max-age=300";
   }
 
+  # force cache of /ajax/site_alert to be 1 minute
+  if (bereq.url == "/ajax/site_alert") {
+    unset beresp.http.cache-control;
+    unset beresp.http.cookie;
+    unset beresp.http.set-cookie;
+    set beresp.ttl = 120s;
+    set beresp.http.cache-control = "public, max-age=60";
+  }
+
   # Allow items to be stale if needed.
   set beresp.grace = 6h;
 
@@ -341,5 +355,10 @@ sub vcl_backend_fetch {
     if(bereq.http.X-brotli == "true") {
         set bereq.http.Accept-Encoding = "br";
         unset bereq.http.X-brotli;
+    }
+
+    # force back end request to use POST method
+    if (bereq.url == "/ajax/site_alert") {
+      set bereq.method = "POST";
     }
 }
