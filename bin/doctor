@@ -29,6 +29,12 @@ if [[ "$HINGECONFIGREPO" == "" && ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-conf
   fi
 fi
 
+# allow choosing branch
+HINGE_CONFIG_BRANCH="master"
+if [ -e /tmp/HINGE_CONFIG_BRANCH ]; then
+  HINGE_CONFIG_BRANCH=$(cat /tmp/FULCRUM_BRANCH)
+fi
+
 etcHosts 127.0.0.1 mariadb
 etcHosts 127.0.0.1 redis
 
@@ -126,7 +132,7 @@ varnishSecret > /dev/null
 
 # clonge out the fulcrum hinge config repo
 if [ ! -e ${FULCRUM_DIRNAME}/var/fulcrum/hinge-config ]; then
-  git -C ${FULCRUM_DIRNAME}/var/fulcrum clone $HINGECONFIGREPO hinge-config
+  git -C ${FULCRUM_DIRNAME}/var/fulcrum clone -b $HINGE_CONFIG_BRANCH $HINGECONFIGREPO hinge-config
 fi
 
 # run the custom doctor if it exists
