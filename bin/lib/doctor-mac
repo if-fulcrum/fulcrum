@@ -226,7 +226,7 @@ else
 fi
 
 # open Docker if it is not already running
-DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
+DOCKER_RUNNING=$(ps x|grep Docker.app/Contents/MacOS/Docker|grep -v grep)
 if [ -z "$DOCKER_RUNNING" ]; then
   open -a /Applications/Docker.app
 
@@ -281,7 +281,7 @@ if [[ "$RESTART_DOCKER" == "1" ]]; then
   vout "Configuration: Starting Docker again"
 
   # open Docker if it is not already running
-  DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
+  DOCKER_RUNNING=$(ps x|grep Docker.app/Contents/MacOS/Docker|grep -v grep)
   if [ -z "$DOCKER_RUNNING" ]; then
     open -a /Applications/Docker.app
 
