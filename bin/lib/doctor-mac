@@ -199,24 +199,19 @@ fi
 if ! (which docker > /dev/null); then
   vout "Can't find Docker downloading and installing"
 
-  # get latest Docker version
-  curl https://download.docker.com/mac/stable/Docker.dmg > /tmp/docker.dmg
+  # get latest Docker version if it doesn't exist
+  if [ ! -e ~/Downloads/Docker.dmg ]; then
+    curl https://download.docker.com/mac/stable/Docker.dmg > ~/Downloads/Docker.dmg
+  fi
 
   # mount DMG
-  sudo hdiutil attach /tmp/docker.dmg
+  sudo hdiutil attach ~/Downloads/Docker.dmg
 
   # copy Docker to proper place
   sudo cp -fa /Volumes/Docker/Docker.app /Applications/
 
   # unmount DMG
   sudo hdiutil detach /Volumes/Docker
-
-  # delete DMG
-  rm /tmp/docker.dmg
-
-  # sleep so that the install has time and we don't get:
-  #  The application /Applications/Docker.app cannot be opened because its executable is missing
-  sleep 10
 
   # show docker in finder
   open -R /Applications/Docker.app
