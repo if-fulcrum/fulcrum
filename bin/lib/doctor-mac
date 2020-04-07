@@ -51,7 +51,7 @@ fi
 
 BREWLIST=$(brew list)
 
-if [[ ! "$BREWLIST" == *"php\@7\.3"* ]]; then
+if [[ ! "$BREWLIST" == *"php@7.3"* ]]; then
   vout "Installing: homebrew 'php' package."
   brew install php@7.3
 else
