@@ -230,6 +230,19 @@ else
   brew install jq
 fi
 
+# open Docker if it is not already running
+DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
+if [ -z "$DOCKER_RUNNING" ]; then
+  open -a /Applications/Docker.app
+
+  echo -ne "\n[hinge] Wait until Docker is running."
+  while ! $(docker run --rm hello-world > /dev/null 2>&1); do
+    echo -n "."
+    sleep .25
+  done
+  echo ""
+fi
+
 # setup some Docker for Mac settings
 RESTART_DOCKER=0
 DOCKER_SETTINGS=~/Library/Group\ Containers/group.com.docker/settings.json
@@ -265,19 +278,19 @@ if [[ "$RESTART_DOCKER" == "1" ]]; then
 
   # restart docker
   osascript -e 'quit app "Docker"'
-fi
 
-# open Docker if it is not already running
-DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
-if [ -z "$DOCKER_RUNNING" ]; then
-  open -a /Applications/Docker.app
+  # open Docker if it is not already running
+  DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
+  if [ -z "$DOCKER_RUNNING" ]; then
+    open -a /Applications/Docker.app
 
-  echo -ne "\n[hinge] Wait until Docker is running."
-  while ! $(docker run --rm hello-world > /dev/null 2>&1); do
-    echo -n "."
-    sleep .25
-  done
-  echo ""
+    echo -ne "\n[hinge] Wait until Docker is running."
+    while ! $(docker run --rm hello-world > /dev/null 2>&1); do
+      echo -n "."
+      sleep .25
+    done
+    echo ""
+  fi
 fi
 
 ############# START: REMOVE TO bin/doctor #############
