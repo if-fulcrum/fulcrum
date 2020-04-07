@@ -214,6 +214,10 @@ if ! (which docker > /dev/null); then
   # delete DMG
   rm /tmp/docker.dmg
 
+  # sleep so that the install has time and we don't get:
+  #  The application /Applications/Docker.app cannot be opened because its executable is missing
+  sleep 10
+
   # show docker in finder
   open -R /Applications/Docker.app
 fi
