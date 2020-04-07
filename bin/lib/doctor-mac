@@ -268,13 +268,17 @@ fi
 
 # if docker restart is needed and it is running then quit it and wait
 if [[ "$RESTART_DOCKER" == "1" ]]; then
+  vout "Configuration: Writing $DOCKER_SETTINGS"
   # write the file
   echo "$DOCKER_SETTINGS_JSON"|sed 's#/#\\/#g' > "$DOCKER_SETTINGS"
 
   # restart docker
+  vout "Configuration: Quiting Docker"
   osascript -e 'quit app "Docker"'
 
-  sleep 2
+  sleep 3
+
+  vout "Configuration: Starting Docker again"
 
   # open Docker if it is not already running
   DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
