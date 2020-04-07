@@ -274,6 +274,8 @@ if [[ "$RESTART_DOCKER" == "1" ]]; then
   # restart docker
   osascript -e 'quit app "Docker"'
 
+  sleep 2
+
   # open Docker if it is not already running
   DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
   if [ -z "$DOCKER_RUNNING" ]; then
