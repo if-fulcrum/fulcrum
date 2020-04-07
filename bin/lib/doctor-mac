@@ -218,6 +218,51 @@ if ! (which docker > /dev/null); then
   open -R /Applications/Docker.app
 fi
 
+# install jq if needed
+if ( echo "$BREWLIST"|egrep '^jq$' > /dev/null ); then
+  vout "Check: homebrew 'jq' package is installed."
+else
+  vout "Installing: homebrew 'jq' package."
+  brew install jq
+fi
+
+# setup some Docker for Mac settings
+RESTART_DOCKER=0
+DOCKER_SETTINGS=~/Library/Group\ Containers/group.com.docker/settings.json
+DOCKER_SETTINGS_JSON="$(cat "$DOCKER_SETTINGS"|jq -M)"
+FILESHARE_DIRS="$(echo "$DOCKER_SETTINGS_JSON"|jq -M .filesharingDirectories)"
+
+# if there is not an array then make it
+if [[ "$FILESHARE_DIRS" == "null" ]]; then
+  vout "Configuration: Docker - new share of macOS /System/Volumes/Data/Users directory."
+  RESTART_DOCKER=1
+  DEFAULT_DIRS='"/System/Volumes/Data/Users", "/Users", "/Volumes", "/private", "/tmp"'
+  DOCKER_SETTINGS_JSON=$(echo "$DOCKER_SETTINGS_JSON"|jq -M ". + {filesharingDirectories: [$DEFAULT_DIRS]}")
+# make sure "/System/Volumes/Data/Users" is being shared
+elif ( ! ( echo "$FILESHARE_DIRS"|grep '/System/Volumes/Data/Users' > /dev/null ) ); then
+  vout "Configuration: Docker needs new share of macOS /System/Volumes/Data/Users directory."
+  RESTART_DOCKER=1
+  DOCKER_SETTINGS_JSON=$(echo "$DOCKER_SETTINGS_JSON"|jq -M '.filesharingDirectories += ["/System/Volumes/Data/Users"]')
+fi
+
+DOCKER_MEMORY="$(echo "$DOCKER_SETTINGS_JSON"|jq -M .memoryMiB)"
+
+# make sure memory is set and high enough
+if [[ "$DOCKER_MEMORY" == "null" || "$DOCKER_MEMORY" -lt 6144 ]]; then
+  vout "Configuration: Docker setting memory allocation to 6GB."
+  RESTART_DOCKER=1
+  DOCKER_SETTINGS_JSON=$(echo "$DOCKER_SETTINGS_JSON"|jq -M ".memoryMiB = 6144")
+fi
+
+# if docker restart is needed and it is running then quit it and wait
+if [[ "$RESTART_DOCKER" == "1" ]]; then
+  # write the file
+  echo "$DOCKER_SETTINGS_JSON"|sed 's#/#\\/#g' > "$DOCKER_SETTINGS"
+
+  # restart docker
+  osascript -e 'quit app "Docker"'
+fi
+
 # open Docker if it is not already running
 DOCKER_RUNNING=$(ps x|grep Docker.app|grep -v grep)
 if [ -z "$DOCKER_RUNNING" ]; then
@@ -229,7 +274,6 @@ if [ -z "$DOCKER_RUNNING" ]; then
     sleep .25
   done
   echo ""
-
 fi
 
 ############# START: REMOVE TO bin/doctor #############
