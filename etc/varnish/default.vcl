@@ -88,25 +88,30 @@ sub vcl_recv {
 
   # Things with these in the url should just be blocked.
   # Check logs often for what the bad guys are after.
-  # wp-admin
-  # wp-content
-  # wp-includes
-  # wp-login
+  # wp-admin, wp-content, wp-includes, wp-login
   # phpMyAdmin
   # /pma20 sniffers put in a random year at the end
   # /mysql
   # /cgi-bin
   # /autodiscover/autodiscover.xml
-  if
-  (
+  # composer.json installed.json package.json package-lock.json bower.json npm-shrinkwrap.json
+  # composer.lock yarn.lock
+  # web.config autoload.php
+  # /vendor/*.php
+  if (
        req.url ~ "wp-(admin|content|includes|login)"
     || req.url ~ "(?i)phpmyadmin"
     || req.url ~ "/pma20"
     || req.url ~ "/mysql"
     || req.url ~ "cgi-bin"
     || req.url == "/autodiscover/autodiscover.xml"
-  )
-  { return (synth(404, "Not Found")); }
+    || req.url ~ "/(composer|installed|package|package-lock|bower|npm-shrinkwrap)\.json($|\?)"
+    || req.url ~ "/(composer|yarn)\.lock($|\?)"
+    || req.url ~ "/(web\.config|autoload\.php)($|\?)"
+    || req.url ~ "/vendor/.*\.php"
+  ) {
+    return (synth(404, "Not Found"));
+  }
 
   # Do not allow outside access to certain php or txt files
   # Block user login and node add external
