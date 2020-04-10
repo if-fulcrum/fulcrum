@@ -15,16 +15,26 @@ if [ ! -f $CONF ]; then
   echo "  ERROR: $CONF does not exist!"
   exit 1
 fi
-
 # get the webroot from config as some site are a level down
 DOCROOT=$(egrep '^ +"webroot"' $CONF|cut -d\" -f4)
+SITEDIR=$(dirname $FULCRUM_DIRNAME/sites/${DOCROOT})
 
 # default to Drush 8
 DRUSH=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8/vendor/bin/drush
 
+RM_TEMP_COMPOSER_JSON=""
+
 # if we are Drupal 8+ use Drush 10
 if [ -e $FULCRUM_DIRNAME/sites/${DOCROOT}/core/lib/Drupal.php ]; then
   DRUSH=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10/vendor/bin/drush
+
+  # kludge for where Drush 10 looks for composer.json
+  TEMP_COMPOSER_JSON=$FULCRUM_DIRNAME/sites/${DOCROOT}/composer.json
+  if [[ -e $SITEDIR/composer.json ]] && [[ ! -e $TEMP_COMPOSER_JSON ]]; then
+    RM_TEMP_COMPOSER_JSON=$TEMP_COMPOSER_JSON
+
+    cp $SITEDIR/composer.json $TEMP_COMPOSER_JSON
+  fi
 fi
 
 # change into the docroot
@@ -33,9 +43,14 @@ cd $FULCRUM_DIRNAME/sites/${DOCROOT}
 PHP_CONFIG_PATH=$(php -i|grep php.ini|grep Path|cut -d\> -f2|cut -d' ' -f2)
 
 # work around for PHP 7.3 pcre.jit bug
-echo -e "[Pcre]\npcre.jit=0" | sudo tee $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
+echo -e "[Pcre]\npcre.jit=0" | sudo tee $PHP_CONFIG_PATH/conf.d/zzz-drush.ini > /dev/null
 
 # run the drush command
 $DRUSH $URI_PARAM $@
 
 sudo rm $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
+
+# clean up from Drush 10 kludge
+if [ -n "$RM_TEMP_COMPOSER_JSON" ]; then
+  rm $RM_TEMP_COMPOSER_JSON
+fi
