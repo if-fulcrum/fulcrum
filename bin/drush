@@ -42,8 +42,14 @@ cd $FULCRUM_DIRNAME/sites/${DOCROOT}
 
 PHP_CONFIG_PATH=$(php -i|grep php.ini|grep Path|cut -d\> -f2|cut -d' ' -f2)
 
+# make dir writable if it is not
+if [ ! -w $PHP_CONFIG_PATH/conf.d ]; then
+  sudo chown $USER $PHP_CONFIG_PATH/conf.d
+  chmod u+w $PHP_CONFIG_PATH/conf.d
+fi
+
 # work around for PHP 7.3 pcre.jit bug
-echo -e "[Pcre]\npcre.jit=0" | sudo tee $PHP_CONFIG_PATH/conf.d/zzz-drush.ini > /dev/null
+echo -e "[Pcre]\npcre.jit=0" | tee $PHP_CONFIG_PATH/conf.d/zzz-drush.ini > /dev/null
 
 # run the drush command
 $DRUSH $URI_PARAM $@
