@@ -74,6 +74,19 @@ fi
 sudo chown -R 999:999 $FULCRUM_DIRNAME/var/lib/mysql
 sudo chmod -R u+w,u+r $FULCRUM_DIRNAME/var/lib/mysql
 
+# mysqldump config - https://serverfault.com/questions/912162/mysqldump-throws-unknown-table-column-statistics-in-information-schema-1109
+MYCNF=~/.my.cnf
+# no cnf file
+if [ ! -e $MYCNF ]; then
+  echo -e "[mysqldump]\ncolumn-statistics=0\n" | tee $MYCNF > /dev/null
+# cnf file doesn't have mysqldump section
+elif ( ! ( grep '[mysqldump]' $MYCNF > /dev/null ) ); then
+  echo -e "\n[mysqldump]\ncolumn-statistics=0\n" | tee -a $MYCNF > /dev/null
+# mysqldump section doesn't have column-statistics
+elif [[ "$(egrep '\[mysqldump\]|column-statistics' $MYCNF|wc -l|xargs)" != "2" ]]; then
+  sed -e $'s/\[mysqldump\]/\[mysqldump\]\\\ncolumn-statistics=0\\\n/' $MYCNF | tee $MYCNF > /dev/null
+fi
+
 # make elasticsearch directory
 if [ ! -d $FULCRUM_DIRNAME/var/lib/elasticsearch ]; then
   sudo mkdir $FULCRUM_DIRNAME/var/lib/elasticsearch
