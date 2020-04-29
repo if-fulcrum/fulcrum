@@ -1,0 +1,36 @@
+#!/bin/bash
+
+FULCRUM_BINDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
+FULCRUM_DIR=$(dirname $FULCRUM_BINDIR)
+START_TIME=$(date +'%s')
+# these settings can be exported in shell profile
+NAG_BEEP_COUNT=${NAG_BEEP_COUNT:-10}
+NAG_BEEP_DELAY=${NAG_BEEP_DELAY:-.25}
+
+# get command to run and run it
+CMD=$1
+shift
+eval $CMD "$@"
+
+MSG="Ran the command \`$CMD $@\` in $(( $(date +'%s') - $START_TIME )) second(s)"
+echo -e "\n$MSG\n"
+
+# see if there is an extra nag in hinge-config/bin to run
+if [ -f $FULCRUM_DIR/var/fulcrum/hinge-config/bin/nag ]; then
+  $FULCRUM_DIR/var/fulcrum/hinge-config/bin/nag "$MSG"
+fi
+
+# TODO: make sure audio is up
+# osascript -e 'output volume of (get volume settings)'
+# osascript -e "set volume output volume 100"
+#
+# pactl set-sink-volume 0 100% 100%
+# pactl list sinks|grep '^[[:space:]]Volume:'
+# # |head -n $(($SINK+1)) | tail -n 1 | sed -e 's,.* \([0-9][0-9]*\)%.*,\1,'
+# pactl list sinks|grep '^[[:space:]]Volume:'|perl -p -e 's/.*?([0-9]+)\%.*?([0-9]+)\%.*/$1:$2/'
+
+# make auditory sound
+for (( COUNT=1; COUNT<=$NAG_BEEP_COUNT; COUNT++ )); do
+  printf " .\\a"
+  sleep $NAG_BEEP_DELAY
+done
