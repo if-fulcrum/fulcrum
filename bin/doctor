@@ -160,6 +160,11 @@ if [ ! -e /tmp/HINGEINSTALLING ]; then
   fi
 fi
 
+# put default hinge settings in place
+if [ ! -f ~/.fulcrum-hinge ]; then
+  cp ${FULCRUM_DIRNAME}/etc/fulcrum/hinge-example-settings ~/.fulcrum-hinge
+fi
+
 # php 5 opcache default to on
 if [ ! -e ${FULCRUM_DIRNAME}/etc/php5/conf.d/zz-opcache-overide.ini ]; then
   echo "opcache.enable=1" > ${FULCRUM_DIRNAME}/etc/php5/conf.d/zz-opcache-overide.ini

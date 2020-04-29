@@ -1,0 +1,13 @@
+# This file is initially copied from fulcrum/etc/fulcrum/hinge-example-settings
+
+# Run the custom hinge-config nag command
+export NAG_RUN_CUSTOM=1
+
+# Have the console beep when `nag` is done running
+export NAG_BEEP=1
+
+# How many beeps to play
+export NAG_BEEP_COUNT=10
+
+# Delay between beeps
+export NAG_BEEP_DELAY=.25
