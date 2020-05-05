@@ -46,6 +46,7 @@
         }
       },
       "settings" : {
+        "config_sync_directory" : "${FULCRUM_D8CONFIG}",
         "container_yamls" : [
           "sites/default/services.yml",
           "modules/redis/example.services.yml"
