@@ -51,10 +51,16 @@ fi
 # work around for PHP 7.3 pcre.jit bug
 echo -e "[Pcre]\npcre.jit=0" | tee $PHP_CONFIG_PATH/conf.d/zzz-drush.ini > /dev/null
 
-# run the drush command
-$DRUSH $URI_PARAM $@
+EXTRA=""
 
-sudo rm $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
+if [ "$1" == "sql-dump" ]; then
+  EXTRA=" --extra-dump=--column-statistics=0"
+fi
+
+# run the drush command
+$DRUSH $URI_PARAM $@ $EXTRA
+
+rm $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
 
 # clean up from Drush 10 kludge
 if [ -n "$RM_TEMP_COMPOSER_JSON" ]; then
