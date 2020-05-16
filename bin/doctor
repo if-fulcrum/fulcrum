@@ -92,9 +92,15 @@ if [ ! -d $FULCRUM_DIRNAME/var/lib/elasticsearch ]; then
   sudo mkdir $FULCRUM_DIRNAME/var/lib/elasticsearch
 fi
 
+if [ ! -d $FULCRUM_DIRNAME/var/lib/elasticsearch7 ]; then
+  sudo mkdir $FULCRUM_DIRNAME/var/lib/elasticsearch7
+fi
+
 # set elasticsearch perms
 sudo chown -R 1000:0 $FULCRUM_DIRNAME/var/lib/elasticsearch
 sudo chmod -R 770 $FULCRUM_DIRNAME/var/lib/elasticsearch
+sudo chown -R 1000:0 $FULCRUM_DIRNAME/var/lib/elasticsearch7
+sudo chmod -R 770 $FULCRUM_DIRNAME/var/lib/elasticsearch7
 
 source $FULCRUM_DIRNAME/bin/lib/cli-autocomplete
 
