@@ -190,9 +190,9 @@ SETVAR
   # default to PHP 5.6
   if [ -z "$FULCRUM_PHPVERSION" ]; then
     USE_PHP_VERSION="56"
-    # change PHP 7 to be 7.1
+    # change PHP 7 to be 7.2
   elif [ "$FULCRUM_PHPVERSION" == "7" ]; then
-    USE_PHP_VERSION="71"
+    USE_PHP_VERSION="72"
   else
     USE_PHP_VERSION=$FULCRUM_PHPVERSION
   fi

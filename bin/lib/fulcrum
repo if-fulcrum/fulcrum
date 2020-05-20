@@ -175,13 +175,13 @@ function dbash() {
 
 function _phpReloadConf() {
   $SUDOCK docker exec php56fpm sh -c 'kill -USR2 1'
-  $SUDOCK docker exec php7.1 sh -c 'kill -USR2 1'
+  $SUDOCK docker exec php7.2 sh -c 'kill -USR2 1'
   $SUDOCK docker exec php7.3 sh -c 'kill -USR2 1'
 }
 
 function phpReloadConf() {
   vout "Reload php56fpm config"
-  vout "Reload php7.1 config"
+  vout "Reload php7.2 config"
   vout "Reload php7.3 config"
   stackStatus "noexit"
   _phpReloadConf
