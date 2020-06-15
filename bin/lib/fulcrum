@@ -99,8 +99,15 @@ function stopAndRmAllContainers() {
   rmAllContainers
 }
 
-function dStop() {
+function dstop() {
   stopAndRmAllContainers
+}
+
+function dpull() {
+  vout "doing docker pull"
+  sendalert "doing docker pull, if you get an error about \"TLS handshake timeout\", then re-run this same command again"
+  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" pull
+  $SUDOCK docker pull fulcrum/util
 }
 
 # start/restart all our containers
@@ -110,10 +117,7 @@ function drestart() {
   stackExports
 
   if [ $DOPULL -eq 1 ]; then
-    vout "doing docker pull"
-    sendalert "doing docker pull, if you get an error about \"TLS handshake timeout\", then re-run this same command again"
-    $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" pull
-    $SUDOCK docker pull fulcrum/util
+    dpull
   else
     vout "skipping docker pull"
     sendalert "skipping docker image pull, add -p flag if you wish to pull next time"

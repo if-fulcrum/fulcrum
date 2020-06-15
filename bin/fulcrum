@@ -98,7 +98,7 @@ case ${MYCOMMAND} in
 
   "stop"|"halt"|"down"|"shutdown")
     vout "running stop command"
-    dStop
+    dstop
     ;;
 
   "sh"|"bash"|"shell"|"enter"|"dsh"|"dbash")
@@ -114,6 +114,11 @@ case ${MYCOMMAND} in
   "log"|"logs"|"dlog"|"dlogs")
     vout "running dlogs command"
     dlogs
+    ;;
+
+  "pull"|"dpull")
+    vout "running dpull command"
+    dpull
     ;;
 
   "haproxy"|"haproxyrestart"|"haproxy-restart")
