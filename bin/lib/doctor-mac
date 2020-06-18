@@ -58,18 +58,19 @@ else
   vout "Check: homebrew 'php' package is installed."
 fi
 
-# if [[ ! "$BREWLIST" == *"php@5.6"* ]]; then
-#   vout "Installing: homebrew 'php@5.6' package."
-#   brew install php@5.6
-# else
-#   vout "Check: homebrew 'php@5.6' package is installed."
-# fi
-
 if [[ ! "$BREWLIST" == *"brew-php-switcher"* ]]; then
   vout "Installing: homebrew 'brew-php-switcher' package."
   brew install brew-php-switcher
 else
   vout "Check: homebrew 'brew-php-switcher' package is installed."
+fi
+
+# if we don't have /usr/local/bin/php setup yet, then do it now
+if [ ! -e /usr/local/bin/php ]; then
+  brew-php-switcher 7.3
+
+  # rehash for the PATH var
+  hash -r
 fi
 
 if [[ ! "$BREWLIST" == *"mysql-client"* ]]; then
@@ -94,26 +95,16 @@ fi
 INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
 
 # lighter weight redis check
-# if [ ! -e /usr/local/lib/php/pecl/20131226/redis.so ]; then
-#   if [[ ! "$INITPHPVER" == "5.6" ]]; then
-#     brew-php-switcher 5.6
-#   fi
-#
-#   vout "Installing: pecl 'php 5.6 redis' package."
-#   printf "\n" | pecl install redis
-# fi
-
-CURRPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
-
-# lighter weight redis check
 if [ ! -e /usr/local/lib/php/pecl/20180731/redis.so ]; then
   if [[ ! "$CURRPHPVER" == "7.3" ]]; then
     brew-php-switcher 7.3
   fi
 
   vout "Installing: pecl 'php 7.3 redis' package."
-  printf "\n" | $(ls /usr/local/Cellar/php@7.3/*/bin/pecl) install redis
+  printf "\n" | pecl install redis
 fi
+
+CURRPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
 
 # switch back to initial php version
 if [[ ! "$CURRPHPVER" == "$INITPHPVER" ]]; then
