@@ -112,7 +112,7 @@ if [ ! -e /usr/local/lib/php/pecl/20180731/redis.so ]; then
   fi
 
   vout "Installing: pecl 'php 7.3 redis' package."
-  printf "\n" | pecl install redis
+  printf "\n" | $(ls /usr/local/Cellar/php@7.3/*/bin/pecl) install redis
 fi
 
 # switch back to initial php version
