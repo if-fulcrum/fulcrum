@@ -129,7 +129,21 @@ if [ ! -f $DRUSH8_DIR/vendor/drush/drush/drush ]; then
   cd $DRUSH8_DIR
 
   # PHP 7.3 has a known bug with pcre.jit
-  php -d pcre.jit=0 $(which composer) require drush/drush:8.\*
+  php -d pcre.jit=0 $(which composer) require \
+    "drush/drush:8.*"                         \
+    "composer/semver:^1.0"                    \
+    "pear/archive_tar:^1.4.9"                 \
+    "psr/log:^1.0"                            \
+    "symfony/console:~2.7|^3"                 \
+    "symfony/debug:~2.8|~3.0"                 \
+    "symfony/event-dispatcher:~2.7|^3"        \
+    "symfony/filesystem:^2.7 || ^3.4"         \
+    "symfony/finder:~2.7|^3"                  \
+    "symfony/http-foundation:~3.4.35"         \
+    "symfony/process:~2.7|^3"                 \
+    "symfony/var-dumper:~2.7|^3"              \
+    "symfony/yaml:~2.3|^3"                    \
+    "twig/twig:^1.38.2"
 fi
 
 DRUSH10_DIR=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10
@@ -140,7 +154,21 @@ if [ ! -f $DRUSH10_DIR/vendor/drush/drush/drush ]; then
   cd $DRUSH10_DIR
 
   # PHP 7.3 has a known bug with pcre.jit
-  php -d pcre.jit=0 $(which composer) require drush/drush:10.\*
+  php -d pcre.jit=0 $(which composer) require \
+    "drush/drush:10.*"                        \
+    "composer/semver:^1.0"                    \
+    "pear/archive_tar:^1.4.9"                 \
+    "psr/log:^1.0"                            \
+    "symfony/console:~2.7|^3"                 \
+    "symfony/debug:~2.8|~3.0"                 \
+    "symfony/event-dispatcher:~2.7|^3"        \
+    "symfony/filesystem:^2.7 || ^3.4"         \
+    "symfony/finder:~2.7|^3"                  \
+    "symfony/http-foundation:~3.4.35"         \
+    "symfony/process:~2.7|^3"                 \
+    "symfony/var-dumper:~2.7|^3"              \
+    "symfony/yaml:~2.3|^3"                    \
+    "twig/twig:^1.38.2"
 fi
 
 # set the resolver IP for nginx
