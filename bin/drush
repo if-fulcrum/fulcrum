@@ -17,28 +17,42 @@ if [ ! -f $CONF ]; then
 fi
 # get the webroot from config as some site are a level down
 DOCROOT=$(egrep '^ +"webroot"' $CONF|cut -d\" -f4)
-SITEDIR=$(dirname $FULCRUM_DIRNAME/sites/${DOCROOT})
+DOCROOT_DIR=$FULCRUM_DIRNAME/sites/${DOCROOT}
+SITEDIR=$(dirname $DOCROOT_DIR)
 
 # default to Drush 8
-DRUSH=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8/vendor/bin/drush
+DRUSH_BIN=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8/vendor/bin/drush
 
 RM_TEMP_COMPOSER_JSON=""
 
+# change into the docroot
+cd $DOCROOT_DIR
+
 # if we are Drupal 8+ use Drush 10
-if [ -e $FULCRUM_DIRNAME/sites/${DOCROOT}/core/lib/Drupal.php ]; then
-  DRUSH=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10/vendor/bin/drush
+if [ -e $DOCROOT_DIR/core/lib/Drupal.php ]; then
+  DRUSH_BIN=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10/vendor/bin/drush
 
   # kludge for where Drush 10 looks for composer.json
-  TEMP_COMPOSER_JSON=$FULCRUM_DIRNAME/sites/${DOCROOT}/composer.json
+  TEMP_COMPOSER_JSON=$DOCROOT_DIR/composer.json
   if [[ -e $SITEDIR/composer.json ]] && [[ ! -e $TEMP_COMPOSER_JSON ]]; then
     RM_TEMP_COMPOSER_JSON=$TEMP_COMPOSER_JSON
 
     cp $SITEDIR/composer.json $TEMP_COMPOSER_JSON
   fi
-fi
 
-# change into the docroot
-cd $FULCRUM_DIRNAME/sites/${DOCROOT}
+  # determine if Drush is local or not
+  VENDOR_DRUSH_DIR="vendor/drush/drush/drush"
+  VENDOR_DRUSH="${FULCRUM_DIRNAME}/sites/${SITE}/${VENDOR_DRUSH_DIR}"
+
+  if [[ -f $VENDOR_DRUSH ]]; then
+    DRUSH_BIN="$VENDOR_DRUSH"
+  else
+    VENDOR_DRUSH="${FULCRUM_DIRNAME}/sites/${SITE}/docroot/${VENDOR_DRUSH_DIR}"
+    if [[ -f $VENDOR_DRUSH ]]; then
+      DRUSH_BIN="$VENDOR_DRUSH"
+    fi
+  fi
+fi
 
 PHP_CONFIG_PATH=$(php -i|grep php.ini|grep Path|cut -d\> -f2|cut -d' ' -f2)
 
@@ -58,7 +72,8 @@ if [ "$1" == "sql-dump" ]; then
 fi
 
 # run the drush command
-$DRUSH $URI_PARAM $@ $EXTRA
+echo -e "Running $DRUSH_BIN $URI_PARAM $@ $EXTRA\n\n"
+$DRUSH_BIN $URI_PARAM $@ $EXTRA
 
 rm $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
 
