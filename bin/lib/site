@@ -431,15 +431,11 @@ function copyConf() {
 }
 
 function drushCmd() {
-  DRUSHCMD="cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@ && exit"
   vout "$DRUSHCMD"
 
-  PHPCONTAINER=$(phpContainer)
+  cd $FULCRUM_DOCROOT
 
-  vout "Using PHP $PHPCONTAINER for $FULCRUM_WEBROOT"
-
-  # echo "cd /var/www/html/$FULCRUM_SITE$FULCRUM_WRD && /usr/local/bin/drush $@" | docker exec -i drush //bin/sh
-  DRUSHCMDRESULT=$($SUDOCK docker exec -i $PHPCONTAINER //bin/sh -c "$DRUSHCMD")
+  DRUSHCMDRESULT=$(${FULCRUM_BINDIR}/drush $DRUSHCMD $@)
 }
 
 function createSolr() {
