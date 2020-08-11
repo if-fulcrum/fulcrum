@@ -3,4 +3,4 @@ FULCRUM_DBGZ=~/fulcrum/var/fulcrum/bak/hello8.sql.gz
 FULCRUM_DBNAME=hello8dev
 FULCRUM_REPO=git@github.com:if-fulcrum/hello8.git
 FULCRUM_WRD=docroot
-
+FULCRUM_PHPVERSION=73
