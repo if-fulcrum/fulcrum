@@ -431,11 +431,11 @@ function copyConf() {
 }
 
 function drushCmd() {
-  vout "$DRUSHCMD"
+  vout "drush $@"
 
   cd $FULCRUM_DOCROOT
 
-  DRUSHCMDRESULT=$(${FULCRUM_BINDIR}/drush $DRUSHCMD $@)
+  DRUSHCMDRESULT=$(${FULCRUM_BINDIR}/drush $@)
 }
 
 function createSolr() {
