@@ -71,8 +71,8 @@ if [ "$1" == "sql-dump" ]; then
   EXTRA=" --extra-dump=--column-statistics=0"
 fi
 
-# run the drush command
-echo -e "Running $DRUSH_BIN $URI_PARAM $@ $EXTRA\n\n"
+# run the drush command, send to stderr so results usable elsewhere
+>&2 echo -e "Running $DRUSH_BIN $URI_PARAM $@ $EXTRA\n\n"
 $DRUSH_BIN $URI_PARAM $@ $EXTRA
 
 rm $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
