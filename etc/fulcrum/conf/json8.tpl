@@ -40,9 +40,6 @@
           "bucket" : "${FULCRUM_S3_BUCKET}",
           "region" : "${FULCRUM_S3_REGION}",
           "use_https" : true
-        },
-        "elasticsearch_connector.cluster.elasticsearch1" : {
-          "url" : "http://elasticsearch:9200"
         }
       },
       "settings" : {
