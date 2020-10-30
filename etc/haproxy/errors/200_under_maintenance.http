@@ -1,0 +1,13 @@
+HTTP/1.0 200 Found
+Cache-Control: no-cache
+Connection: close
+Content-Type: text/html
+
+<html>
+<head>
+<title>Site undergoing maintenance</title>
+</head>
+<body>
+<p>This site is currently undergoing maintenance and will be back shortly, thanks for your patience</p>
+</body>
+</html>
