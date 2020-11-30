@@ -49,7 +49,7 @@ if [[ ! "$TAPDIR" == *"Homebrew"* ]]; then
   fi
 fi
 
-BREWLIST=$(brew list)
+BREWLIST=$(brew list --formula)
 
 if [[ ! "$BREWLIST" == *"php@7.3"* ]]; then
   vout "Installing: homebrew 'php' package."
