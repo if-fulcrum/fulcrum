@@ -455,7 +455,7 @@ function remakeCerts() {
 function fulcrumLastest() {
   vout "Updating Fulcrum and Hinge-Config to latest commit"
   cd $FULCRUM_DIRNAME
-  git pull
+  git pull --ff-only
   cd $FULCRUM_DIRNAME/var/fulcrum/hinge-config
-  git pull
+  git pull --ff-only
 }
