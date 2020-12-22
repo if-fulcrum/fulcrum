@@ -55,7 +55,7 @@ function cloneCodebase() {
       if [ "$GITPULL" == "y" ]; then
         chmod u+w $FULCRUM_DOCROOT/sites/default
         cd $FULCRUM_REPODIR
-        git pull
+        git pull --ff-only
         chmod u-w $FULCRUM_DOCROOT/sites/default
       fi
     fi
@@ -288,7 +288,7 @@ function setupEnv() {
       # update if a git repo
       if [ -d $FULCRUM_SITES_VARS_DIR/.git ]; then
         cd $FULCRUM_SITES_VARS_DIR
-        git pull origin master
+        git pull origin master --ff-only
       fi
 
       SITES=$(find $FULCRUM_SITES_ETC_DIR $FULCRUM_SITES_VARS_DIR -name "*.site" -exec basename {} .site \;|sort|awk '{print FNR " " $0}')
