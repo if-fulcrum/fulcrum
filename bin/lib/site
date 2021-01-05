@@ -87,7 +87,7 @@ function cloneCodebase() {
       rm -f $FULCRUM_DOCROOT/sites/default/files/.htaccess
     fi
 
-    cp $FULCRUM_DIRNAME/etc/php5/drupal_files_htaccess $FULCRUM_DOCROOT/sites/default/files/.htaccess
+    cp $FULCRUM_DIRNAME/etc/php7.3/drupal_files_htaccess $FULCRUM_DOCROOT/sites/default/files/.htaccess
     chmod u-w $FULCRUM_DOCROOT/sites/default $FULCRUM_DOCROOT/sites/default/files/.htaccess
   fi
 
@@ -418,7 +418,7 @@ function setupEnv() {
 }
 
 function phpContainer() {
-  PHPCONTAINER=php7.2
+  PHPCONTAINER=php7.4
 
   echo $PHPCONTAINER
 }

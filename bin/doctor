@@ -199,19 +199,9 @@ if [ ! -f ~/.fulcrum-hinge ]; then
   cp ${FULCRUM_DIRNAME}/etc/fulcrum/hinge-example-settings ~/.fulcrum-hinge
 fi
 
-# php 5 opcache default to on
-if [ ! -e ${FULCRUM_DIRNAME}/etc/php5/conf.d/zz-opcache-overide.ini ]; then
-  echo "opcache.enable=1" > ${FULCRUM_DIRNAME}/etc/php5/conf.d/zz-opcache-overide.ini
-fi
-
 # php 7 opcache default to on
 if [ ! -e ${FULCRUM_DIRNAME}/etc/php7/conf.d/zz-opcache-overide.ini ]; then
   echo "opcache.enable=1" > ${FULCRUM_DIRNAME}/etc/php7/conf.d/zz-opcache-overide.ini
-fi
-
-# php 5 xdebug default to off
-if [ ! -e ${FULCRUM_DIRNAME}/etc/php5/conf.d/zz-xdebug-overide.ini ]; then
-  cp $FULCRUM_DIRNAME/etc/php5xdebug/conf.d/zz-xdebug-off.ini $FULCRUM_DIRNAME/etc/php5/conf.d/zz-xdebug-overide.ini
 fi
 
 # php 7 xdebug default to off

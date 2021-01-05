@@ -320,14 +320,6 @@ function stackStatus() {
     STACK_STATUS="${STACK_STATUS}${SEVERITY}: nginx not running\n"
   fi
 
-  if [[ "$RUNNING_CONTAINERS" != *"php56fpm"* ]]; then
-    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php56fpm not running\n"
-  fi
-
-  if [[ "$RUNNING_CONTAINERS" != *"php7.2"* ]]; then
-    STACK_STATUS="${STACK_STATUS}${SEVERITY}: php7.2 not running\n"
-  fi
-
   if [[ "$RUNNING_CONTAINERS" != *"php7.3"* ]]; then
     STACK_STATUS="${STACK_STATUS}${SEVERITY}: php7.3 not running\n"
   fi
