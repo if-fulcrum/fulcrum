@@ -60,37 +60,11 @@ function dlogs() {
 }
 
 function stopAllContainers() {
-  # this trick helps kill everything in the event compose file changes and it doesn't really stop everything
-  RUNNING_CONTAINERS=$($SUDOCK docker ps --format '{{.Names}}')
-
-  if [ $(echo -n "$RUNNING_CONTAINERS"|wc -l)  -gt 0 ]; then
-    sendalert "stopping any running containers"
-
-    set +e
-    for CONT in $RUNNING_CONTAINERS; do
-      STOPSCRIPT="$FULCRUM_DIRNAME/var/fulcrum/hinge-config/etc/fulcrum/container/$CONT/stop.sh"
-
-      # optionally run stop script before actually stopping, useful for umounting stale NFS mounts
-      if [ -e "$STOPSCRIPT" ]; then
-        sendalert "running stop script $STOPSCRIPT"
-        $SUDOCK docker cp "$STOPSCRIPT" $CONT:/fulcrum-stop.sh
-        $SUDOCK docker exec -it --user=root $CONT /fulcrum-stop.sh
-      fi
-
-      echo "Stopping $CONT"
-      $SUDOCK docker stop $CONT
-    done
-
-    set -e
-  fi
+  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" stop
 }
 
 function rmAllContainers() {
-  STOPPED_CONTAINERS=$($SUDOCK docker ps -a -q | wc -l)
-  if [ $STOPPED_CONTAINERS -gt 0 ]; then
-    sendalert "killing any stopped containers"
-    $SUDOCK docker rm -f $($SUDOCK docker ps -a -q) 1>/dev/null
-  fi
+  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" rm -f
 }
 
 function stopAndRmAllContainers() {
