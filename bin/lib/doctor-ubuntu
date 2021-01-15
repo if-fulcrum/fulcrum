@@ -89,39 +89,39 @@ if (which php > /dev/null); then
   echo "php exists"
 else
   echo "installing php"
-  sudo apt install -y php7.2-cli
+  sudo apt install -y php7.3-cli
 fi
 
-# install php7.2-xml if needed
+# install php7.3-xml if needed
 if (php -m|grep dom); then
-  echo "php7.2-xml exists"
+  echo "php7.3-xml exists"
 else
-  echo "installing php7.2-xml"
-    sudo apt install -y php7.2-xml
+  echo "installing php7.3-xml"
+    sudo apt install -y php7.3-xml
 fi
 
-# install php7.2-redis if needed
+# install php7.3-redis if needed
 if (php -m|grep redis); then
-  echo "php7.2-redis exists"
+  echo "php7.3-redis exists"
 else
-  echo "installing php7.2-redis"
-    sudo apt install -y php7.2-redis
+  echo "installing php7.3-redis"
+    sudo apt install -y php7.3-redis
 fi
 
-# install php7.2-mysql if needed
+# install php7.3-mysql if needed
 if (php -m|grep mysql); then
-  echo "php7.2-mysql exists"
+  echo "php7.3-mysql exists"
 else
-  echo "installing php7.2-mysql"
-    sudo apt install -y php7.2-mysql
+  echo "installing php7.3-mysql"
+    sudo apt install -y php7.3-mysql
 fi
 
-# install php7.2-curl if needed
+# install php7.3-curl if needed
 if (php -m|grep curl); then
-  echo "php7.2-curl exists"
+  echo "php7.3-curl exists"
 else
-  echo "installing php7.2-curl"
-    sudo apt install -y php7.2-curl
+  echo "installing php7.3-curl"
+    sudo apt install -y php7.3-curl
 fi
 
 # install curl if needed
