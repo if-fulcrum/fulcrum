@@ -171,7 +171,7 @@ function opcacheFlush() {
 function opcacheOff() {
   vout "Disable Zend OPcache"
   echo "opcache.enable=0" > $FULCRUM_DIRNAME/etc/php7.3/conf.d/zz-opcache-overide.ini
-  echo "opcache.enable=0" > $FULCRUM_DIRNAME/etc/php7.4/conf.d/zz-opcache-overide.ini
+  echo "opcache.enable=0" > $FULCRUM_DIRNAME/etc/php7.4/php/conf.d/zz-opcache-overide.ini
   phpReloadConf
   opcacheStatus
 }
@@ -179,7 +179,7 @@ function opcacheOff() {
 function opcacheOn() {
   vout "Enable Zend OPcache"
   echo "opcache.enable=1" > $FULCRUM_DIRNAME/etc/php7.3/conf.d/zz-opcache-overide.ini
-  echo "opcache.enable=1" > $FULCRUM_DIRNAME/etc/php7.4/conf.d/zz-opcache-overide.ini
+  echo "opcache.enable=1" > $FULCRUM_DIRNAME/etc/php7.4/php/conf.d/zz-opcache-overide.ini
   phpReloadConf
   opcacheStatus
 }
@@ -195,7 +195,7 @@ function opcacheStatus() {
     vout "PHP 7.3 Zend OPcache status is unknown ($OCMODE)"
   fi
 
-  OCMODE=$(cat $FULCRUM_DIRNAME/etc/php7.4/conf.d/zz-opcache-overide.ini)
+  OCMODE=$(cat $FULCRUM_DIRNAME/etc/php7.4/php/conf.d/zz-opcache-overide.ini)
 
   if [[ "$OCMODE" == *"opcache.enable=1"* ]]; then
     vout "PHP 7.4 Zend OPcache status appears to be *enabled* ($OCMODE)"
@@ -209,7 +209,7 @@ function opcacheStatus() {
 function xdebugOff() {
   vout "Disable Xdebug"
   cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-off.ini $FULCRUM_DIRNAME/etc/php7.3/conf.d/zz-xdebug-overide.ini
-  cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-off.ini $FULCRUM_DIRNAME/etc/php7.4/conf.d/zz-xdebug-overide.ini
+  cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-off.ini $FULCRUM_DIRNAME/etc/php7.4/php/conf.d/zz-xdebug-overide.ini
   phpReloadConf
   xdebugStatus
 }
@@ -217,7 +217,7 @@ function xdebugOff() {
 function xdebugOn() {
   vout "Enable Xdebug"
   cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-on.ini $FULCRUM_DIRNAME/etc/php7.3/conf.d/zz-xdebug-overide.ini
-  cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-on.ini $FULCRUM_DIRNAME/etc/php7.4/conf.d/zz-xdebug-overide.ini
+  cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-on.ini $FULCRUM_DIRNAME/etc/php7.4/php/conf.d/zz-xdebug-overide.ini
   phpReloadConf
   xdebugStatus
 }
@@ -231,7 +231,7 @@ function xdebugStatus() {
     vout "PHP 7.3 Xdebug status appears to be *disabled*"
   fi
 
-  OCMODE=$(cat $FULCRUM_DIRNAME/etc/php7.4/conf.d/zz-xdebug-overide.ini)
+  OCMODE=$(cat $FULCRUM_DIRNAME/etc/php7.4/php/conf.d/zz-xdebug-overide.ini)
 
   if [[ "$OCMODE" == *"xdebug.so"* ]]; then
     vout "PHP 7.4 Xdebug status appears to be *enabled*"
