@@ -216,8 +216,10 @@ function xdebugOff() {
 
 function xdebugOn() {
   vout "Enable Xdebug"
-  cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-on.ini $FULCRUM_DIRNAME/etc/php7.3/conf.d/zz-xdebug-overide.ini
-  cp $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-on.ini $FULCRUM_DIRNAME/etc/php7.4/php/conf.d/zz-xdebug-overide.ini
+
+  cat $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-on.ini|sed 's/PHP_FPM_PORT/9073/' > $FULCRUM_DIRNAME/etc/php7.3/conf.d/zz-xdebug-overide.ini
+  cat $FULCRUM_DIRNAME/etc/php7xdebug/conf.d/zz-xdebug-on.ini|sed 's/PHP_FPM_PORT/9074/' > $FULCRUM_DIRNAME/etc/php7.4/php/conf.d/zz-xdebug-overide.ini
+
   phpReloadConf
   xdebugStatus
 }
