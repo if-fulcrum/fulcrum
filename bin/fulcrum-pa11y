@@ -27,8 +27,12 @@ if ! [ -x "$(command -v pa11y)" ]; then
   done
 fi
 
+if [ $# -ne 1 ]; then
+  echo " You must pass the relative url of a page to test with fulcrum-pa11y: e.g. https://project.ifdev/RELATIVE_URL"
+  exit 1
+fi
 
-pa11y --runner axe --runner htmlcs --standard WCAG2AAA $FULCRUM_SITE
+pa11y --runner axe --runner htmlcs --standard WCAG2AAA $FULCRUM_SITE/$1
 
 echo ""
 echo ""
