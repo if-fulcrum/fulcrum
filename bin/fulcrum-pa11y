@@ -1,5 +1,8 @@
 #!/bin/bash
 # http://pa11y.org
+
+FULCRUM_SITE=$(echo $PWD|sed 's#^.*/fulcrum/sites/##'|cut -d/ -f1)
+
 if ! [ -x "$(command -v node)" ]; then
   echo "pa11y requires node, which may be installed by mac brew \"brew install node\""
   while true; do
@@ -24,12 +27,8 @@ if ! [ -x "$(command -v pa11y)" ]; then
   done
 fi
 
-if [ $# -ne 1 ]; then
-  echo "must pass the url to test to this script (https://hello8.fulcrum.ifdev)"
-  exit 1
-fi
 
-pa11y $1
+pa11y --runner axe --runner htmlcs --standard WCAG2AAA $FULCRUM_SITE
 
 echo ""
 echo ""
