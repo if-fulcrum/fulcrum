@@ -220,10 +220,6 @@ function nginxConfAll() {
 
   getDCYML
 
-  vout "FULCRUM_COMPOSE_YML: $FULCRUM_COMPOSE_YML"
-  vout "FULCRUM_DIRNAME:     $FULCRUM_DIRNAME"
-  vout "FULCRUM_OS_LC:       $FULCRUM_OS_LC"
-
   vout "recreating nginx container for new config"
   $SUDOCK docker stop nginx
   $SUDOCK docker rm nginx
