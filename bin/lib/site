@@ -267,7 +267,7 @@ function drushSysVars() {
 
 function drushUserLogin() {
   vout "Running drush to get UID 1 login"
-  drushCmd uli --uri=http://$FULCRUM_SITE
+  drushCmd uli --no-browser --uri=http://$FULCRUM_SITE
 
   vout "$FULCRUM_SITE login: git web--browse \"$DRUSHCMDRESULT\""
   git web--browse "$DRUSHCMDRESULT"
