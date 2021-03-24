@@ -151,6 +151,19 @@ function etcHosts() {
   fi
 }
 
+function getDCYML() {
+  DUMMYVAR="DUMMYVAL"
+
+  # allow for override in a custom doctor file
+  if [ -z ${FULCRUM_COMPOSE_YML+DUMMYVAR} ]; then
+    # must come after FULCRUM_HOST_USER
+    FULCRUM_COMPOSE_YML="$FULCRUM_DIRNAME/var/fulcrum/hinge-config/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
+    echo "Using $FULCRUM_COMPOSE_YML for Docker Compose"
+  fi
+
+  export FULCRUM_COMPOSE_YML
+}
+
 function nginxConfAll() {
   CONFDIR=$FULCRUM_DIRNAME/etc/fulcrum/conf/
 
@@ -205,10 +218,16 @@ function nginxConfAll() {
 
   stackStatus "noexit"
 
+  getDCYML
+
+  vout "FULCRUM_COMPOSE_YML: $FULCRUM_COMPOSE_YML"
+  vout "FULCRUM_DIRNAME:     $FULCRUM_DIRNAME"
+  vout "FULCRUM_OS_LC:       $FULCRUM_OS_LC"
+
   vout "recreating nginx container for new config"
   $SUDOCK docker stop nginx
   $SUDOCK docker rm nginx
-  docker-compose --file ~/fulcrum/var/fulcrum/hinge-config/etc/fulcrum/stack/hinge-mac.yml up -d nginx
+  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" up -d nginx
 }
 
 function signCert() {
