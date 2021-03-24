@@ -205,8 +205,10 @@ function nginxConfAll() {
 
   stackStatus "noexit"
 
-  vout "send nginx container the reload signal"
-  $SUDOCK docker exec nginx nginx -s reload
+  vout "recreating nginx container for new config"
+  $SUDOCK docker stop nginx
+  $SUDOCK docker rm nginx
+  docker-compose --file ~/fulcrum/var/fulcrum/hinge-config/etc/fulcrum/stack/hinge-mac.yml up -d nginx
 }
 
 function signCert() {
