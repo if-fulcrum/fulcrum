@@ -64,15 +64,7 @@ export FULCRUM_HOST_GID=$(id -g $FULCRUM_HOST_USER)
 #   export FULCRUM_HOST_IP=$(ip addr list $FULCRUM_INTERFACE |grep "inet " |cut -d' ' -f6|cut -d/ -f1)
 # fi
 
-DUMMYVAR="DUMMYVAL"
-# echo "\${FULCRUM_COMPOSE_YML+DUMMYVAR}: ${FULCRUM_COMPOSE_YML+DUMMYVAR}"
-
-# allow for override in a custom doctor file
-if [ -z ${FULCRUM_COMPOSE_YML+DUMMYVAR} ]; then
-  # must come after FULCRUM_HOST_USER
-  FULCRUM_COMPOSE_YML="$FULCRUM_DIRNAME/var/fulcrum/hinge-config/etc/fulcrum/stack/hinge-${FULCRUM_OS_LC}.yml"
-  echo "Using $FULCRUM_COMPOSE_YML for Docker Compose"
-fi
+getDCYML
 
 # debug
 vout "FULCRUM_HOST_USER = $FULCRUM_HOST_USER"
