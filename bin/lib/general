@@ -223,7 +223,7 @@ function nginxConfAll() {
   vout "recreating nginx container for new config"
   $SUDOCK docker stop nginx
   $SUDOCK docker rm nginx
-  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" up -d nginx
+  $SUDOCK /usr/local/bin/docker-compose --file "${FULCRUM_COMPOSE_YML}" up -d nginx
 }
 
 function signCert() {

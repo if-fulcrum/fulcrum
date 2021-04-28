@@ -48,23 +48,23 @@ function usage() {
 
 # show container status
 function dps() {
-  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" ps
+  $SUDOCK /usr/local/bin/docker-compose --file "${FULCRUM_COMPOSE_YML}" ps
   exit 0
 }
 
 # show container logs
 function dlogs() {
   sendalert "We are following the logs of the containers, Ctrl+C to stop"
-  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" logs -f
+  $SUDOCK /usr/local/bin/docker-compose --file "${FULCRUM_COMPOSE_YML}" logs -f
   exit 0
 }
 
 function stopAllContainers() {
-  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" stop
+  $SUDOCK /usr/local/bin/docker-compose --file "${FULCRUM_COMPOSE_YML}" stop
 }
 
 function rmAllContainers() {
-  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" rm -f
+  $SUDOCK /usr/local/bin/docker-compose --file "${FULCRUM_COMPOSE_YML}" rm -f
 }
 
 function stopAndRmAllContainers() {
@@ -80,7 +80,7 @@ function dstop() {
 function dpull() {
   vout "doing docker pull"
   sendalert "doing docker pull, if you get an error about \"TLS handshake timeout\", then re-run this same command again"
-  $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" pull
+  $SUDOCK /usr/local/bin/docker-compose --file "${FULCRUM_COMPOSE_YML}" pull
   $SUDOCK docker pull fulcrum/util
 }
 
@@ -101,10 +101,10 @@ function drestart() {
   sendalert "Starting containers"
   if [ $QUIET -eq 1 ]; then
     vout "quiet docker-compose up"
-    $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" up -d 1>/dev/null 2>/dev/null
+    $SUDOCK /usr/local/bin/docker-compose --file "${FULCRUM_COMPOSE_YML}" up -d 1>/dev/null 2>/dev/null
   else
     vout "verbose docker-compose up"
-    $SUDOCK docker-compose --file "${FULCRUM_COMPOSE_YML}" up -d
+    $SUDOCK /usr/local/bin/docker-compose --file "${FULCRUM_COMPOSE_YML}" up -d
   fi
 
   waitForDB
