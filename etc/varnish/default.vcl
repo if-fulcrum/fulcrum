@@ -304,16 +304,17 @@ sub vcl_backend_response {
 sub vcl_backend_error {
   # HTML for all
   set beresp.http.Content-Type = "text/html; charset=utf-8";
+  set bereq.http.X-Tail-Message = "<ul><li><strong>Status Code: </strong>" + beresp.status + "</li><li><strong>Date: </strong>" + now + "</li><li><strong>IP: </strong>" + bereq.http.X-Client-IP + "</li></ul>" + std.fileread("/etc/varnish/error-tail.html");
 
   # more specific error for those who need to report it
   if (beresp.status == 403) {
-    synthetic(std.fileread("/etc/varnish/error-denied.html"));
+    synthetic(std.fileread("/etc/varnish/error-denied.html") + bereq.http.X-Tail-Message);
   } else if (beresp.status == 404) {
-    synthetic(std.fileread("/etc/varnish/error-notfound.html"));
+    synthetic(std.fileread("/etc/varnish/error-notfound.html") + bereq.http.X-Tail-Message);
   } else if (beresp.status >= 500 && beresp.status <= 599) {
-    synthetic(std.fileread("/etc/varnish/error-server.html"));
+    synthetic(std.fileread("/etc/varnish/error-server.html") + bereq.http.X-Tail-Message);
   } else {
-    synthetic(std.fileread("/etc/varnish/error-default.html"));
+    synthetic(std.fileread("/etc/varnish/error-default.html") + bereq.http.X-Tail-Message);
   }
 
   return (deliver);
@@ -335,19 +336,20 @@ sub vcl_synth {
   } else {
     # HTML for all
     set resp.http.Content-Type = "text/html; charset=utf-8";
+    set req.http.X-Tail-Message = "<ul><li><strong>Status Code: </strong>" + resp.status + "</li><li><strong>Date: </strong>" + now + "</li><li><strong>IP: </strong>" + req.http.X-Client-IP + "</li></ul>" + std.fileread("/etc/varnish/error-tail.html");
 
     # more specific error for those who need to report it
     if (resp.status == 403) {
       # do not let cloudflare cache
       set resp.http.Cache-Control = "must-revalidate, no-cache, private";
 
-      synthetic(std.fileread("/etc/varnish/error-denied.html"));
+      synthetic(std.fileread("/etc/varnish/error-denied.html") + req.http.X-Tail-Message);
     } else if (resp.status == 404) {
-      synthetic(std.fileread("/etc/varnish/error-notfound.html"));
+      synthetic(std.fileread("/etc/varnish/error-notfound.html") + req.http.X-Tail-Message);
     } else if (resp.status >= 500 && resp.status <= 599) {
-      synthetic(std.fileread("/etc/varnish/error-server.html"));
+      synthetic(std.fileread("/etc/varnish/error-server.html") + req.http.X-Tail-Message);
     } else {
-      synthetic(std.fileread("/etc/varnish/error-default.html"));
+      synthetic(std.fileread("/etc/varnish/error-default.html") + req.http.X-Tail-Message);
     }
   }
 
