@@ -119,13 +119,8 @@ function drestart() {
 # so we have to wait until there is only 1 root user
 # until everything is setup and we can use it
 function waitForDB() {
-  mkdir -p $FULCRUM_DIRNAME/var/fulcrum/tmp
-  ROOT_COUNT=$FULCRUM_DIRNAME/var/fulcrum/tmp/count
-
-  echo -n "-1" > $ROOT_COUNT
-
   echo -n "Waiting until database is available."
-  while ! ($SUDOCK docker exec mariadb mysql -sN -e "SELECT COUNT(*) FROM mysql.user where user = 'root'" 2> /dev/null 1> $ROOT_COUNT) || [ "$(cat $ROOT_COUNT)" != "1" ] ; do
+  while ! $SUDOCK docker exec mariadb mysql --protocol TCP -u root -e "show databases;" > /dev/null 2>&1 ; do
     echo -n "."
     sleep .25
   done
