@@ -120,7 +120,7 @@ function drestart() {
 # until everything is setup and we can use it
 function waitForDB() {
   MY_CMD="$SUDOCK docker exec mariadb mysql -u root --protocol socket"
-  echo -n "Waiting until database is available on local container socket."
+  echo -n "Waiting until database is available on local container socket..."
   while ! $MY_CMD -e "show databases;" > /dev/null 2>&1 ; do
     echo -n "."
     sleep .25
@@ -128,8 +128,19 @@ function waitForDB() {
 
   echo "ready"
 
-  echo -n "Seeing if proper root perms exist: "
   DEFAULT_ROUTE_IP=$(docker exec -it mariadb /sbin/ip route|grep default|cut -d' ' -f3)
+  
+  echo -n "Seeing if proper root perms exist for docker localhost connection: "
+  PROPER_ROOT=$($MY_CMD -Ne "SELECT user FROM mysql.user where user='root' and host='127.0.0.1';")
+
+  if [[ "$PROPER_ROOT" == "" ]]; then
+    echo "no - making proper root perms"
+    $MY_CMD -e "CREATE USER root@'127.0.0.1' IDENTIFIED BY '';GRANT ALL ON *.* to root@'127.0.0.1' IDENTIFIED BY '' WITH GRANT OPTION;FLUSH PRIVILEGES;"
+  else
+    echo "yes"
+  fi
+
+  echo -n "Seeing if proper root perms exist for docker host connection: "
   PROPER_ROOT=$($MY_CMD -Ne "SELECT user FROM mysql.user where user='root' and host='$DEFAULT_ROUTE_IP';")
 
   if [[ "$PROPER_ROOT" == "" ]]; then
@@ -139,7 +150,7 @@ function waitForDB() {
     echo "yes"
   fi
 
-  echo -n "Waiting until database is available to docker host on default port."
+  echo -n "Waiting until database is available to docker host on default port..."
   while ! mysql -h 127.0.0.1 -u root -e "show databases;" > /dev/null 2>&1 ; do
     echo -n "."
     sleep .25
