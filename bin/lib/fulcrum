@@ -119,13 +119,31 @@ function drestart() {
 # so we have to wait until there is only 1 root user
 # until everything is setup and we can use it
 function waitForDB() {
-  echo -n "Waiting until database is available."
-  while ! $SUDOCK docker exec mariadb mysql --protocol TCP -u root -e "show databases;" > /dev/null 2>&1 ; do
+  MY_CMD="$SUDOCK docker exec mariadb mysql -u root --protocol "
+  echo -n "Waiting until database is available on local container socket."
+  while ! $MY_CMD socket -e "show databases;" > /dev/null 2>&1 ; do
     echo -n "."
     sleep .25
   done
 
-  rm $ROOT_COUNT
+  echo ""
+
+  echo -n "Seeing if proper root perms exist: "
+  PROPER_ROOT=$($MY_CMD socket -Ne "SELECT user FROM mysql.user where user='root' and host='%';")
+
+  if [[ "$PROPER_ROOT" == "" ]]; then
+    echo "no - making proper root perms"
+    $MY_CMD socket -e "CREATE USER root@'%' IDENTIFIED BY '';GRANT ALL ON *.* to root@'%' IDENTIFIED BY '' WITH GRANT OPTION;FLUSH PRIVILEGES;"
+  else
+    echo "yes"
+  fi
+
+  echo -n "Waiting until database is available to docker host on default port."
+  while ! $MY_CMD TCP -e "show databases;" > /dev/null 2>&1 ; do
+    echo -n "."
+    sleep .25
+  done
+
   echo ""
 }
 
