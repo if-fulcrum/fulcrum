@@ -446,19 +446,39 @@ function createSolr() {
     ABBR=${FULCRUM_DBNAME/dev}
   fi
 
-  RESULT=$($SUDOCK docker exec --user=solr solr sh -c "if [ -d /opt/solr/server/solr/core_${ABBR}01 ]; then echo true ; else echo false ; fi")
+  if [ "$FULCRUM_SOLR5" == "yes" ]; then
+    RESULT=$($SUDOCK docker exec --user=solr solr sh -c "if [ -d /opt/solr/server/solr/core_${ABBR}01 ]; then echo true ; else echo false ; fi")
 
-  if [ ${RESULT} == "false" ]; then
-    sudo chown -R root:101 ~/fulcrum/etc/solr-copy-configs
-    $SUDOCK docker exec --user=solr solr sh -c "bin/solr create_core -c core_${ABBR}01"
+    if [ ${RESULT} == "false" ]; then
+      sudo chown -R root:101 ~/fulcrum/etc/solr-copy-configs
+      $SUDOCK docker exec --user=solr solr sh -c "bin/solr create_core -c core_${ABBR}01"
 
-    if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
-      $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
-    else
-      $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults-d8/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+      if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+        $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+      else
+        $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults-d8/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+      fi
+
+      $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/lang /opt/solr/server/solr/core_${ABBR}01/conf/"
+      $SUDOCK docker restart solr
     fi
+  fi
 
-    $SUDOCK docker exec --user=solr solr sh -c "cp -a /opt/solr-copy-configs/core-defaults/lang /opt/solr/server/solr/core_${ABBR}01/conf/"
-    $SUDOCK docker restart solr
+  if [ "$FULCRUM_SOLR7" == "yes" ]; then
+    RESULT=$($SUDOCK docker exec --user=solr solr7 sh -c "if [ -d /opt/solr/server/solr/core_${ABBR}01 ]; then echo true ; else echo false ; fi")
+
+    if [ ${RESULT} == "false" ]; then
+      sudo chown -R root:101 ~/fulcrum/etc/solr7-copy-configs
+      $SUDOCK docker exec --user=solr solr7 sh -c "bin/solr create_core -c core_${ABBR}01"
+
+      if [[ "$DRUPAL_MAJOR_VERSION" = "7" ]]; then
+        $SUDOCK docker exec --user=solr solr7 sh -c "cp -a /opt/solr-copy-configs/core-defaults-d7/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+        $SUDOCK docker exec --user=solr solr7 sh -c "cp -a /opt/solr-copy-configs/core-defaults-d7/lang /opt/solr/server/solr/core_${ABBR}01/conf/"
+      else
+        $SUDOCK docker exec --user=solr solr7 sh -c "cp -a /opt/solr-copy-configs/core-defaults-d8/*.* /opt/solr/server/solr/core_${ABBR}01/conf"
+      fi
+
+      $SUDOCK docker restart solr7
+    fi
   fi
 }
