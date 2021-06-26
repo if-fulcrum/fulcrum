@@ -13,14 +13,12 @@ FULCRUM_DOCROOT=$FULCRUM_DIRNAME/sites/$SITE
 
 if [ -d $FULCRUM_DOCROOT/docroot ]; then
   FULCRUM_DOCROOT=$FULCRUM_DOCROOT/docroot
-else
-  FULCRUM_WRD=""
 fi
 
 if [ -z "$DRUPAL_MAJOR_VERSION" ]; then
   source ${FULCRUM_BINDIR}/lib/general
 
-  drupalVersion
+  drupalVersion > /dev/null
 fi
 
 # make sure the conf exists before going on
