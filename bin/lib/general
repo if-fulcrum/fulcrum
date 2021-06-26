@@ -432,7 +432,7 @@ function drupalVersion() {
     eout "Could not find files to determine Drupal version under $FULCRUM_DOCROOT"
   fi
 
-  if [[ "$DRUPAL_MAJOR_VERSION" != "7" && "$DRUPAL_MAJOR_VERSION" != "8" ]]; then
+  if [[ "$DRUPAL_MAJOR_VERSION" -lt "7" && "$DRUPAL_MAJOR_VERSION" -gt "9" ]]; then
       eout "Not compatible with Drupal version '$DRUPAL_MAJOR_VERSION' in $FULCRUM_DOCROOT!"
   fi
 

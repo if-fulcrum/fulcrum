@@ -9,6 +9,20 @@ SITE=$(echo $PWD | sed 's#^.*/fulcrum/sites/##'|cut -d/ -f1)
 CONF=$FULCRUM_DIRNAME/etc/fulcrum/conf/${SITE}.json
 URI_PARAM="--uri=https://$SITE"
 
+FULCRUM_DOCROOT=$FULCRUM_DIRNAME/sites/$SITE
+
+if [ -d $FULCRUM_DOCROOT/docroot ]; then
+  FULCRUM_DOCROOT=$FULCRUM_DOCROOT/docroot
+else
+  FULCRUM_WRD=""
+fi
+
+if [ -z "$DRUPAL_MAJOR_VERSION" ]; then
+  source ${FULCRUM_BINDIR}/lib/general
+
+  drupalVersion
+fi
+
 # make sure the conf exists before going on
 if [ ! -f $CONF ]; then
   echo "Make sure you are in a Drupal directory!"
@@ -32,12 +46,14 @@ cd $DOCROOT_DIR
 if [ -e $DOCROOT_DIR/core/lib/Drupal.php ]; then
   DRUSH_BIN=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10/vendor/bin/drush
 
-  # kludge for where Drush 10 looks for composer.json
-  TEMP_COMPOSER_JSON=$DOCROOT_DIR/composer.json
-  if [[ -e $SITEDIR/composer.json ]] && [[ ! -e $TEMP_COMPOSER_JSON ]]; then
-    RM_TEMP_COMPOSER_JSON=$TEMP_COMPOSER_JSON
+  # kludge for Drupal 8 where Drush 10 looks for composer.json
+  if [ "$DRUPAL_MAJOR_VERSION" = "8" ]; then
+    TEMP_COMPOSER_JSON=$DOCROOT_DIR/composer.json
+    if [[ -e $SITEDIR/composer.json ]] && [[ ! -e $TEMP_COMPOSER_JSON ]]; then
+      RM_TEMP_COMPOSER_JSON=$TEMP_COMPOSER_JSON
 
-    cp $SITEDIR/composer.json $TEMP_COMPOSER_JSON
+      cp $SITEDIR/composer.json $TEMP_COMPOSER_JSON
+    fi
   fi
 
   # determine if Drush is local or not
