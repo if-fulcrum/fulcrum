@@ -9,31 +9,29 @@ SITE=$(echo $PWD | sed 's#^.*/fulcrum/sites/##'|cut -d/ -f1)
 CONF=$FULCRUM_DIRNAME/etc/fulcrum/conf/${SITE}.json
 URI_PARAM="--uri=https://$SITE"
 
-FULCRUM_DOCROOT=$FULCRUM_DIRNAME/sites/$SITE
-
-if [ -d $FULCRUM_DOCROOT/docroot ]; then
-  FULCRUM_DOCROOT=$FULCRUM_DOCROOT/docroot
-fi
-
-if [ -z "$DRUPAL_MAJOR_VERSION" ]; then
-  source ${FULCRUM_BINDIR}/lib/general
-
-  drupalVersion > /dev/null
-fi
-
 # make sure the conf exists before going on
 if [ ! -f $CONF ]; then
   echo "Make sure you are in a Drupal directory!"
   echo "  ERROR: $CONF does not exist!"
   exit 1
 fi
+
 # get the webroot from config as some site are a level down
 DOCROOT=$(egrep '^ +"webroot"' $CONF|cut -d\" -f4)
 DOCROOT_DIR=$FULCRUM_DIRNAME/sites/${DOCROOT}
 SITEDIR=$(dirname $DOCROOT_DIR)
 
+if [ -z "$DRUPAL_MAJOR_VERSION" ]; then
+  FULCRUM_DOCROOT=$DOCROOT_DIR
+
+  source ${FULCRUM_BINDIR}/lib/fulcrum
+
+  drupalVersion > /dev/null
+fi
+
 # default to Drush 8
 DRUSH_BIN=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8/vendor/bin/drush
+DRUSH_MAJOR_VERSION=8
 
 RM_TEMP_COMPOSER_JSON=""
 
@@ -44,26 +42,28 @@ cd $DOCROOT_DIR
 if [ -e $DOCROOT_DIR/core/lib/Drupal.php ]; then
   DRUSH_BIN=$FULCRUM_DIRNAME/var/fulcrum/drush/drush10/vendor/bin/drush
 
-  # kludge for Drupal 8 where Drush 10 looks for composer.json
-  if [ "$DRUPAL_MAJOR_VERSION" = "8" ]; then
-    TEMP_COMPOSER_JSON=$DOCROOT_DIR/composer.json
-    if [[ -e $SITEDIR/composer.json ]] && [[ ! -e $TEMP_COMPOSER_JSON ]]; then
-      RM_TEMP_COMPOSER_JSON=$TEMP_COMPOSER_JSON
-
-      cp $SITEDIR/composer.json $TEMP_COMPOSER_JSON
-    fi
-  fi
-
   # determine if Drush is local or not
   VENDOR_DRUSH_DIR="vendor/drush/drush/drush"
   VENDOR_DRUSH="${FULCRUM_DIRNAME}/sites/${SITE}/${VENDOR_DRUSH_DIR}"
 
   if [[ -f $VENDOR_DRUSH ]]; then
     DRUSH_BIN="$VENDOR_DRUSH"
+    DRUSH_MAJOR_VERSION=$(cut -d= -f2 ${VENDOR_DRUSH}.info|cut -d. -f1)
   else
-    VENDOR_DRUSH="${FULCRUM_DIRNAME}/sites/${SITE}/docroot/${VENDOR_DRUSH_DIR}"
+    VENDOR_DRUSH="${DOCROOT_DIR}/${VENDOR_DRUSH_DIR}"
     if [[ -f $VENDOR_DRUSH ]]; then
       DRUSH_BIN="$VENDOR_DRUSH"
+      DRUSH_MAJOR_VERSION=$(cut -d= -f2 ${VENDOR_DRUSH}.info|cut -d. -f1)
+    fi
+  fi
+
+  # kludge for Drupal 8 where Drush 10 looks for composer.json
+  if [[ "$DRUPAL_MAJOR_VERSION" = "8" && "$DRUSH_MAJOR_VERSION" = "10" ]]; then
+    TEMP_COMPOSER_JSON=$DOCROOT_DIR/composer.json
+    if [[ -e $SITEDIR/composer.json ]] && [[ ! -e $TEMP_COMPOSER_JSON ]]; then
+      RM_TEMP_COMPOSER_JSON=$TEMP_COMPOSER_JSON
+
+      cp $SITEDIR/composer.json $TEMP_COMPOSER_JSON
     fi
   fi
 fi
