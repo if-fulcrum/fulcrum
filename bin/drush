@@ -33,8 +33,6 @@ fi
 DRUSH_BIN=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8/vendor/bin/drush
 DRUSH_MAJOR_VERSION=8
 
-RM_TEMP_COMPOSER_JSON=""
-
 # change into the docroot
 cd $DOCROOT_DIR
 
@@ -57,13 +55,36 @@ if [ -e $DOCROOT_DIR/core/lib/Drupal.php ]; then
     fi
   fi
 
-  # kludge for Drupal 8 where Drush 10 looks for composer.json
-  if [[ "$DRUPAL_MAJOR_VERSION" = "8" && "$DRUSH_MAJOR_VERSION" = "10" ]]; then
-    TEMP_COMPOSER_JSON=$DOCROOT_DIR/composer.json
-    if [[ -e $SITEDIR/composer.json ]] && [[ ! -e $TEMP_COMPOSER_JSON ]]; then
-      RM_TEMP_COMPOSER_JSON=$TEMP_COMPOSER_JSON
+  # if we are Drupal 8+ make sure composer.json is proper
+  if [ "$DRUPAL_MAJOR_VERSION" -gt "7" ]; then
+    COMPOSER_JSON=""
 
-      cp $SITEDIR/composer.json $TEMP_COMPOSER_JSON
+    # see if composer.json is at root
+    if [ -e $SITEDIR/composer.json ]; then
+      COMPOSER_JSON=$SITEDIR/composer.json
+    # or composer.json is at docroot
+    elif [ -e $DOCROOT_DIR/composer.json ]; then
+      COMPOSER_JSON=$DOCROOT_DIR/composer.json
+    fi
+
+    # make sure name of project is not drupal/drupal
+    if [ -n "$COMPOSER_JSON" ]; then
+      COMPOSER_NAME="$(cat $COMPOSER_JSON |jq -r .name)"
+
+      if [ "$COMPOSER_NAME" = "drupal/drupal" ]; then
+        NEW_NAME=drupal/update-to-if-client-abbr
+        echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' >/dev/stderr
+        echo "WARNING:  The composer.json has an invalid value for the 'name' attribute" >/dev/stderr
+        echo "WARNING:  $COMPOSER_JSON" >/dev/stderr
+        echo "WARNING:  now has 'name' updated to $NEW_NAME" >/dev/stderr
+        echo "WARNING:  Please set it appropriately before pushing this change" >/dev/stderr
+        echo "WARNING:  See https://www.drupal.org/docs/develop/using-composer/using-composer-to-install-drupal-and-manage-dependencies#deprecated-drupal-drupal" >/dev/stderr
+        echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' >/dev/stderr
+        echo '' >/dev/stderr
+
+        cd $(dirname $COMPOSER_JSON)
+        composer config name $NEW_NAME
+      fi
     fi
   fi
 fi
@@ -90,8 +111,3 @@ fi
 $DRUSH_BIN $URI_PARAM $@ $EXTRA
 
 rm $PHP_CONFIG_PATH/conf.d/zzz-drush.ini
-
-# clean up from Drush 10 kludge
-if [ -n "$RM_TEMP_COMPOSER_JSON" ]; then
-  rm $RM_TEMP_COMPOSER_JSON
-fi
