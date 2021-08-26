@@ -177,13 +177,19 @@ function dbash() {
 }
 
 function _phpReloadConf() {
-  $SUDOCK docker exec php7.3 sh -c 'kill -USR2 1'
-  $SUDOCK docker exec php7.4 sh -c 'kill -USR2 1'
+  CONT=php7.3
+  if [ "$(docker container inspect -f '{{.State.Status}}' $CONT 2> /dev/null)" == "running" ]; then
+    $SUDOCK docker exec $CONT sh -c 'kill -USR2 1'
+  fi
+ 
+  CONT=php7.4
+  if [ "$(docker container inspect -f '{{.State.Status}}' $CONT 2> /dev/null)" == "running" ]; then
+    $SUDOCK docker exec $CONT sh -c 'kill -USR2 1'
+  fi
 }
 
 function phpReloadConf() {
-  vout "Reload php7.3 config"
-  vout "Reload php7.4 config"
+  vout "Reload php configs"
   stackStatus "noexit"
   _phpReloadConf
 }
