@@ -211,9 +211,31 @@ fi
 # install jq if needed
 if ( echo "$BREWLIST"|egrep '^jq$' > /dev/null ); then
   vout "Check: homebrew 'jq' package is installed."
+  if ( echo |/usr/local/bin/jq ); then
+    vout "Check: homebrew 'jq' package is functional."
+  else
+    vout "Re-Installing: homebrew 'jq' package."
+    brew uninstall jq
+    brew install jq
+  fi
 else
   vout "Installing: homebrew 'jq' package."
   brew install jq
+fi
+
+# install libjpeg if needed
+if ( echo "$BREWLIST"|egrep '^jpeg$' > /dev/null ); then
+  vout "Check: homebrew 'jpeg' package is installed."
+  if ( /usr/local/bin/djpeg /usr/local/Homebrew/Library/Homebrew/test/support/fixtures/test.jpg > /dev/null ); then
+    vout "Check: homebrew 'jpeg' package is functional."
+  else
+    vout "Re-Installing: homebrew 'jpeg' package."
+    brew uninstall jpeg
+    brew install jpeg
+  fi
+else
+  vout "Installing: homebrew 'jpeg' package."
+  brew install jpeg
 fi
 
 # open Docker if it is not already running
