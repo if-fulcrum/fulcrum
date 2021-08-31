@@ -4,6 +4,8 @@
 
 # functions to make sure that fulcrum hinge is healthy on Debian variants
 
+PHP_PINNED=7.4
+
 # Stop using Ubuntu DNSMasq
 if (sudo netstat -tulnp|egrep 'tcp.*53:53.*systemd-re'); then
   echo "Ubuntu by default runs DNSMasq."
@@ -89,39 +91,39 @@ if (which php > /dev/null); then
   echo "php exists"
 else
   echo "installing php"
-  sudo apt install -y php7.3-cli
+  sudo apt install -y php$PHP_PINNED-cli
 fi
 
-# install php7.3-xml if needed
+# install php$PHP_PINNED-xml if needed
 if (php -m|grep dom); then
-  echo "php7.3-xml exists"
+  echo "php$PHP_PINNED-xml exists"
 else
-  echo "installing php7.3-xml"
-    sudo apt install -y php7.3-xml
+  echo "installing php$PHP_PINNED-xml"
+    sudo apt install -y php$PHP_PINNED-xml
 fi
 
-# install php7.3-redis if needed
+# install php$PHP_PINNED-redis if needed
 if (php -m|grep redis); then
-  echo "php7.3-redis exists"
+  echo "php$PHP_PINNED-redis exists"
 else
-  echo "installing php7.3-redis"
-    sudo apt install -y php7.3-redis
+  echo "installing php$PHP_PINNED-redis"
+    sudo apt install -y php$PHP_PINNED-redis
 fi
 
-# install php7.3-mysql if needed
+# install php$PHP_PINNED-mysql if needed
 if (php -m|grep mysql); then
-  echo "php7.3-mysql exists"
+  echo "php$PHP_PINNED-mysql exists"
 else
-  echo "installing php7.3-mysql"
-    sudo apt install -y php7.3-mysql
+  echo "installing php$PHP_PINNED-mysql"
+    sudo apt install -y php$PHP_PINNED-mysql
 fi
 
-# install php7.3-curl if needed
+# install php$PHP_PINNED-curl if needed
 if (php -m|grep curl); then
-  echo "php7.3-curl exists"
+  echo "php$PHP_PINNED-curl exists"
 else
-  echo "installing php7.3-curl"
-    sudo apt install -y php7.3-curl
+  echo "installing php$PHP_PINNED-curl"
+    sudo apt install -y php$PHP_PINNED-curl
 fi
 
 # install curl if needed
@@ -141,12 +143,3 @@ else
   sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
   rm /tmp/composer-setup.php
 fi
-
-# install git if needed
-# TODO: move into fulcrum/install
-# if (which git > /dev/null); then
-#   echo "git exists"
-# else
-#   echo "installing git"
-#   sudo apt install -y git
-# fi
