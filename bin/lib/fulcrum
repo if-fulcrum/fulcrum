@@ -128,7 +128,7 @@ function waitForDB() {
 
   echo "ready"
 
-  DEFAULT_ROUTE_IP=$(docker exec -it mariadb /sbin/ip route|grep default|cut -d' ' -f3)
+  DEFAULT_ROUTE_IP=$($SUDOCK docker exec -it mariadb /sbin/ip route|grep default|cut -d' ' -f3)
   
   echo -n "Seeing if proper root perms exist for docker localhost connection: "
   PROPER_ROOT=$($MY_CMD -Ne "SELECT user FROM mysql.user where user='root' and host='127.0.0.1';")
