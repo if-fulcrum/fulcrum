@@ -9,7 +9,7 @@ if [ -n ${HOSTNAME} ]; then
 fi
 
 # fix php log permissions
-sudo chown 1971.1971 ~/fulcrum/var/log/php* ~/fulcrum/var/log/php*/*
+sudo chown -R 1971.1971 ~/fulcrum/var/log/php*
 
 # fix solr permissions
 sudo chown -R 8983.8983 ~/fulcrum/var/lib/solr
