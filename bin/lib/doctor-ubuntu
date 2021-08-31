@@ -143,3 +143,19 @@ else
   sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
   rm /tmp/composer-setup.php
 fi
+
+# install mysql if needed
+if (which mysql > /dev/null); then
+  echo "mysql exists"
+else
+  echo "installing mysql"
+  sudo apt install -y mariadb-client-core-10.3
+fi
+
+# install jq if needed
+if (which jq > /dev/null); then
+  echo "jq exists"
+else
+  echo "installing jq"
+  sudo apt install -y jq
+fi
