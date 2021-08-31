@@ -6,6 +6,14 @@
 
 PHP_PINNED=7.4
 
+# install netstat if needed
+if (which netstat > /dev/null); then
+  echo "netstat exists"
+else
+  echo "installing netstat"
+  sudo apt install -y net-tools
+fi
+
 # Stop using Ubuntu DNSMasq
 if (sudo netstat -tulnp|egrep 'tcp.*53:53.*systemd-re'); then
   echo "Ubuntu by default runs DNSMasq."
@@ -69,14 +77,6 @@ if (which certutil > /dev/null); then
 else
   echo "installing certutil"
   sudo apt install -y libnss3-tools
-fi
-
-# install ifconfig if needed, needed for multiple IP on loopback
-if (which ifconfig > /dev/null); then
-  echo "ifconfig exists"
-else
-  echo "installing ifconfig"
-  sudo apt install -y net-tools
 fi
 
 # set an alias for localhost so xdebug can transmit back the IDE
