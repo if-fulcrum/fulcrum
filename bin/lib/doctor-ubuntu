@@ -110,6 +110,22 @@ else
     sudo apt install -y php$PHP_PINNED-redis
 fi
 
+# install php$PHP_PINNED-mbstring if needed
+if (php -m|grep mbstring); then
+  echo "php$PHP_PINNED-mbstring exists"
+else
+  echo "installing php$PHP_PINNED-mbstring"
+    sudo apt install -y php$PHP_PINNED-mbstring
+fi
+
+# install php$PHP_PINNED-gd if needed
+if (php -m|grep gd); then
+  echo "php$PHP_PINNED-gd exists"
+else
+  echo "installing php$PHP_PINNED-gd"
+    sudo apt install -y php$PHP_PINNED-gd
+fi
+
 # install php$PHP_PINNED-mysql if needed
 if (php -m|grep mysql); then
   echo "php$PHP_PINNED-mysql exists"
