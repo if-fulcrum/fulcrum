@@ -130,7 +130,7 @@ if [ ! -f $DRUSH8_DIR/vendor/drush/drush/drush ]; then
 
   # PHP 7.3 has a known bug with pcre.jit
   php -d pcre.jit=0 $(which composer) require \
-    "drush/drush:8.*"                         \
+    "drush/drush:>=8.3.3 <9.0"                \
     "composer/semver:^1.0"                    \
     "pear/archive_tar:^1.4.9"                 \
     "psr/log:^1.0"                            \
@@ -210,4 +210,5 @@ if [ ! -e ${FULCRUM_DIRNAME}/etc/php7/conf.d/zz-xdebug-overide.ini ]; then
 fi
 
 # add 99_fulcrum.ini so drush can use it
-echo "auto_prepend_file=${FULCRUM_DIRNAME}/etc/fulcrum/php/fulcrum.php" | sudo tee $(php --ini|grep Scan|cut -d: -f2)/99_fulcrum.ini > /dev/null
+SCAN_DIR=$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')
+echo "auto_prepend_file=${FULCRUM_DIRNAME}/etc/fulcrum/php/fulcrum.php" | sudo tee $SCAN_DIR/99_fulcrum.ini > /dev/null
