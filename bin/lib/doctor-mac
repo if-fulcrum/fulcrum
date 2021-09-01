@@ -2,6 +2,8 @@
 
 # functions to make sure that fulcrum hinge is healthy on the Mac
 
+PHP_PINNED=7.4
+
 # set an alias for localhost so xdebug can transmit back the IDE
 # https://forums.docker.com/t/accessing-host-machine-from-within-docker-container/14248/14
 # sudo ifconfig lo0 remove 172.16.222.111  - to remove
@@ -51,9 +53,9 @@ fi
 
 BREWLIST=$(brew list --formula)
 
-if [[ ! "$BREWLIST" == *"php@7.3"* ]]; then
+if [[ ! "$BREWLIST" == *"php@$PHP_PINNED"* ]]; then
   vout "Installing: homebrew 'php' package."
-  brew install php@7.3
+  brew install php@$PHP_PINNED
 else
   vout "Check: homebrew 'php' package is installed."
 fi
@@ -67,7 +69,7 @@ fi
 
 # if we don't have /usr/local/bin/php setup yet, then do it now
 if [ ! -e /usr/local/bin/php ]; then
-  brew-php-switcher 7.3
+  brew-php-switcher $PHP_PINNED -s
 
   # rehash for the PATH var
   hash -r
@@ -94,21 +96,29 @@ fi
 
 INITPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
 
-# lighter weight redis check
-if [ ! -e /usr/local/lib/php/pecl/20180731/redis.so ]; then
-  if [[ ! "$CURRPHPVER" == "7.3" ]]; then
-    brew-php-switcher 7.3
-  fi
+# switch to php $PHP_PINNED
+if [[ ! "$INITPHPVER" == "$PHP_PINNED" ]]; then
+  brew-php-switcher $PHP_PINNED -s
+fi
 
-  vout "Installing: pecl 'php 7.3 redis' package."
+EXT_DIR=$(php -r 'echo ini_get("extension_dir");')
+
+# lighter weight redis check
+if [ ! -e $EXT_DIR/redis.so ]; then
+  vout "Installing: pecl 'php redis' package."
   printf "\n" | pecl install redis
+
+  SCAN_DIR=$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')
+
+  # make redis available for CLI
+  echo 'extension="redis.so"' > $SCAN_DIR/20_redis.ini
 fi
 
 CURRPHPVER=$(php -v|head -n 1|cut -d\  -f2|cut -d. -f1,2)
 
 # switch back to initial php version
 if [[ ! "$CURRPHPVER" == "$INITPHPVER" ]]; then
-  brew-php-switcher $INITPHPVER
+  brew-php-switcher $INITPHPVER -s
 fi
 
 # stop apache in case previous installs had started it
