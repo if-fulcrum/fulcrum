@@ -187,12 +187,12 @@ SETVAR
     ${FULCRUM_BINDIR}/fulcrum forcehttps $FULCRUM_SITE
   fi
 
-  # default to PHP 7.3
+  # default to PHP 7.4
   if [ -z "$FULCRUM_PHPVERSION" ]; then
-    USE_PHP_VERSION="73"
-    # change PHP 7 to be 7.3
+    USE_PHP_VERSION="74"
+    # change PHP 7 to be 7.4
   elif [ "$FULCRUM_PHPVERSION" == "7" ]; then
-    USE_PHP_VERSION="73"
+    USE_PHP_VERSION="74"
   else
     USE_PHP_VERSION=$FULCRUM_PHPVERSION
   fi
