@@ -121,7 +121,19 @@ else
 fi
 
 DRUSH8_DIR=$FULCRUM_DIRNAME/var/fulcrum/drush/drush8
-if [ ! -f $DRUSH8_DIR/vendor/drush/drush/drush ]; then
+DRUSH8_BIN=$DRUSH8_DIR/vendor/drush/drush/drush
+DRUSH8_NEWISH="-1"
+
+# if drush8 is installed, get the version
+if [ -d $DRUSH8_DIR ]; then
+  cd $DRUSH8_DIR
+
+  DRUSH8_VER="$(composer show|grep drush/drush|perl -p -e 's#^drush/drush\s+(\d+\.\d+\.\d+).*#$1#')"
+  DRUSH8_NEWISH=$(php -r "echo version_compare(\"$DRUSH8_VER\", \"8.3.3\");")
+fi
+
+# if drush8 doesn't exist or is too old then install/update
+if [ "$DRUSH8_NEWISH" -lt "0" ]; then
   echo "Installing Drush 8"
 
   mkdir -p $DRUSH8_DIR
@@ -211,4 +223,9 @@ fi
 
 # add 99_fulcrum.ini so drush can use it
 SCAN_DIR=$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')
-echo "auto_prepend_file=${FULCRUM_DIRNAME}/etc/fulcrum/php/fulcrum.php" | sudo tee $SCAN_DIR/99_fulcrum.ini > /dev/null
+
+if ( ! touch $SCAN_DIR/99_fulcrum.ini ); then
+  sudo chown -R $(id -u) $SCAN_DIR
+fi
+
+echo "auto_prepend_file=${FULCRUM_DIRNAME}/etc/fulcrum/php/fulcrum.php" > $SCAN_DIR/99_fulcrum.ini
